@@ -16,7 +16,7 @@ Baca dokumen lengkapnya hanya jika butuh detail yang tidak ada di sini.
 | 7 | Timer, restart < 1 detik, bintang, stage berikutnya | Selesai |
 | + | Simpan rekor bintang (user://rekor.json) | Selesai |
 | + | Pemeriksa jalan saat build (plugin editor + tools/build_android.bat) | Selesai |
-| + | Kontrol modern: satu kanvas, joystick dinamis, tombol melayang, label target, HUD atas | Selesai |
+| + | Kontrol modern: satu kanvas, joystick dinamis, tombol melayang, label target, HUD atas | Selesai, diuji pengguna di HP Android (2026-10-08): OK |
 
 Kerjakan per fase. Setelah tiap fase: jelaskan singkat, commit, push ke `origin main`, lalu tunggu konfirmasi.
 
