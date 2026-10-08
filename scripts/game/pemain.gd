@@ -12,11 +12,10 @@ const WARNA_MATA := Color.WHITE
 ## Posisi dan ukuran titik arah hadap, sebagai porsi radius badan.
 const PORSI_JARAK_MATA := 0.55
 const PORSI_RADIUS_MATA := 0.25
-## Pemain digambar di atas benda dan gelembung ikon alat (z_index 1).
-const LAPISAN_GAMBAR := 2
-## Ukuran gambar pemain (porsi petak) dan geseran ke atas agar kaki di pusat.
-const PORSI_GAMBAR := 1.05
-const PORSI_NAIK_GAMBAR := 0.2
+## Lebar gambar pemain (porsi petak) dan letak kaki di bawah pusat tabrakan.
+## Pemain di-y-sort bersama benda: tertutup benda di depannya (tampilan 3/4).
+const PORSI_LEBAR_GAMBAR := 0.95
+const PORSI_KAKI := 0.32
 ## Pantulan langkah: tinggi (porsi petak) dan langkah per detik.
 const PORSI_PANTUL := 0.04
 const LANGKAH_PER_DETIK := 7.0
@@ -50,7 +49,6 @@ func siapkan(ukuran_petak: float, sumber_joystick: Node) -> void:
 	for arah in Aset.ARAH_PEMAIN:
 		_tekstur[arah] = Aset.tekstur(Aset.pemain(arah))
 	joystick = sumber_joystick
-	z_index = LAPISAN_GAMBAR
 	var bentuk := CircleShape2D.new()
 	bentuk.radius = _radius
 	$Bentuk.shape = bentuk
@@ -90,8 +88,9 @@ func _draw() -> void:
 	var gambar: Texture2D = _tekstur.get(arah_gambar())
 	if gambar != null:
 		var pantul := absf(sin(_waktu_jalan * LANGKAH_PER_DETIK * PI)) * _ukuran * PORSI_PANTUL
-		var sisi := _ukuran * PORSI_GAMBAR
-		draw_texture_rect(gambar, Rect2(Vector2(-sisi / 2.0, -sisi / 2.0 - _ukuran * PORSI_NAIK_GAMBAR - pantul), Vector2.ONE * sisi), false)
+		var lebar := _ukuran * PORSI_LEBAR_GAMBAR
+		var tinggi := lebar * gambar.get_size().y / gambar.get_size().x
+		draw_texture_rect(gambar, Rect2(Vector2(-lebar / 2.0, _ukuran * PORSI_KAKI - tinggi - pantul), Vector2(lebar, tinggi)), false)
 		return
 	draw_circle(Vector2.ZERO, _radius, WARNA_BADAN)
 	draw_circle(hadap * _radius * PORSI_JARAK_MATA, _radius * PORSI_RADIUS_MATA, WARNA_MATA)

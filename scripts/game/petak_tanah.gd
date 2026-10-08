@@ -84,9 +84,9 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
 	var kotak := Rect2(Vector2.ONE * (-_ukuran / 2.0), Vector2.ONE * _ukuran)
-	if _tekstur_tanah != null:
-		draw_texture_rect(_tekstur_tanah, kotak, false)
-	else:
+	# Tanah beraset digambar di lapisan latar oleh peta (supaya tidak menutupi
+	# kaki pemain); node ini hanya menggambar tanamannya.
+	if _tekstur_tanah == null:
 		draw_rect(kotak, WARNA_TANAH)
 		for i in JUMLAH_ALUR:
 			var y := kotak.position.y + _ukuran * (i + 1) / (JUMLAH_ALUR + 1)
@@ -112,4 +112,4 @@ func _draw() -> void:
 			var kotak_huruf := Rect2(Vector2.ONE * -radius, Vector2.ONE * radius * 2.0)
 			Gambar.huruf_tengah(self, DataGame.nama_tanaman(tanaman).left(1), kotak_huruf, Gambar.warna_kontras(warna), 0.7)
 	if disorot:
-		draw_rect(kotak.grow(-2.0), WARNA_SOROT, false, 3.0)
+		draw_rect(kotak.grow(-4.0), Color(WARNA_SOROT, 0.6), false, 2.0)

@@ -13,7 +13,7 @@ const AKSI_TANAM := "tanam"
 const AKSI_PANEN := "panen"
 
 const LABEL := {
-	AKSI_IDENTIFIKASI: "Identifikasi",
+	AKSI_IDENTIFIKASI: "Periksa",
 	AKSI_AMBIL: "Ambil",
 	AKSI_POTONG: "Potong",
 	AKSI_TANAM: "Tanam",
@@ -40,6 +40,10 @@ const TANAH_TUMBUH := "tumbuh"
 const TANAH_MATANG := "matang"
 
 const ALASAN_KANTONG_PENUH := "Kantong penuh"
+
+## Jenis benda yang namanya dirahasiakan sampai diperiksa: pemain harus
+## menebak dari gambar saja (keputusan pengguna).
+const JENIS_RAHASIA := [PemuatData.JENIS_SUMBER, PemuatData.JENIS_KOSONG, PemuatData.JENIS_HIASAN]
 
 
 ## Aksi untuk satu petak tanah. Petak kosong tanpa benih di kantong dan
@@ -71,7 +75,7 @@ static func untuk_benda(entri: Dictionary, status: String, kantong_penuh: bool, 
 			var hasil := _hasil(AKSI_POTONG, false, "Butuh alat")
 			hasil.butuh_alat = butuh
 			return hasil
-		PemuatData.JENIS_SUMBER, PemuatData.JENIS_KOSONG:
+		PemuatData.JENIS_SUMBER, PemuatData.JENIS_KOSONG, PemuatData.JENIS_HIASAN:
 			# Saat kantong penuh semua benda dikunci, supaya tombol tidak
 			# membocorkan mana yang sumber benih (keputusan pengguna).
 			if kantong_penuh:

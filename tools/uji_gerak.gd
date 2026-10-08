@@ -36,6 +36,9 @@ func _jalankan() -> void:
 	_u = stage.UKURAN_PETAK
 	var r: float = p.radius_pemain_petak * _u
 	var pemain: CharacterBody2D = stage.pemain
+	# Kolom 4 dari baris 9 ke atas kosong di 1-1.
+	pemain.position = stage.peta.pusat_petak(Vector2i(4, 9))
+	await physics_frame
 	var awal := pemain.position
 
 	await _gerak(pemain, Vector2.UP, 0.5)
@@ -50,15 +53,20 @@ func _jalankan() -> void:
 	_cek("Dinding kiri menahan pemain (1-1)", pemain.position.x >= _u + r - 1.0,
 		"x = %.2f petak" % (pemain.position.x / _u))
 
-	await _gerak(pemain, Vector2.RIGHT, 2.0)
+	pemain.position = stage.peta.pusat_petak(Vector2i(4, 9))
+	await physics_frame
+	await _gerak(pemain, Vector2.RIGHT, 1.0)
 	_cek("Penghalang rumah 'R' menahan pemain (1-1)", pemain.position.x <= 5.0 * _u - r + 1.0,
 		"x = %.2f petak" % (pemain.position.x / _u))
 
 	stage = await _muat("1-1")
 	pemain = stage.pemain
-	await _gerak(pemain, Vector2.UP, 3.0)
-	_cek("Pembeli 'B' padat (1-1)", pemain.position.y >= 2.0 * _u + r - 1.0,
-		"y = %.2f petak" % (pemain.position.y / _u))
+	# Pembeli di (1,1); dekati dari kanan.
+	pemain.position = stage.peta.pusat_petak(Vector2i(2, 1))
+	await physics_frame
+	await _gerak(pemain, Vector2.LEFT, 1.0)
+	_cek("Pembeli 'B' padat (1-1)", pemain.position.x >= 2.0 * _u + r - 1.0,
+		"x = %.2f petak" % (pemain.position.x / _u))
 
 	stage = await _muat("1-3")
 	pemain = stage.pemain

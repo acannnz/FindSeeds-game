@@ -40,6 +40,11 @@ func _initialize() -> void:
 	_uji("Cek 5: bola karet merah dipakai lagi di stage 1-2", [Pemeriksa.CEK_JEDA_BENDA], func(d):
 		_stage(d, "1-2").legenda.K = "bola_karet_merah")
 
+	_uji("Hiasan boleh dipakai lagi di stage berikutnya (bebas jeda 4 stage)", [], func(d):
+		var s := _stage(d, "1-2")
+		_ganti_sel(s, Vector2i(6, 2), "k")
+		s.legenda.k = "kursi_taman")
+
 	_uji("Cek 6: logika musim Panas dipakai di Musim Semi", [Pemeriksa.CEK_LOGIKA_MUSIM], func(d):
 		d.katalog.bola_karet_merah.logika = "asosiasi")
 

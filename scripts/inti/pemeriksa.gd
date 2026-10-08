@@ -118,6 +118,9 @@ func _periksa_katalog() -> void:
 					_lapor(f, CEK_FORMAT, "'%s': hasil '%s' tidak ada di %s." % [id, entri.hasil, PemuatData.FILE_TANAMAN])
 				if not entri.has("logika"):
 					_lapor(f, CEK_FORMAT, "Benda sumber '%s' tidak punya kolom 'logika'." % id)
+			PemuatData.JENIS_HIASAN:
+				if typeof(entri.get("teks_reaksi")) != TYPE_STRING:
+					_lapor(f, CEK_FORMAT, "Hiasan '%s' butuh kolom 'teks_reaksi'." % id)
 			PemuatData.JENIS_WADAH:
 				var alat = entri.butuh_alat
 				if not _katalog.has(alat) or PemuatData.jenis_benda(_katalog[alat]) != PemuatData.JENIS_ALAT:

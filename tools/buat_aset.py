@@ -1,6 +1,6 @@
 # Generator aset SVG FindSeeds: gaya kartun datar, garis tepi tebal.
 #
-# Dipakai sekali untuk membuat set aset awal di folder aset/. File SVG hasilnya
+# GAYA LAMA (digantikan tools/buat_aset_adegan.py). Dipakai sekali untuk set awal. File SVG hasilnya
 # adalah sumber utama: boleh diedit langsung (Inkscape/Illustrator/teks) dan
 # ilustrator boleh menggantinya. PERINGATAN: menjalankan skrip ini lagi akan
 # MENIMPA semua SVG yang ada di folder tujuan, termasuk hasil edit manual.

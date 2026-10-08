@@ -42,7 +42,8 @@ func _uji_stage_1_3() -> void:
 
 	# Benda kosong: reaksi lalu abu-abu, pemain terkunci selama identifikasi.
 	await _berdiri_di(Vector2i(2, 9))
-	_cek_aksi("Dekat kotak pos: Identifikasi aktif", "kotak_pos", "identifikasi", true)
+	_cek_aksi("Dekat kotak pos: Periksa aktif", "kotak_pos", "identifikasi", true)
+	_cek("Nama benda dirahasiakan sebelum diperiksa (label tanpa nama)", _stage.label_target._nama == "")
 	var posisi_awal := _pemain.position
 	_interaksi.tekan_aksi()
 	_pemain.arah_paksa = Vector2.RIGHT
@@ -52,6 +53,7 @@ func _uji_stage_1_3() -> void:
 	_pemain.arah_paksa = Vector2.ZERO
 	await _tunggu(0.1 + float(FRAME_LEBIH) / FPS)
 	var kotak_pos := _benda_di(Vector2i(2, 10))
+	_cek("Setelah diperiksa, nama benda terungkap di teks reaksi", _ada_teks("Kotak pos merah"))
 	_cek("Kotak pos jadi abu-abu dan kantong tetap kosong", kotak_pos.status == AturanAksi.STATUS_ABU and _interaksi.kantong.kosong())
 	_cek("Benda abu-abu tidak menawarkan aksi lagi", _interaksi.aksi_kini.is_empty())
 
@@ -190,6 +192,12 @@ func _berdiri_di(sel: Vector2i) -> void:
 
 ## Memastikan aksi yang ditawarkan sesuai, menekannya, lalu menunggu selesai.
 func _jalankan_aksi(id_target: String, aksi: String) -> void:
+	# Hadapkan pemain ke target supaya hiasan lain yang sama dekat tidak
+	# terpilih (pemecah seri memakai arah hadap).
+	for b in _peta.daftar_benda:
+		if b.id == id_target:
+			_pemain.hadap = (b.position - _pemain.position).normalized()
+	await _tunggu(2.0 / FPS)
 	_cek_aksi("Tawarkan %s pada %s" % [aksi, id_target], id_target, aksi, true)
 	_interaksi.tekan_aksi()
 	await _tunggu(DataGame.durasi(AturanAksi.KUNCI_DURASI[aksi]) + float(FRAME_LEBIH) / FPS)
@@ -201,6 +209,13 @@ func _cek_aksi(judul: String, id_target: String, aksi: String, aktif: bool) -> v
 	var target_id: String = a.target.id if a.has("target") and is_instance_valid(a.target) else ""
 	_cek(judul, target_id == id_target and a.get("aksi", "") == aksi and a.get("aktif", false) == aktif,
 		"dapat target='%s' aksi='%s' aktif=%s" % [target_id, a.get("aksi", ""), a.get("aktif", false)])
+
+
+func _ada_teks(potongan: String) -> bool:
+	for anak in _peta.get_children():
+		if "_teks" in anak and potongan in str(anak._teks):
+			return true
+	return false
 
 
 func _kantong_berisi(harapan: Array[String]) -> bool:

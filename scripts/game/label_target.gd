@@ -39,7 +39,8 @@ func siapkan(ukuran_petak: float, lebar_peta: float) -> void:
 func tampilkan(posisi: Vector2, nama: String, label_aksi: String, aktif: bool, alasan: String, ada_ikon: bool, di_bawah: bool) -> void:
 	var baris := label_aksi if alasan == "" else "%s · %s" % [label_aksi, alasan]
 	var naik := PORSI_JARAK_ATAS + (PORSI_JARAK_IKON if ada_ikon and not di_bawah else 0.0)
-	if visible and position == posisi and nama == _nama and baris == _baris_aksi and aktif == _aktif 			and naik == _naik and di_bawah == _di_bawah:
+	if visible and position == posisi and nama == _nama and baris == _baris_aksi and aktif == _aktif \
+			and naik == _naik and di_bawah == _di_bawah:
 		return
 	_di_bawah = di_bawah
 	position = posisi
@@ -63,7 +64,9 @@ func _draw() -> void:
 	var ukuran_aksi := int(tinggi_baris * 0.8)
 	var lebar := maxf(font.get_string_size(_nama, HORIZONTAL_ALIGNMENT_LEFT, -1, ukuran_nama).x,
 		font.get_string_size(_baris_aksi, HORIZONTAL_ALIGNMENT_LEFT, -1, ukuran_aksi).x) + sela * 3.0
-	var tinggi := tinggi_baris * 2.0 + sela * 2.0
+	# Tanpa nama (benda belum diperiksa): satu baris aksi saja.
+	var jumlah_baris := 1 if _nama == "" else 2
+	var tinggi := tinggi_baris * jumlah_baris + sela * 2.0
 	var y_kotak := _ukuran * _naik if _di_bawah else -_ukuran * _naik - tinggi
 	var kotak := Rect2(Vector2(-lebar / 2.0, y_kotak), Vector2(lebar, tinggi))
 	# Jaga label tetap di dalam lebar peta.
@@ -71,10 +74,11 @@ func _draw() -> void:
 	if _lebar_peta > 0.0:
 		kotak.position.x -= minf(0.0, x_dunia) + maxf(0.0, x_dunia + lebar - _lebar_peta)
 	draw_rect(kotak, WARNA_LATAR)
-	var baris_atas := Rect2(kotak.position + Vector2(0, sela), Vector2(lebar, tinggi_baris))
-	var baris_bawah := Rect2(baris_atas.position + Vector2(0, tinggi_baris), Vector2(lebar, tinggi_baris))
-	Gambar.huruf_tengah(self, _nama, baris_atas, WARNA_NAMA, 0.7)
-	Gambar.huruf_tengah(self, _baris_aksi, baris_bawah, WARNA_AKSI if _aktif else WARNA_ALASAN, 0.8)
+	var baris := Rect2(kotak.position + Vector2(0, sela), Vector2(lebar, tinggi_baris))
+	if _nama != "":
+		Gambar.huruf_tengah(self, _nama, baris, WARNA_NAMA, 0.7)
+		baris.position.y += tinggi_baris
+	Gambar.huruf_tengah(self, _baris_aksi, baris, WARNA_AKSI if _aktif else WARNA_ALASAN, 0.8)
 	# Segitiga kecil menunjuk ke target.
 	var arah := -1.0 if _di_bawah else 1.0
 	var ujung := Vector2(0, -_ukuran * _naik * arah)

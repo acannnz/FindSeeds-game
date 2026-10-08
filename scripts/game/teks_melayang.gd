@@ -16,9 +16,12 @@ var _warna: Color
 var _ukuran: float
 var _lama: float
 var _umur := 0.0
+var _lebar_peta := 0.0
 
 
-func siapkan(teks: String, warna: Color, ukuran_petak: float) -> void:
+## lebar_peta: lebar dunia peta; teks digeser agar tidak keluar tepi peta.
+func siapkan(teks: String, warna: Color, ukuran_petak: float, lebar_peta: float = 0.0) -> void:
+	_lebar_peta = lebar_peta
 	_teks = teks
 	_warna = warna
 	_ukuran = ukuran_petak
@@ -39,6 +42,9 @@ func _draw() -> void:
 	var tinggi := _ukuran * PORSI_TINGGI
 	var lebar := maxf(_ukuran, _teks.length() * _ukuran * PORSI_LEBAR_PER_HURUF)
 	var kotak := Rect2(Vector2(-lebar / 2.0, -_ukuran * (0.9 + PORSI_NAIK * t)), Vector2(lebar, tinggi))
+	if _lebar_peta > 0.0:
+		var x_dunia := position.x + kotak.position.x
+		kotak.position.x -= minf(0.0, x_dunia) + maxf(0.0, x_dunia + lebar - _lebar_peta)
 	var pudar := 1.0 - maxf(0.0, t - 0.6) / 0.4
 	draw_rect(kotak, Color(WARNA_LATAR, WARNA_LATAR.a * pudar))
 	Gambar.huruf_tengah(self, _teks, kotak, Color(_warna, pudar), 0.7)

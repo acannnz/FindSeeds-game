@@ -1,7 +1,9 @@
 extends StaticBody2D
 ## Satu benda di peta (sumber, kosong, wadah, atau alat). Padat: pemain
 ## berinteraksi dari petak sebelah. Keadaannya diubah oleh interaksi.gd.
-## Digambar dengan aset SVG-nya; jika belum ada, kotak warna + huruf.
+## Digambar dengan aset SVG-nya (3/4, berpijak di dasar petak, boleh lebih
+## tinggi dari satu petak); jika belum ada, kotak warna + huruf. Node ini
+## di-y-sort bersama pemain, jadi benda di depan menutupi pemain di belakangnya.
 
 const DataGame := preload("res://scripts/inti/data_game.gd")
 const PemuatData := preload("res://scripts/inti/pemuat_data.gd")
@@ -14,13 +16,18 @@ const SHADER_ABU := preload("res://scripts/game/abu.gdshader")
 const PORSI_TEPI := 0.1
 const PORSI_HURUF_LABEL := 0.45
 const WARNA_ABU := Color("#9e9e9e")
-const WARNA_SOROT := Color("#ffeb3b")
 const WARNA_GELEMBUNG := Color(1, 1, 1, 0.92)
 const WARNA_TEKS_GELEMBUNG := Color("#263238")
 const WARNA_LABEL_WADAH := Color("#5d4037")
-## Area tulisan di muka kardus (porsi petak, sesuai aset/benda/kardus.svg).
-const KOTAK_LABEL_WADAH := Rect2(Vector2(-0.33, -0.06), Vector2(0.66, 0.3))
+## Area tulisan di muka kardus, sebagai porsi ukuran gambar (0..1), sesuai
+## panel kosong di aset/benda/kardus.svg.
+const KOTAK_LABEL_WADAH := Rect2(Vector2(0.17, 0.44), Vector2(0.66, 0.31))
 const PORSI_GELEMBUNG := 0.42
+## Piksel tekstur per petak (SVG viewBox 128 per petak, diekspor 2x).
+const PIKSEL_PER_PETAK := 256.0
+const WARNA_CINCIN := Color(1, 1, 1, 0.55)
+## Lapisan gelembung ikon alat: di atas pemain dan benda lain.
+const LAPISAN_GELEMBUNG := 5
 
 var id: String
 var huruf: String
@@ -39,13 +46,14 @@ var ikon_alat := "":
 		if v != ikon_alat:
 			ikon_alat = v
 			# Gelembung menjorok ke petak atas; gambar di atas benda lain.
-			z_index = 1 if v != "" else 0
 			_tekstur_ikon = Aset.tekstur(Aset.benda(v, DataGame.entri_benda(v))) if v != "" else null
-			queue_redraw()
+			if _gelembung:
+				_gelembung.queue_redraw()
 
 var _ukuran: float
 var _tekstur: Texture2D
 var _tekstur_ikon: Texture2D
+var _gelembung: Node2D
 static var _bahan_abu: ShaderMaterial
 
 
@@ -58,6 +66,12 @@ func siapkan(id_benda: String, huruf_peta: String, sel_peta: Vector2i, ukuran_pe
 	kotak.size = Vector2.ONE * _ukuran
 	bentuk.shape = kotak
 	add_child(bentuk)
+	# Gelembung ikon alat di node anak dengan z_index sendiri, supaya tidak
+	# ikut tertutup pemain walau bendanya tertutup.
+	_gelembung = Node2D.new()
+	_gelembung.z_index = LAPISAN_GELEMBUNG
+	_gelembung.draw.connect(_gambar_gelembung)
+	add_child(_gelembung)
 	_jadi(id_benda, huruf_peta)
 
 
@@ -100,29 +114,36 @@ func _jadi(id_baru: String, huruf_peta: String = "") -> void:
 func _draw() -> void:
 	var tepi := _ukuran * PORSI_TEPI
 	var kotak := Rect2(Vector2.ONE * (-_ukuran / 2.0 + tepi), Vector2.ONE * (_ukuran - 2.0 * tepi))
-	var warna := Color(entri.get("warna", "#ffffff"))
-	if status == AturanAksi.STATUS_ABU:
-		warna = WARNA_ABU
+	if disorot:
+		# Sorotan halus: cincin di kaki benda, tidak mencolok.
+		draw_arc(Vector2(0, _ukuran * 0.36), _ukuran * 0.42, 0.0, TAU, 32, WARNA_CINCIN, 3.0, true)
 	if _tekstur != null:
-		draw_texture_rect(_tekstur, Rect2(Vector2.ONE * -_ukuran / 2.0, Vector2.ONE * _ukuran), false)
+		# Benda digambar lebih besar dari petaknya supaya adegan rapat dan
+		# benda saling bersinggungan (menyatu); tabrakan tetap satu petak.
+		var ukuran_gambar: Vector2 = _tekstur.get_size() / PIKSEL_PER_PETAK * _ukuran * float(DataGame.pengaturan.skala_gambar_benda)
+		var dasar := Vector2(-ukuran_gambar.x / 2.0, _ukuran / 2.0 - ukuran_gambar.y)
+		draw_texture_rect(_tekstur, Rect2(dasar, ukuran_gambar), false)
 		if entri.has("label"):
-			var area := Rect2(KOTAK_LABEL_WADAH.position * _ukuran, KOTAK_LABEL_WADAH.size * _ukuran)
+			var area := Rect2(dasar + KOTAK_LABEL_WADAH.position * ukuran_gambar, KOTAK_LABEL_WADAH.size * ukuran_gambar)
 			Gambar.huruf_tengah(self, entri.label, area, WARNA_LABEL_WADAH, 0.7)
-	elif entri.has("label"):
-		# Wadah: tulisan besar sebagai petunjuk isinya.
+		return
+	var warna := WARNA_ABU if status == AturanAksi.STATUS_ABU else Color(entri.get("warna", "#ffffff"))
+	if entri.has("label"):
 		draw_rect(kotak, warna)
 		draw_rect(kotak, warna.darkened(0.35), false, 2.0)
 		Gambar.huruf_tengah(self, entri.label, kotak, Gambar.warna_kontras(warna), PORSI_HURUF_LABEL)
 	else:
 		Gambar.kotak_benda(self, kotak, warna, huruf)
-	if disorot:
-		draw_rect(kotak.grow(tepi * 0.6), WARNA_SOROT, false, 3.0)
-	if ikon_alat != "":
-		var r := _ukuran * PORSI_GELEMBUNG / 2.0
-		var pusat := Vector2(0, -_ukuran * 0.5 - r - 4.0)
-		draw_circle(pusat, r + 2.0, WARNA_TEKS_GELEMBUNG)
-		draw_circle(pusat, r, WARNA_GELEMBUNG)
-		if _tekstur_ikon != null:
-			draw_texture_rect(_tekstur_ikon, Rect2(pusat - Vector2.ONE * r * 0.8, Vector2.ONE * r * 1.6), false)
-		else:
-			Gambar.huruf_tengah(self, DataGame.nama_benda(ikon_alat), Rect2(pusat - Vector2(r * 2.0, r), Vector2(r * 4.0, r * 2.0)), WARNA_TEKS_GELEMBUNG, 0.6)
+
+
+func _gambar_gelembung() -> void:
+	if ikon_alat == "":
+		return
+	var r := _ukuran * PORSI_GELEMBUNG / 2.0
+	var pusat := Vector2(0, -_ukuran * 0.5 - r - 4.0)
+	_gelembung.draw_circle(pusat, r + 2.0, WARNA_TEKS_GELEMBUNG)
+	_gelembung.draw_circle(pusat, r, WARNA_GELEMBUNG)
+	if _tekstur_ikon != null:
+		_gelembung.draw_texture_rect(_tekstur_ikon, Rect2(pusat - Vector2.ONE * r * 0.8, Vector2.ONE * r * 1.6), false)
+	else:
+		Gambar.huruf_tengah(_gelembung, DataGame.nama_benda(ikon_alat), Rect2(pusat - Vector2(r * 2.0, r), Vector2(r * 4.0, r * 2.0)), WARNA_TEKS_GELEMBUNG, 0.6)

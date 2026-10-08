@@ -25,6 +25,9 @@ const SIMBOL_BISA_DIINJAK := [SIMBOL_LANTAI, SIMBOL_PEMAIN, SIMBOL_TANAH]
 
 const JENIS_SUMBER := "sumber"
 const JENIS_KOSONG := "kosong"
+## Benda hiasan adegan: bisa diperiksa seperti benda kosong (reaksi lalu
+## abu-abu), tetapi boleh dipakai di stage mana saja (tidak kena jeda 4 stage).
+const JENIS_HIASAN := "hiasan"
 const JENIS_WADAH := "wadah"
 const JENIS_ALAT := "alat"
 const JENIS_PENGHALANG := "penghalang"
@@ -116,6 +119,8 @@ static func jenis_benda(entri: Variant) -> String:
 			return JENIS_ALAT
 		JENIS_PENGHALANG:
 			return JENIS_PENGHALANG
+		JENIS_HIASAN:
+			return JENIS_HIASAN
 	if entri.has("butuh_alat"):
 		return JENIS_WADAH
 	if entri.has("hasil"):

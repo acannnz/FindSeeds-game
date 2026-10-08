@@ -8,13 +8,14 @@ extends RefCounted
 ##   aset/tanaman/<id>_<tahap>.svg  tahap: muda, matang, buah; plus tanaman/tunas.svg
 ##   aset/karakter/pemain_<arah>.svg   arah: bawah, atas, kiri, kanan
 ##   aset/pembeli/<id>.svg
-##   aset/petak/<tema>_<bagian>.svg    bagian: lantai, dinding; plus petak/tanah.svg
+##   aset/petak/<tema>_<bagian>.svg    bagian: lantai (mulus, boleh 2x2 petak), dinding,
+##                                     dinding_muka (dinding dengan sisi muka 3/4); plus petak/tanah.svg
 ##   aset/ui/aksi_<aksi>.svg
 
 const FOLDER := "res://aset"
 const TAHAP_TANAMAN := ["muda", "matang", "buah"]
 const ARAH_PEMAIN := ["bawah", "atas", "kiri", "kanan"]
-const BAGIAN_PETAK := ["lantai", "dinding"]
+const BAGIAN_PETAK := ["lantai", "dinding", "dinding_muka"]
 const AKSI := ["identifikasi", "ambil", "potong", "tanam", "panen"]
 
 static var _simpanan := {}
@@ -42,6 +43,11 @@ static func pembeli(id: String) -> String:
 
 static func petak(tema: String, bagian: String) -> String:
 	return "%s/petak/%s_%s.svg" % [FOLDER, tema, bagian]
+
+
+## Tempelan lantai (hiasan datar, tidak menghalangi): aset/petak/<nama>.svg.
+static func tempelan(nama: String) -> String:
+	return "%s/petak/%s.svg" % [FOLDER, nama]
 
 
 static func tanah() -> String:
@@ -80,6 +86,8 @@ static func kebutuhan(data: Dictionary) -> Array[String]:
 	for tema in data.get("tema", {}):
 		for bagian in BAGIAN_PETAK:
 			jalur.append(petak(tema, bagian))
+		for nama in data.tema[tema].get("tempelan", []):
+			jalur.append(tempelan(nama))
 	jalur.append(tanah())
 	for arah in ARAH_PEMAIN:
 		jalur.append(pemain(arah))

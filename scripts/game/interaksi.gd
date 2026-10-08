@@ -147,6 +147,9 @@ func _nama_target(target: Node2D) -> String:
 			return "%s matang" % DataGame.nama_tanaman(target.tanaman)
 		# Benih ditanam sesuai urutan masuk; beri tahu benih mana yang akan dipakai.
 		return "Petak tanah · benih %s" % DataGame.nama_tanaman(kantong.berikutnya()).to_lower()
+	# Benda yang belum diperiksa tidak diberi nama: pemain menebak dari gambar.
+	if target.jenis() in AturanAksi.JENIS_RAHASIA:
+		return ""
 	return DataGame.nama_benda(target.id)
 
 
@@ -184,15 +187,17 @@ func _selesaikan() -> void:
 		_perbarui_target()
 
 
-## Sumber dan pengecoh berubah jadi benih; benda kosong bereaksi lalu abu-abu.
+## Sumber dan pengecoh berubah jadi benih; benda kosong dan hiasan bereaksi
+## lalu abu-abu. Nama benda baru diungkap di sini, setelah diperiksa.
 func _identifikasi(benda: Node2D) -> void:
+	var nama := DataGame.nama_benda(benda.id)
 	if benda.jenis() == PemuatData.JENIS_SUMBER:
 		var tanaman: String = benda.entri.hasil
 		kantong.tambah(tanaman)
-		_teks(benda.position, "+ Benih %s" % DataGame.nama_tanaman(tanaman).to_lower(), DataGame.warna_tanaman(tanaman))
+		_teks(benda.position, "%s → benih %s!" % [nama, DataGame.nama_tanaman(tanaman).to_lower()], DataGame.warna_tanaman(tanaman))
 		_peta.hapus_benda(benda)
 	else:
-		_teks(benda.position, str(benda.entri.get("teks_reaksi", "...")), WARNA_TEKS_REAKSI)
+		_teks(benda.position, "%s: %s" % [nama, str(benda.entri.get("teks_reaksi", "..."))], WARNA_TEKS_REAKSI)
 		benda.jadi_abu()
 
 
@@ -221,5 +226,5 @@ func _panen(tanah: Node2D) -> void:
 func _teks(posisi: Vector2, teks: String, warna: Color) -> void:
 	var t := TeksMelayang.new()
 	t.position = posisi
-	t.siapkan(teks, warna, _ukuran)
+	t.siapkan(teks, warna, _ukuran, _peta.ukuran_dunia().x)
 	_peta.add_child(t)

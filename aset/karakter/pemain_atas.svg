@@ -1,7 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 128 128">
-<ellipse cx="64" cy="116" rx="30" ry="7" fill="#000" fill-opacity="0.16"/>
-<circle cx="34" cy="80" r="9" fill="#ffcc80" stroke="#3b2a20" stroke-linejoin="round" stroke-linecap="round" stroke-width="3"/><circle cx="94" cy="80" r="9" fill="#ffcc80" stroke="#3b2a20" stroke-linejoin="round" stroke-linecap="round" stroke-width="3"/>
-<ellipse cx="64" cy="86" rx="28" ry="24" fill="#1e88e5" stroke="#3b2a20" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
-<circle cx="64" cy="60" r="22" fill="#6d4c41" stroke="#3b2a20" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
-<ellipse cx="64" cy="54" rx="34" ry="17" fill="#fbc02d" stroke="#3b2a20" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/><ellipse cx="64" cy="48" rx="18" ry="12" fill="#f9a825" stroke="#3b2a20" stroke-linejoin="round" stroke-linecap="round" stroke-width="3"/><path d="M46 52 Q64 58 82 52" fill="none" stroke="#e53935" stroke-width="4"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="320" viewBox="0 0 128 160">
+<ellipse cx="64" cy="152" rx="29.1" ry="9.8" fill="#1f2a14" fill-opacity="0.12"/><ellipse cx="64" cy="152" rx="26.0" ry="7.8" fill="#1f2a14" fill-opacity="0.18"/>
+<circle cx="34" cy="114" r="8" fill="#f6c79e" stroke="#897061" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="94" cy="114" r="8" fill="#f6c79e" stroke="#897061" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M53 140 L53 152 M75 140 L75 152" fill="none" stroke="#3b4a6b" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><path d="M38 140 Q36 102 64 98 Q92 102 90 140 Z" fill="#3d8fe0" stroke="#2c5482" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/><path d="M38 128 L90 128 L90 140 L38 140 Z" fill="#3b4a6b"/>
+<circle cx="64" cy="80" r="24" fill="#5d3f30" stroke="#3c2c2a" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<ellipse cx="64" cy="72" rx="34" ry="15" fill="#f2c14e" stroke="#876c39" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/><ellipse cx="64" cy="67" rx="19" ry="12" fill="#e8b03b" stroke="#826430" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/><path d="M45 70 Q64 77 83 70" fill="none" stroke="#d9534f" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

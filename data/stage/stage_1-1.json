@@ -7,20 +7,23 @@
   "pesanan": { "pembeli": "bu_ijah", "isi": { "tomat": 1 } },
   "peta": [
     "########",
-    "#B....E#",
+    "#B.k..E#",
+    "#.m....#",
+    "#c..O.t#",
     "#......#",
-    "#...O..#",
-    "#......#",
-    "#......#",
+    "#....b.#",
     "#.S....#",
-    "#....RR#",
-    "#....RR#",
-    "#..T.RR#",
-    "#@...RR#",
+    "#w...RR#",
+    "#..g.RR#",
+    "#a.T.RR#",
+    "#@.s.RR#",
     "########"
   ],
   "legenda": {
     "O": "bola_karet_merah", "E": "ember", "S": "sandal_jepit",
-    "R": "rumah"
+    "R": "rumah",
+    "k": "kursi_taman", "m": "mawar_merah", "c": "pot_kaktus", "t": "tong_sampah",
+    "b": "batu_bulat", "w": "kaleng_siram", "g": "sepeda_roda_tiga", "a": "mobil_mainan",
+    "s": "selang_air"
   }
 }

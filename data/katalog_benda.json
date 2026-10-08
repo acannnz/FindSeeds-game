@@ -21,6 +21,16 @@
   "ember":               { "nama": "Ember",            "warna": "#607d8b", "hasil": null, "reaksi": "klontang",          "teks_reaksi": "Klontang!" },
   "sandal_jepit":        { "nama": "Sandal jepit",     "warna": "#4fc3f7", "hasil": null, "reaksi": "plak",              "teks_reaksi": "Plak!" },
 
+  "mawar_merah":         { "nama": "Semak mawar merah",      "warna": "#d8394a", "jenis": "hiasan", "teks_reaksi": "Aduh, durinya tajam!" },
+  "sepeda_roda_tiga":    { "nama": "Sepeda roda tiga merah", "warna": "#c93b33", "jenis": "hiasan", "teks_reaksi": "Kring kring!" },
+  "batu_bulat":          { "nama": "Batu bulat",             "warna": "#9a9ea8", "jenis": "hiasan", "teks_reaksi": "Cuma batu biasa." },
+  "kaleng_siram":        { "nama": "Kaleng siram",           "warna": "#47b07c", "jenis": "hiasan", "teks_reaksi": "Byur! Airnya tumpah." },
+  "selang_air":          { "nama": "Gulungan selang",        "warna": "#2f9a4f", "jenis": "hiasan", "teks_reaksi": "Psst! Air menyemprot." },
+  "kursi_taman":         { "nama": "Kursi taman",            "warna": "#e9eef0", "jenis": "hiasan", "teks_reaksi": "Kursinya bergoyang." },
+  "pot_kaktus":          { "nama": "Pot kaktus",             "warna": "#58a35a", "jenis": "hiasan", "teks_reaksi": "Auw! Tertusuk duri." },
+  "tong_sampah":         { "nama": "Tong sampah",            "warna": "#3f8a6a", "jenis": "hiasan", "teks_reaksi": "Ih, bau sampah!" },
+  "mobil_mainan":        { "nama": "Mobil mainan",           "warna": "#3a7bd5", "jenis": "hiasan", "teks_reaksi": "Brmm... mobilnya melaju." },
+
   "kardus_mainan":       { "nama": "Kardus MAINAN", "warna": "#a1887f", "label": "MAINAN", "gambar": "kardus", "butuh_alat": "gunting", "isi": "hidung_badut" },
   "kardus_sepatu":       { "nama": "Kardus SEPATU", "warna": "#a1887f", "label": "SEPATU", "gambar": "kardus", "butuh_alat": "gunting", "isi": "sepatu" },
 

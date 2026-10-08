@@ -24,7 +24,7 @@ Semua angka di bagian ini adalah titik awal untuk prototipe dan perlu disetel le
 
 - Layar portrait, satu kanvas tanpa panel kontrol terpisah. Peta selebar layar tepat di bawah HUD atas; area di bawah peta tetap bagian dunia game dan menjadi tempat jempol. Jika layar terlalu pendek (misalnya 16:9), peta diperkecil secukupnya agar area bawah tetap minimal 22% tinggi layar.
 - Joystick virtual dinamis untuk bergerak bebas, tidak per petak: tidak terlihat sampai disentuh, muncul di titik sentuh mana pun di separuh kiri layar, alasnya ikut tertarik jika jempol melewati radius, dan memudar saat dilepas.
-- Satu tombol aksi melayang di kanan bawah. Labelnya berubah sesuai benda terdekat dalam jarak 1 petak: Identifikasi, Ambil, Potong, Tanam, atau Panen. Tanpa aksi, tombol kecil dan samar; ada aksi, tombol membesar dan berdenyut. Nama benda dan aksinya juga muncul sebagai label kecil yang menempel pada benda itu di dunia game.
+- Satu tombol aksi melayang di kanan bawah. Labelnya berubah sesuai benda terdekat dalam jarak 1 petak: Periksa (identifikasi), Ambil, Potong, Tanam, atau Panen. Tanpa aksi, tombol kecil dan samar; ada aksi, tombol membesar dan berdenyut. Label aksi juga muncul kecil di atas benda itu. Nama benda yang belum diperiksa TIDAK ditampilkan: pemain menebak dari gambar saja, dan namanya baru terungkap setelah diperiksa.
 - HUD (timer, kantong benih, alat di tangan) melayang di tepi atas layar.
 
 **Durasi aksi**
@@ -45,6 +45,8 @@ Pemain berjalan 4 petak per detik, jadi menyeberangi peta dari bawah ke atas (12
 - Benda sumber benih berubah jadi benih dan masuk kantong.
 - Benda kosong memunculkan reaksi lucu, lalu berubah abu-abu supaya tidak dicoba dua kali.
 - Benda pengecoh tetap menghasilkan benih, tapi hasil panennya tidak mengisi pesanan.
+- Benda hiasan adegan (kursi, pot, tong sampah, dan lain-lain) juga bisa diperiksa: bereaksi lucu lalu abu-abu seperti benda kosong. Hiasan membuat benda petunjuk menyatu dengan adegan, sehingga pemain harus benar-benar mengamati warna dan bentuk.
+- Tiap stage digambar sebagai satu adegan utuh bersudut pandang 3/4 tanpa garis petak; benda di depan bisa menutupi pemain.
 - Wadah tertutup memunculkan ikon alat yang dibutuhkan saat didekati, tanpa memotong waktu.
 
 **Bawaan**
@@ -79,7 +81,7 @@ Musim Semi memakai lima tanaman dengan minimal dua benda sumber per tanaman, dan
 
 **Aturan variasi benda**
 
-- **Jeda 4 stage:** benda yang sama, baik sumber benih, benda kosong, maupun pengecoh, baru boleh muncul lagi minimal 4 stage setelah kemunculan terakhirnya.
+- **Jeda 4 stage:** benda yang sama, baik sumber benih, benda kosong, maupun pengecoh, baru boleh muncul lagi minimal 4 stage setelah kemunculan terakhirnya. Benda hiasan adegan tidak terkena aturan ini.
 - **Dua sifat sekaligus:** benda sumber cocok dengan tanamannya di dua sifat. Benda kosong dan pengecoh sengaja cocok di satu sifat saja, sehingga pemain yang terburu-buru tertipu.
 - **Logika baru tiap musim:** setiap musim memperkenalkan satu jenis logika di stage 1–3, dan logika musim sebelumnya tetap dipakai.
 
@@ -142,16 +144,16 @@ Simbol umum di semua peta: `#` dinding atau pagar, `.` lantai, `@` posisi awal p
 
 ```
 # # # # # # # #
-# B . . . . E #
+# B . k . . E #
+# . m . . . . #
+# c . . O . t #
 # . . . . . . #
-# . . . O . . #
-# . . . . . . #
-# . . . . . . #
+# . . . . b . #
 # . S . . . . #
-# . . . . R R #
-# . . . . R R #
-# . . T . R R #
-# @ . . . R R #
+# w . . . R R #
+# . . g . R R #
+# a . T . R R #
+# @ . s . R R #
 # # # # # # # #
 ```
 
@@ -161,6 +163,12 @@ Simbol umum di semua peta: `#` dinding atau pagar, `.` lantai, `@` posisi awal p
 | E | Ember | Kosong |
 | S | Sandal jepit | Kosong |
 | R | Rumah | Penghalang |
+| m | Semak mawar merah | Hiasan (merah, tapi bukan bola) |
+| g | Sepeda roda tiga merah | Hiasan (merah, tapi tidak bulat) |
+| b | Batu bulat | Hiasan (bulat, tapi abu-abu) |
+| k, c, t, w, a, s | Kursi taman, pot kaktus, tong sampah, kaleng siram, mobil mainan, gulungan selang | Hiasan |
+
+Huruf kecil dipakai untuk hiasan adegan. Posisi bola karet, tanah, rumah, dan jalur solusi sama seperti rancangan awal.
 
 **Solusi tercepat, sekitar 9 detik:**
 
@@ -341,7 +349,7 @@ Tambahkan juga skrip pemeriksa yang berjalan setiap kali build, untuk menangkap 
 2. Setiap wadah yang butuh alat punya alat itu di peta yang sama.
 3. Setiap huruf di peta ada di legenda atau termasuk simbol umum.
 4. Semua benda dan petak tanah bisa dicapai dari `@`, dicek dengan flood fill (menyebar dari posisi awal ke semua petak yang bisa dilewati).
-5. Tidak ada benda yang muncul lagi kurang dari 4 stage setelah kemunculan terakhirnya. Skrip membaca semua file stage berurutan dan mencatat stage terakhir tempat setiap benda dipakai.
+5. Tidak ada benda (selain hiasan) yang muncul lagi kurang dari 4 stage setelah kemunculan terakhirnya. Skrip membaca semua file stage berurutan dan mencatat stage terakhir tempat setiap benda dipakai.
 6. Setiap benda sumber memakai logika yang sudah diperkenalkan di musim itu atau sebelumnya. Musim dibaca dari angka pertama id stage, logika dari kolom `logika` di katalog.
 
 ## Keputusan
