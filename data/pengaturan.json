@@ -8,6 +8,7 @@
   "joystick_zona_mati": 0.15,
   "tombol_aksi_radius_px": 95,
   "lama_teks_melayang_detik": 1.5,
+  "lama_reaksi_pembeli_detik": 0.6,
 
   "kapasitas_kantong": 3,
   "kecepatan_jalan_petak_per_detik": 4.0,

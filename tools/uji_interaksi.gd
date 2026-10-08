@@ -31,6 +31,7 @@ func _jalankan() -> void:
 		return
 	await _uji_stage_1_3()
 	await _uji_tukar_alat()
+	await _uji_panen_pengecoh()
 	_selesai("uji interaksi")
 
 
@@ -102,6 +103,53 @@ func _uji_tukar_alat() -> void:
 	_cek("Tukar alat: tangan memegang sekop", _interaksi.alat_di_tangan == "sekop")
 	var ditaruh := _benda_di(Vector2i(2, 6))
 	_cek("Tukar alat: gunting ditaruh di tempat sekop", ditaruh != null and ditaruh.id == "gunting")
+
+
+## Stage 1-2: benih bunga (pengecoh) ditanam dan dipanen.
+func _uji_panen_pengecoh() -> void:
+	await _muat(DataGame.stage_dengan_id("1-2"))
+	await _berdiri_di(Vector2i(2, 3))
+	await _jalankan_aksi("pot_bunga", "identifikasi")
+	_cek("Pot bunga jadi benih bunga", _kantong_berisi(["bunga"]))
+
+	var tanah := _tanah_di(Vector2i(1, 6))
+	await _berdiri_di(tanah.sel)
+	_cek_aksi_tanah("Di petak tanah dengan benih: Tanam", tanah, "tanam")
+	_interaksi.tekan_aksi()
+	await _tunggu(DataGame.durasi("tanam") + float(FRAME_LEBIH) / FPS)
+	_cek("Benih bunga tertanam, kantong kosong", tanah.status == AturanAksi.TANAH_TUMBUH and _interaksi.kantong.kosong())
+	_cek("Tanaman yang tumbuh tidak menawarkan aksi", _interaksi.aksi_kini.is_empty())
+
+	var posisi := _pemain.position
+	_pemain.arah_paksa = Vector2.DOWN
+	await _tunggu(0.3)
+	_pemain.arah_paksa = Vector2.ZERO
+	_cek("Pemain bisa bergerak selama tanaman tumbuh", _pemain.position.distance_to(posisi) > 0.5 * _stage.UKURAN_PETAK)
+	_cek("Tanaman belum matang sebelum %.1f detik" % DataGame.durasi("tumbuh"), tanah.status == AturanAksi.TANAH_TUMBUH)
+	await _tunggu(DataGame.durasi("tumbuh"))
+	_cek("Tanaman matang setelah %.1f detik" % DataGame.durasi("tumbuh"), tanah.status == AturanAksi.TANAH_MATANG)
+
+	await _berdiri_di(tanah.sel)
+	_cek_aksi_tanah("Tanaman matang: Panen", tanah, "panen")
+	_interaksi.tekan_aksi()
+	await _tunggu(DataGame.durasi("panen") + float(FRAME_LEBIH) / FPS)
+	var pesanan: RefCounted = _stage.pesanan
+	_cek("Bunga tidak mengisi pesanan", pesanan.terisi.tomat == 0 and pesanan.terisi.wortel == 0)
+	_cek("Pembeli menggeleng", _stage.peta.daftar_pembeli[0].sedang_menggeleng())
+	_cek("Petak tanah kosong lagi, stage belum selesai", tanah.status == AturanAksi.TANAH_KOSONG and not _stage.sudah_selesai)
+
+
+func _tanah_di(sel: Vector2i) -> Node2D:
+	for t in _peta.daftar_tanah:
+		if t.sel == sel:
+			return t
+	return null
+
+
+func _cek_aksi_tanah(judul: String, tanah: Node2D, aksi: String) -> void:
+	var a: Dictionary = _interaksi.aksi_kini
+	_cek(judul, a.get("target") == tanah and a.get("aksi", "") == aksi and a.get("aktif", false),
+		"dapat aksi='%s' aktif=%s" % [a.get("aksi", ""), a.get("aktif", false)])
 
 
 func _muat(data: Dictionary) -> void:

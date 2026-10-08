@@ -34,7 +34,24 @@ const STATUS_NORMAL := "normal"
 ## Benda kosong yang sudah diidentifikasi: abu-abu, tidak bisa dicoba lagi.
 const STATUS_ABU := "abu"
 
+## Status petak tanah.
+const TANAH_KOSONG := "kosong"
+const TANAH_TUMBUH := "tumbuh"
+const TANAH_MATANG := "matang"
+
 const ALASAN_KANTONG_PENUH := "Kantong penuh"
+
+
+## Aksi untuk satu petak tanah. Petak kosong tanpa benih di kantong dan
+## tanaman yang masih tumbuh tidak menawarkan aksi, supaya tidak menutupi
+## benda di sebelahnya.
+static func untuk_tanah(status: String, ada_benih: bool) -> Dictionary:
+	match status:
+		TANAH_KOSONG:
+			return _hasil(AKSI_TANAM if ada_benih else AKSI_TIDAK_ADA)
+		TANAH_MATANG:
+			return _hasil(AKSI_PANEN)
+	return _hasil(AKSI_TIDAK_ADA)
 
 
 ## Aksi untuk satu benda.

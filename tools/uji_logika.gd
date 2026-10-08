@@ -1,5 +1,5 @@
 extends "res://tools/dasar_uji.gd"
-## Uji logika murni: kantong benih dan aturan tombol aksi.
+## Uji logika murni: kantong benih, pesanan, dan aturan tombol aksi.
 ##
 ## Jalankan dari root proyek:
 ##   tools\periksa.bat --uji-logika
@@ -7,11 +7,14 @@ extends "res://tools/dasar_uji.gd"
 const DataGame := preload("res://scripts/inti/data_game.gd")
 const Kantong := preload("res://scripts/inti/kantong.gd")
 const AturanAksi := preload("res://scripts/inti/aturan_aksi.gd")
+const Pesanan := preload("res://scripts/inti/pesanan.gd")
 
 
 func _initialize() -> void:
 	_uji_kantong()
+	_uji_pesanan()
 	_uji_aturan_aksi()
+	_uji_aturan_tanah()
 	_selesai("uji logika")
 
 
@@ -30,6 +33,25 @@ func _uji_kantong() -> void:
 		keluar.append(k.ambil())
 	_cek("Urutan tanam sama dengan urutan masuk", keluar == urutan.slice(0, kapasitas))
 	_cek("Ambil dari kantong kosong mengembalikan \"\"", k.ambil() == "")
+
+
+func _uji_pesanan() -> void:
+	# Pesanan stage 1-3 dari file data: 2 tomat, 1 jagung.
+	var p := Pesanan.new(DataGame.stage_dengan_id("1-3").pesanan.isi)
+	_cek("Pesanan baru belum lengkap", not p.lengkap())
+	_cek("Stroberi (pengecoh) ditolak", not p.terima("stroberi"))
+	_cek("Tomat pertama diterima", p.terima("tomat"))
+	_cek("Jagung diterima dan item jagung lengkap", p.terima("jagung") and p.tanaman_lengkap("jagung"))
+	_cek("Jagung kedua (melebihi pesanan) ditolak", not p.terima("jagung"))
+	_cek("Belum lengkap selama tomat baru 1 dari 2", not p.lengkap() and p.terisi.tomat == 1)
+	_cek("Tomat kedua melengkapi pesanan", p.terima("tomat") and p.lengkap())
+
+
+func _uji_aturan_tanah() -> void:
+	_aksi("Tanah kosong + ada benih: Tanam aktif", AturanAksi.untuk_tanah(AturanAksi.TANAH_KOSONG, true), "tanam", true)
+	_aksi("Tanah kosong tanpa benih: tidak ada aksi", AturanAksi.untuk_tanah(AturanAksi.TANAH_KOSONG, false), "", false)
+	_aksi("Tanaman tumbuh: tidak ada aksi", AturanAksi.untuk_tanah(AturanAksi.TANAH_TUMBUH, true), "", false)
+	_aksi("Tanaman matang: Panen aktif", AturanAksi.untuk_tanah(AturanAksi.TANAH_MATANG, false), "panen", true)
 
 
 func _uji_aturan_aksi() -> void:
