@@ -1,0 +1,31 @@
+{
+  "bola_karet_merah":    { "nama": "Bola karet merah",        "warna": "#e53935", "hasil": "tomat",    "logika": "warna_bentuk" },
+  "jam_weker_merah":     { "nama": "Jam weker merah bundar",  "warna": "#d32f2f", "hasil": "tomat",    "logika": "warna_bentuk" },
+  "lampion_merah":       { "nama": "Lampion merah",           "warna": "#c62828", "hasil": "tomat",    "logika": "warna_bentuk" },
+  "hidung_badut":        { "nama": "Hidung badut",            "warna": "#ff1744", "hasil": "tomat",    "logika": "warna_bentuk" },
+  "kerucut_lalu_lintas": { "nama": "Kerucut lalu lintas",     "warna": "#fb8c00", "hasil": "wortel",   "logika": "warna_bentuk" },
+  "krayon_oranye":       { "nama": "Krayon oranye",           "warna": "#ef6c00", "hasil": "wortel",   "logika": "warna_bentuk" },
+  "spons_kuning":        { "nama": "Spons cuci piring kuning","warna": "#fdd835", "hasil": "jagung",   "logika": "warna_bentuk" },
+  "kemoceng_kuning":     { "nama": "Kemoceng kuning",         "warna": "#fbc02d", "hasil": "jagung",   "logika": "warna_bentuk" },
+  "bantalan_jarum":      { "nama": "Bantalan jarum jahit merah", "warna": "#ad1457", "hasil": "stroberi", "logika": "warna_bentuk" },
+  "bantal_hati_merah":   { "nama": "Bantal sofa hati merah",  "warna": "#c2185b", "hasil": "stroberi", "logika": "warna_bentuk" },
+  "bola_kertas_hijau":   { "nama": "Bola kertas hijau kusut", "warna": "#7cb342", "hasil": "kubis",    "logika": "warna_bentuk" },
+  "rok_tutu_hijau":      { "nama": "Rok tutu hijau",          "warna": "#689f38", "hasil": "kubis",    "logika": "warna_bentuk" },
+  "pot_bunga":           { "nama": "Pot bunga",               "warna": "#8e24aa", "hasil": "bunga",    "logika": "warna_bentuk" },
+
+  "kaleng_cat_merah":    { "nama": "Kaleng cat merah", "warna": "#b71c1c", "hasil": null, "reaksi": "cat_tumpah",        "teks_reaksi": "Cat tumpah ke lantai!" },
+  "kotak_pos":           { "nama": "Kotak pos merah",  "warna": "#d84315", "hasil": null, "reaksi": "surat_beterbangan", "teks_reaksi": "Surat beterbangan!" },
+  "bola_tenis":          { "nama": "Bola tenis",       "warna": "#cddc39", "hasil": null, "reaksi": "memantul",          "teks_reaksi": "Boing! Boing! Memantul ke sana kemari." },
+  "kucing_tidur":        { "nama": "Kucing tidur",     "warna": "#8d6e63", "hasil": null, "reaksi": "mengeong_kesal",    "teks_reaksi": "Meooong! Kucingnya kesal." },
+  "sepatu":              { "nama": "Sepatu",           "warna": "#5d4037", "hasil": null, "reaksi": "bau",               "teks_reaksi": "Uh, bau! (menutup hidung)" },
+  "ember":               { "nama": "Ember",            "warna": "#607d8b", "hasil": null, "reaksi": "klontang",          "teks_reaksi": "Klontang!" },
+  "sandal_jepit":        { "nama": "Sandal jepit",     "warna": "#4fc3f7", "hasil": null, "reaksi": "plak",              "teks_reaksi": "Plak!" },
+
+  "kardus_mainan":       { "nama": "Kardus MAINAN", "warna": "#a1887f", "label": "MAINAN", "butuh_alat": "gunting", "isi": "hidung_badut" },
+  "kardus_sepatu":       { "nama": "Kardus SEPATU", "warna": "#a1887f", "label": "SEPATU", "butuh_alat": "gunting", "isi": "sepatu" },
+
+  "gunting":             { "nama": "Gunting", "warna": "#90a4ae", "jenis": "alat" },
+  "sekop":               { "nama": "Sekop",   "warna": "#78909c", "jenis": "alat" },
+
+  "penghalang":          { "nama": "Penghalang", "warna": "#4e342e", "jenis": "penghalang" }
+}

@@ -1,0 +1,28 @@
+{
+  "peta_lebar_petak": 8,
+  "peta_tinggi_petak": 12,
+
+  "kapasitas_kantong": 3,
+  "kecepatan_jalan_petak_per_detik": 4.0,
+  "jarak_interaksi_petak": 1.0,
+
+  "durasi_detik": {
+    "identifikasi": 2.0,
+    "ambil_alat": 0.5,
+    "pakai_alat": 1.5,
+    "tanam": 1.0,
+    "tumbuh": 1.5,
+    "panen": 0.5
+  },
+
+  "timer_merah_sisa_detik": 10,
+  "jeda_ulang_detik": 0.8,
+
+  "jeda_kemunculan_benda_stage": 4,
+  "logika_per_musim": {
+    "1": "warna_bentuk",
+    "2": "asosiasi",
+    "3": "bunyi_nama",
+    "4": "varian_benda"
+  }
+}

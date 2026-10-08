@@ -8,7 +8,7 @@ Baca dokumen lengkapnya hanya jika butuh detail yang tidak ada di sini.
 | Fase | Isi | Status |
 | --- | --- | --- |
 | 1 | Rencana: struktur folder, daftar file | Selesai |
-| 2 | Data: katalog, pengaturan, 3 file stage | Belum |
+| 2 | Data: katalog, pengaturan, 3 file stage | Selesai |
 | 3 | Pemeriksa stage (6 pengecekan, CLI) | Belum |
 | 4 | Pemuat peta, gerak, tabrakan | Belum |
 | 5 | Interaksi: aksi kontekstual, identifikasi, alat, wadah, kantong | Belum |
@@ -19,7 +19,7 @@ Kerjakan per fase. Setelah tiap fase: jelaskan singkat, commit, push ke `origin 
 
 ## Teknologi
 
-- Godot 4.6.2-stable, GDScript. Executable: `D:\Download\Godot_v4.6.2-stable_win64.exe\Godot_v4.6.2-stable_win64_console.exe`
+- Godot 4.7.2-stable, GDScript. Executable CLI: `D:\Download\Godot_v4.7.2-stable_win64\Godot_v4.7.2-stable_win64_console.exe` (editor: `Godot_v4.7.2-stable_win64.exe` di folder yang sama)
 - Target Android, layar portrait. Placeholder kotak warna + huruf, belum ada aset.
 - Peta 8 × 12 petak di dua pertiga atas layar; sepertiga bawah: joystick (kiri), satu tombol aksi (kanan).
 - Lingkup prototipe: Stage 1-1, 1-2, 1-3. Tanpa menu, musim lain, suara, art, tutorial.
@@ -66,6 +66,7 @@ CLAUDE.md                    mengimpor docs/Claude.md
 data/
   katalog_benda.json         sifat semua benda
   pengaturan.json            semua angka penyetelan
+  pembeli.json               nama tampilan pembeli (id → nama)
   stage/stage_1-1.json …     peta, legenda, pesanan, ambang bintang
 scripts/
   inti/                      logika murni (bukan Node), dipakai game dan pemeriksa
@@ -84,6 +85,16 @@ tools/
 ```
 
 Aturan kode: tidak ada angka penyetelan atau posisi benda di kode; semuanya dari `data/`.
+
+## Format data
+
+**`data/katalog_benda.json`** — kunci = id benda. Kolom dari dokumen: `hasil`, `logika`, `reaksi`, `butuh_alat`, `isi`, `jenis`.
+Kolom tambahan prototipe: `nama` (teks tampilan), `warna` (warna kotak placeholder), `teks_reaksi` (benda kosong), `label` (tulisan di wadah).
+Legenda penghalang selalu menunjuk id `penghalang`. Benda cadangan (krayon, kemoceng, bantal hati, bola kertas, rok tutu) dan `sekop` sudah ada di katalog walau belum dipakai.
+
+**`data/pengaturan.json`** — `peta_lebar_petak`, `peta_tinggi_petak`, `kapasitas_kantong`, `kecepatan_jalan_petak_per_detik`, `jarak_interaksi_petak`, `durasi_detik.{identifikasi, ambil_alat, pakai_alat, tanam, tumbuh, panen}`, `timer_merah_sisa_detik`, `jeda_ulang_detik`, `jeda_kemunculan_benda_stage`, `logika_per_musim` (angka musim → id logika).
+
+**`data/stage/stage_<id>.json`** — `id`, `nama`, `waktu_detik`, `bintang_sisa_detik.{tiga, dua}`, `pesanan.{pembeli, isi}`, `peta` (12 string × 8 karakter), `legenda` (huruf → id katalog). Urutan stage = urutan id (musim, nomor).
 
 ## Menjalankan pemeriksa stage
 

@@ -1,0 +1,26 @@
+{
+  "id": "1-3",
+  "nama": "Gudang Kakek",
+  "waktu_detik": 90,
+  "bintang_sisa_detik": { "tiga": 45, "dua": 25 },
+  "pesanan": { "pembeli": "pak_rt", "isi": { "tomat": 2, "jagung": 1 } },
+  "peta": [
+    "#B######",
+    "#..S..G#",
+    "#.R..R.#",
+    "#JR.LR.#",
+    "#.R..R.#",
+    "#......#",
+    "####.###",
+    "#T.....#",
+    "#T.....#",
+    "#.....Y#",
+    "#@Q.A.W#",
+    "########"
+  ],
+  "legenda": {
+    "Y": "spons_kuning", "L": "lampion_merah", "A": "kardus_mainan",
+    "S": "kardus_sepatu", "G": "gunting", "J": "bantalan_jarum",
+    "Q": "kotak_pos", "W": "penghalang", "R": "penghalang"
+  }
+}

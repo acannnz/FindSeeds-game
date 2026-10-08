@@ -1,0 +1,25 @@
+{
+  "id": "1-1",
+  "nama": "Halaman Rumah",
+  "waktu_detik": 90,
+  "bintang_sisa_detik": { "tiga": 60, "dua": 40 },
+  "pesanan": { "pembeli": "bu_ijah", "isi": { "tomat": 1 } },
+  "peta": [
+    "########",
+    "#B....E#",
+    "#......#",
+    "#...O..#",
+    "#......#",
+    "#......#",
+    "#.S....#",
+    "#....RR#",
+    "#....RR#",
+    "#..T.RR#",
+    "#@...RR#",
+    "########"
+  ],
+  "legenda": {
+    "O": "bola_karet_merah", "E": "ember", "S": "sandal_jepit",
+    "R": "penghalang"
+  }
+}

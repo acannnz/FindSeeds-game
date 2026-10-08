@@ -1,0 +1,26 @@
+{
+  "id": "1-2",
+  "nama": "Teras Rumah Dodi",
+  "waktu_detik": 90,
+  "bintang_sisa_detik": { "tiga": 55, "dua": 35 },
+  "pesanan": { "pembeli": "mang_ujang", "isi": { "tomat": 1, "wortel": 1 } },
+  "peta": [
+    "########",
+    "#B....X#",
+    "#.PZ...#",
+    "#...O..#",
+    "#...MM.#",
+    "#...MM.#",
+    "#T..MM.#",
+    "#T.....#",
+    "#.....K#",
+    "#.N....#",
+    "#...@..#",
+    "########"
+  ],
+  "legenda": {
+    "O": "jam_weker_merah", "X": "kerucut_lalu_lintas", "P": "pot_bunga",
+    "K": "kaleng_cat_merah", "N": "bola_tenis", "Z": "kucing_tidur",
+    "M": "penghalang"
+  }
+}
