@@ -1,12 +1,14 @@
 {
   "peta_lebar_petak": 8,
   "peta_tinggi_petak": 12,
-  "porsi_tinggi_peta": 0.6667,
+  "tinggi_hud_atas_px": 112,
+  "porsi_bawah_minimal": 0.22,
 
   "radius_pemain_petak": 0.35,
   "joystick_radius_px": 110,
   "joystick_zona_mati": 0.15,
   "tombol_aksi_radius_px": 95,
+  "tombol_aksi_jarak_tepi_px": 56,
   "lama_teks_melayang_detik": 1.5,
   "lama_reaksi_pembeli_detik": 0.6,
 

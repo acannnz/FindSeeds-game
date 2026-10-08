@@ -35,16 +35,18 @@ var aksi_kini: Dictionary = {}
 var _pemain: CharacterBody2D
 var _peta: Node2D
 var _tombol: Control
+var _label_target: Node2D
 var _ukuran: float
 var _berjalan: Dictionary = {}
 var _sisa_detik := 0.0
 var _berhenti := false
 
 
-func siapkan(pemain: CharacterBody2D, peta: Node2D, tombol: Control, pesanan_stage: RefCounted, ukuran_petak: float) -> void:
+func siapkan(pemain: CharacterBody2D, peta: Node2D, tombol: Control, label_target: Node2D, pesanan_stage: RefCounted, ukuran_petak: float) -> void:
 	_pemain = pemain
 	_peta = peta
 	_tombol = tombol
+	_label_target = label_target
 	pesanan = pesanan_stage
 	_ukuran = ukuran_petak
 	kantong = Kantong.new(int(DataGame.pengaturan.kapasitas_kantong))
@@ -61,7 +63,8 @@ func hentikan() -> void:
 	_berjalan = {}
 	aksi_kini = {}
 	_tombol.progres = -1.0
-	_tombol.tampilkan("", false, "", "")
+	_tombol.tampilkan("", false, "")
+	_label_target.sembunyikan()
 	_sorot(null)
 
 
@@ -111,14 +114,19 @@ func _perbarui_target() -> void:
 
 	aksi_kini = {}
 	if terdekat == null:
-		_tombol.tampilkan("", false, "", "")
+		_tombol.tampilkan("", false, "")
+		_label_target.sembunyikan()
 		return
 	aksi_kini = aksi_terdekat
 	aksi_kini.target = terdekat
 	var alasan: String = aksi_kini.alasan
 	if aksi_kini.butuh_alat != "":
 		alasan = "Butuh %s" % DataGame.nama_benda(aksi_kini.butuh_alat)
-	_tombol.tampilkan(aksi_kini.label, aksi_kini.aktif, alasan, _nama_target(terdekat))
+	_tombol.tampilkan(aksi_kini.label, aksi_kini.aktif, alasan)
+	var ada_ikon: bool = "ikon_alat" in terdekat and terdekat.ikon_alat != ""
+	# Pemain di atas target: label di bawah agar tidak menutupi pemain.
+	var di_bawah := _pemain.position.y < terdekat.position.y - _ukuran * 0.25
+	_label_target.tampilkan(terdekat.position, _nama_target(terdekat), aksi_kini.label, aksi_kini.aktif, alasan, ada_ikon, di_bawah)
 
 
 ## Calon terdekat. Jika selisih jaraknya dalam toleransi seri, pilih yang

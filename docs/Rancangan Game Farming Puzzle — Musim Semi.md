@@ -22,9 +22,10 @@ Semua angka di bagian ini adalah titik awal untuk prototipe dan perlu disetel le
 
 **Kontrol**
 
-- Layar portrait. Peta mengisi dua pertiga atas layar; sepertiga bawah untuk kontrol, di jangkauan kedua jempol.
-- Joystick virtual di kiri bawah untuk bergerak bebas, tidak per petak.
-- Satu tombol aksi di kanan bawah. Labelnya berubah sesuai benda terdekat dalam jarak 1 petak: Identifikasi, Ambil, Potong, Tanam, atau Panen.
+- Layar portrait, satu kanvas tanpa panel kontrol terpisah. Peta selebar layar tepat di bawah HUD atas; area di bawah peta tetap bagian dunia game dan menjadi tempat jempol. Jika layar terlalu pendek (misalnya 16:9), peta diperkecil secukupnya agar area bawah tetap minimal 22% tinggi layar.
+- Joystick virtual dinamis untuk bergerak bebas, tidak per petak: tidak terlihat sampai disentuh, muncul di titik sentuh mana pun di separuh kiri layar, alasnya ikut tertarik jika jempol melewati radius, dan memudar saat dilepas.
+- Satu tombol aksi melayang di kanan bawah. Labelnya berubah sesuai benda terdekat dalam jarak 1 petak: Identifikasi, Ambil, Potong, Tanam, atau Panen. Tanpa aksi, tombol kecil dan samar; ada aksi, tombol membesar dan berdenyut. Nama benda dan aksinya juga muncul sebagai label kecil yang menempel pada benda itu di dunia game.
+- HUD (timer, kantong benih, alat di tangan) melayang di tepi atas layar.
 
 **Durasi aksi**
 

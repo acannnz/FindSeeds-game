@@ -9,6 +9,8 @@ const WARNA_MATA := Color.WHITE
 ## Posisi dan ukuran titik arah hadap, sebagai porsi radius badan.
 const PORSI_JARAK_MATA := 0.55
 const PORSI_RADIUS_MATA := 0.25
+## Pemain digambar di atas benda dan gelembung ikon alat (z_index 1).
+const LAPISAN_GAMBAR := 2
 
 ## Sumber arah dari joystick virtual (punya properti `vektor`).
 var joystick: Node
@@ -32,6 +34,7 @@ func siapkan(ukuran_petak: float, sumber_joystick: Node) -> void:
 	_kecepatan = p.kecepatan_jalan_petak_per_detik * ukuran_petak
 	_radius = p.radius_pemain_petak * ukuran_petak
 	joystick = sumber_joystick
+	z_index = LAPISAN_GAMBAR
 	var bentuk := CircleShape2D.new()
 	bentuk.radius = _radius
 	$Bentuk.shape = bentuk

@@ -1,8 +1,9 @@
 extends Node2D
 ## Satu stage yang sedang dimainkan: membangun peta dari data, menaruh pemain
 ## di '@', menyambungkan interaksi dengan tombol aksi, HUD, dan pembeli,
-## menghitung mundur timer, dan mengatur tata letak layar (peta di atas,
-## kontrol di bawah). Stage selesai otomatis begitu item terakhir pesanan
+## menghitung mundur timer, dan mengatur tata letak layar: peta selebar layar
+## di bawah HUD atas; joystick, tombol aksi, dan HUD melayang langsung di atas
+## tampilan game tanpa panel terpisah. Stage selesai otomatis begitu item terakhir pesanan
 ## terisi. Alur antarstage (bintang, ulang, lanjut) diatur main.gd.
 
 ## Pesanan lengkap sebelum waktu habis.
@@ -31,11 +32,11 @@ var rekor_bintang := 0
 @onready var kamera: Camera2D = $Kamera
 @onready var peta: Node2D = $Peta
 @onready var pemain: CharacterBody2D = $Pemain
-@onready var area_kontrol: Control = $UI/AreaKontrol
-@onready var joystick: Control = $UI/AreaKontrol/Joystick
-@onready var tombol_aksi: Control = $UI/AreaKontrol/TombolAksi
-@onready var hud: Control = $UI/AreaKontrol/Hud
+@onready var joystick: Control = $UI/Joystick
+@onready var tombol_aksi: Control = $UI/TombolAksi
+@onready var hud: Control = $UI/Hud
 @onready var interaksi: Node = $Interaksi
+@onready var label_target: Node2D = $LabelTarget
 
 
 func _ready() -> void:
@@ -44,12 +45,13 @@ func _ready() -> void:
 	peta.bangun(data, UKURAN_PETAK, pesanan)
 	pemain.position = peta.posisi_awal
 	pemain.siapkan(UKURAN_PETAK, joystick)
-	interaksi.siapkan(pemain, peta, tombol_aksi, pesanan, UKURAN_PETAK)
+	label_target.siapkan(UKURAN_PETAK, peta.ukuran_dunia().x)
+	interaksi.siapkan(pemain, peta, tombol_aksi, label_target, pesanan, UKURAN_PETAK)
 	interaksi.bawaan_berubah.connect(_perbarui_hud)
 	interaksi.dipanen.connect(_saat_dipanen)
-	hud.judul = "Stage %s: %s" % [data.id, data.nama]
+	hud.judul = "%s %s" % [data.id, data.nama]
 	if rekor_bintang > 0:
-		hud.judul += "  ·  rekor %d/%d" % [rekor_bintang, Bintang.BINTANG_MAKS]
+		hud.judul += " · rekor %d/%d" % [rekor_bintang, Bintang.BINTANG_MAKS]
 	hud.sisa_detik = sisa_detik
 	_perbarui_hud()
 	get_viewport().size_changed.connect(_atur_tata_letak)
@@ -87,16 +89,34 @@ func _perbarui_hud() -> void:
 	hud.perbarui(interaksi.kantong, interaksi.alat_di_tangan)
 
 
-## Peta mengisi bagian atas layar sebesar porsi_tinggi_peta, sisanya kontrol.
 func _atur_tata_letak() -> void:
 	var layar := get_viewport_rect().size
-	var porsi: float = DataGame.pengaturan.porsi_tinggi_peta
-	var area_peta := Vector2(layar.x, layar.y * porsi)
-	area_kontrol.anchor_top = porsi
-
-	var dunia: Vector2 = peta.ukuran_dunia()
-	var skala := minf(area_peta.x / dunia.x, area_peta.y / dunia.y)
-	kamera.zoom = Vector2.ONE * skala
+	var aman := _area_aman(layar)
+	hud.inset_atas = aman.position.y
+	tombol_aksi.inset_bawah = layar.y - aman.end.y
+	var p := DataGame.pengaturan
+	var tata := hitung_tata_letak(layar, peta.ukuran_dunia(), aman.position.y + float(p.tinggi_hud_atas_px), p.porsi_bawah_minimal)
+	kamera.zoom = Vector2.ONE * tata.skala
 	# Kamera berjangkar kiri atas: titik dunia di posisi kamera tampil di (0, 0).
-	var sisa := (area_peta - dunia * skala) / 2.0
-	kamera.position = -sisa / skala
+	kamera.position = -tata.asal / tata.skala
+
+
+## Peta selebar layar, tepat di bawah HUD atas. Jika layar terlalu pendek
+## sehingga sisa bawah (tempat jempol) kurang dari porsi_bawah, peta diperkecil
+## dan diletakkan di tengah horizontal.
+## Mengembalikan {"skala": float, "asal": Vector2 (pojok kiri atas peta di layar)}.
+static func hitung_tata_letak(layar: Vector2, dunia: Vector2, atas: float, porsi_bawah: float) -> Dictionary:
+	var tinggi_boleh := layar.y - atas - layar.y * porsi_bawah
+	var skala := minf(layar.x / dunia.x, tinggi_boleh / dunia.y)
+	return {"skala": skala, "asal": Vector2((layar.x - dunia.x * skala) / 2.0, atas)}
+
+
+## Area aman layar (di luar poni/bilah gestur) dalam koordinat viewport.
+## Di desktop seluruh viewport dianggap aman.
+func _area_aman(layar: Vector2) -> Rect2:
+	if not OS.has_feature("mobile"):
+		return Rect2(Vector2.ZERO, layar)
+	var jendela := Vector2(DisplayServer.window_get_size())
+	var aman := Rect2(DisplayServer.get_display_safe_area())
+	var skala := layar / jendela
+	return Rect2(aman.position * skala, aman.size * skala)
