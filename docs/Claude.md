@@ -14,6 +14,7 @@ Baca dokumen lengkapnya hanya jika butuh detail yang tidak ada di sini.
 | 5 | Interaksi: aksi kontekstual, identifikasi, alat, wadah, kantong | Selesai |
 | 6 | Tanam, panen, pesanan, menang otomatis | Selesai |
 | 7 | Timer, restart < 1 detik, bintang, stage berikutnya | Selesai |
+| + | Simpan rekor bintang (user://rekor.json) | Selesai |
 
 Kerjakan per fase. Setelah tiap fase: jelaskan singkat, commit, push ke `origin main`, lalu tunggu konfirmasi.
 
@@ -64,8 +65,9 @@ Durasi (semua dari `data/pengaturan.json`): jalan 4 petak/detik, identifikasi 2,
 11. Petak tanah: kosong tanpa benih dan tanaman yang sedang tumbuh tidak menawarkan aksi (tidak menutupi benda di sebelahnya). Pemain berdiri di atas petak untuk Tanam/Panen.
 12. Gelembung pesanan digambar di baris dinding atas, di atas/kanan pembeli, memanjang ke tepi kanan peta. Centang digambar dengan garis (font bawaan tak punya ✓).
 13. Jeda latar belakang: NOTIFICATION_APPLICATION_PAUSED/FOCUS_OUT → `get_tree().paused` (timer, aksi, tanaman, jeda ulang ikut berhenti), layar "Dijeda". RESUMED/FOCUS_IN melanjutkan. Di desktop, klik di luar jendela juga menjeda.
-14. Menang → layar hasil (bintang, sisa waktu, Ulangi/Lanjut). Waktu habis → "Waktu habis!" selama `jeda_ulang_detik` (0,8) lalu stage dimuat ulang. Setelah stage terakhir, "Ke awal" kembali ke 1-1. Bintang belum disimpan antar sesi.
-15. Di luar lingkup sekarang: tutorial (timer langsung jalan), musik, animasi reaksi (cukup teks). Setelah 1-3 kembali ke 1-1.
+14. Menang → layar hasil (bintang, sisa waktu, Ulangi/Lanjut). Waktu habis → "Waktu habis!" selama `jeda_ulang_detik` (0,8) lalu stage dimuat ulang. Setelah stage terakhir, "Ke awal" kembali ke 1-1.
+15. Rekor bintang terbaik per stage disimpan di `user://rekor.json` (`{"versi": 1, "bintang": {"1-1": 3}}`); hanya ditulis saat rekor pecah. Tulis ke `.tmp` lalu ganti nama; jika hanya `.tmp` yang ada, itu yang dimuat. File rusak → rekor kosong + peringatan, tidak crash. Layar menang: "Rekor baru!" atau "Rekor: N bintang"; judul HUD: "· rekor N/3".
+16. Di luar lingkup sekarang: tutorial (timer langsung jalan), musik, animasi reaksi (cukup teks). Setelah 1-3 kembali ke 1-1.
 
 ## Struktur folder
 
@@ -86,6 +88,7 @@ scripts/
     aturan_aksi.gd           aksi kontekstual per benda (label, aktif, alasan, butuh_alat)
     pesanan.gd               diminta/terisi per tanaman; terima() menolak yang tidak dipesan atau berlebih
     bintang.gd               hitung(sisa, ambang): ≥ tiga → 3, ≥ dua → 2, selain itu 1
+    rekor.gd                 rekor bintang per stage di user://, catat() → true jika rekor baru
   game/
     main.gd                  alur stage (PROCESS_MODE_ALWAYS): muat/ulang/lanjut, bintang, waktu habis, jeda latar belakang; galat data; pintasan debug
     stage.gd                 bangun peta, pesanan, pemain di @, timer mundur, tata letak + kamera; sinyal `selesai(sisa)` / `waktu_habis`
@@ -133,6 +136,7 @@ Legenda penghalang selalu menunjuk id `penghalang`. Benda cadangan (krayon, kemo
 ## Catatan teknis Godot
 
 - **Jangan pakai autoload.** Di mode `--script` (skrip uji), nama autoload tidak dikenali saat kompilasi. Data bersama ada di `scripts/inti/data_game.gd`, dipakai lewat `const DataGame := preload("res://scripts/inti/data_game.gd")`.
+- **Rekor di uji:** skrip uji yang memakai main.tscn WAJIB mengisi `main.jalur_rekor` dengan file khusus uji sebelum `add_child`, lalu menghapusnya, supaya rekor pemain tidak tertimpa.
 - **Skrip uji** extends `res://tools/dasar_uji.gd`, harus `await process_frame` dulu sebelum menambah node ke `root` (pohon belum siap di `_initialize`), dan dijalankan dengan `--fixed-fps 60`.
 - **Pemeriksa** dipanggil `Pemeriksa.new().periksa(data)` dengan `data` = hasil `PemuatData.muat_semua()`.
 - **Satuan dunia** `Stage.UKURAN_PETAK = 64` per petak. Camera2D (jangkar kiri atas) di-zoom agar peta pas di area `porsi_tinggi_peta` bagian atas layar dan berada di tengah.

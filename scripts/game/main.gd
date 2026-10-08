@@ -1,14 +1,20 @@
 extends Node
 ## Adegan utama prototipe dan alur antarstage:
 ## - memuat stage pertama; jika data stage bermasalah, galatnya tampil di layar;
-## - menang: hitung bintang, tampilkan layar hasil (Ulangi / Lanjut);
+## - menang: hitung bintang, catat rekor (user://), tampilkan layar hasil (Ulangi / Lanjut);
 ## - waktu habis: tampilkan "Waktu habis!", lalu stage diulang dalam jeda_ulang_detik;
 ## - aplikasi ke latar belakang: seluruh permainan dijeda (timer ikut berhenti).
 ## Main berjalan dengan PROCESS_MODE_ALWAYS; stage PAUSABLE agar ikut terjeda.
 
 const DataGame := preload("res://scripts/inti/data_game.gd")
 const Bintang := preload("res://scripts/inti/bintang.gd")
+const Rekor := preload("res://scripts/inti/rekor.gd")
 const ADEGAN_STAGE := preload("res://scenes/stage.tscn")
+
+## Lokasi file rekor. Skrip uji menggantinya sebelum Main masuk pohon agar
+## rekor pemain tidak tertimpa.
+var jalur_rekor := Rekor.JALUR_BAWAAN
+var rekor: Rekor
 
 var _indeks := 0
 var _stage: Node
@@ -18,6 +24,7 @@ var _dijeda := false
 
 
 func _ready() -> void:
+	rekor = Rekor.new(jalur_rekor)
 	layar_hasil.ulangi.connect(func(): muat_stage(_indeks))
 	layar_hasil.lanjut.connect(func(): muat_stage(_indeks + 1))
 	if not DataGame.galat.is_empty():
@@ -35,6 +42,7 @@ func muat_stage(indeks: int) -> void:
 	_stage = ADEGAN_STAGE.instantiate()
 	_stage.process_mode = Node.PROCESS_MODE_PAUSABLE
 	_stage.data = DataGame.daftar_stage[_indeks].data
+	_stage.rekor_bintang = rekor.bintang(_stage.data.id)
 	_stage.selesai.connect(_saat_selesai)
 	_stage.waktu_habis.connect(_saat_waktu_habis)
 	add_child(_stage)
@@ -47,9 +55,11 @@ func stage_aktif() -> Node:
 
 
 func _saat_selesai(sisa_detik: float) -> void:
+	var id: String = _stage.data.id
 	var bintang := Bintang.hitung(sisa_detik, _stage.data.bintang_sisa_detik)
+	var rekor_baru := rekor.catat(id, bintang)
 	var terakhir := _indeks == DataGame.daftar_stage.size() - 1
-	layar_hasil.tampilkan_menang(bintang, sisa_detik, "Ke awal" if terakhir else "Lanjut")
+	layar_hasil.tampilkan_menang(bintang, sisa_detik, "Ke awal" if terakhir else "Lanjut", rekor.bintang(id), rekor_baru)
 
 
 func _saat_waktu_habis() -> void:

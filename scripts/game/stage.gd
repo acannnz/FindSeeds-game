@@ -12,6 +12,7 @@ signal waktu_habis
 
 const DataGame := preload("res://scripts/inti/data_game.gd")
 const Pesanan := preload("res://scripts/inti/pesanan.gd")
+const Bintang := preload("res://scripts/inti/bintang.gd")
 
 ## Satuan dunia per petak. Tampilan diskalakan oleh kamera agar pas di layar,
 ## jadi angka ini hanya satuan internal, bukan angka penyetelan.
@@ -23,6 +24,9 @@ var pesanan: Pesanan
 var sisa_detik := 0.0
 var sudah_selesai := false
 var sudah_habis := false
+## Bintang terbaik stage ini dari sesi sebelumnya (0 = belum pernah selesai).
+## Diisi main.gd sebelum node masuk pohon.
+var rekor_bintang := 0
 
 @onready var kamera: Camera2D = $Kamera
 @onready var peta: Node2D = $Peta
@@ -44,6 +48,8 @@ func _ready() -> void:
 	interaksi.bawaan_berubah.connect(_perbarui_hud)
 	interaksi.dipanen.connect(_saat_dipanen)
 	hud.judul = "Stage %s: %s" % [data.id, data.nama]
+	if rekor_bintang > 0:
+		hud.judul += "  ·  rekor %d/%d" % [rekor_bintang, Bintang.BINTANG_MAKS]
 	hud.sisa_detik = sisa_detik
 	_perbarui_hud()
 	get_viewport().size_changed.connect(_atur_tata_letak)

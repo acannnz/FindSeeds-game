@@ -25,9 +25,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -300.0
-offset_top = -220.0
+offset_top = -270.0
 offset_right = 300.0
-offset_bottom = 220.0
+offset_bottom = 270.0
 alignment = 1
 theme_override_constants/separation = 24
 
@@ -48,6 +48,12 @@ script = ExtResource("2_bintang")
 [node name="Info" type="Label" parent="Kotak"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
+horizontal_alignment = 1
+
+[node name="Rekor" type="Label" parent="Kotak"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.835, 0.31, 1)
+theme_override_font_sizes/font_size = 34
 horizontal_alignment = 1
 
 [node name="Tombol" type="HBoxContainer" parent="Kotak"]

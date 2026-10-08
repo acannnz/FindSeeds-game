@@ -1,5 +1,5 @@
 extends "res://tools/dasar_uji.gd"
-## Uji logika murni: kantong benih, pesanan, bintang, dan aturan tombol aksi.
+## Uji logika murni: kantong benih, pesanan, bintang, rekor, dan aturan tombol aksi.
 ##
 ## Jalankan dari root proyek:
 ##   tools\periksa.bat --uji-logika
@@ -9,12 +9,17 @@ const Kantong := preload("res://scripts/inti/kantong.gd")
 const AturanAksi := preload("res://scripts/inti/aturan_aksi.gd")
 const Pesanan := preload("res://scripts/inti/pesanan.gd")
 const Bintang := preload("res://scripts/inti/bintang.gd")
+const Rekor := preload("res://scripts/inti/rekor.gd")
+
+## File rekor khusus uji, supaya rekor pemain tidak tersentuh.
+const JALUR_REKOR_UJI := "user://uji_logika_rekor.json"
 
 
 func _initialize() -> void:
 	_uji_kantong()
 	_uji_pesanan()
 	_uji_bintang()
+	_uji_rekor()
 	_uji_aturan_aksi()
 	_uji_aturan_tanah()
 	_selesai("uji logika")
@@ -58,6 +63,46 @@ func _uji_bintang() -> void:
 		_cek("Stage %s: sisa %d (= ambang dua) memberi 2 bintang" % [id, ambang.dua], Bintang.hitung(ambang.dua, ambang) == 2)
 		_cek("Stage %s: sisa %.1f memberi 1 bintang" % [id, ambang.dua - 0.1], Bintang.hitung(ambang.dua - 0.1, ambang) == 1)
 	_cek("Selesai di detik terakhir tetap 1 bintang", Bintang.hitung(0.01, {"tiga": 60, "dua": 40}) == 1)
+
+
+func _uji_rekor() -> void:
+	_hapus_rekor_uji()
+	var r := Rekor.new(JALUR_REKOR_UJI)
+	_cek("Rekor tanpa file: 0 bintang", r.bintang("1-1") == 0)
+	_cek("2 bintang pertama adalah rekor baru", r.catat("1-1", 2))
+	_cek("1 bintang bukan rekor baru, rekor tetap 2", not r.catat("1-1", 1) and r.bintang("1-1") == 2)
+	_cek("2 bintang lagi bukan rekor baru", not r.catat("1-1", 2))
+	_cek("3 bintang memecahkan rekor (file ditimpa)", r.catat("1-1", 3) and r.bintang("1-1") == 3)
+	r.catat("1-3", 1)
+	var dimuat := Rekor.new(JALUR_REKOR_UJI)
+	_cek("Rekor tersimpan dan terbaca lagi (sesi baru)", dimuat.bintang("1-1") == 3 and dimuat.bintang("1-3") == 1 and dimuat.bintang("1-2") == 0)
+	_cek("Tidak ada file sementara tertinggal", not FileAccess.file_exists(JALUR_REKOR_UJI + Rekor.AKHIRAN_SEMENTARA))
+
+	# Aplikasi mati di antara hapus dan ganti nama: hanya file sementara tersisa.
+	DirAccess.rename_absolute(JALUR_REKOR_UJI, JALUR_REKOR_UJI + Rekor.AKHIRAN_SEMENTARA)
+	_cek("Rekor dipulihkan dari file sementara", Rekor.new(JALUR_REKOR_UJI).bintang("1-1") == 3)
+	_hapus_rekor_uji()
+
+	var f := FileAccess.open(JALUR_REKOR_UJI, FileAccess.WRITE)
+	f.store_string("{ ini bukan json")
+	f.close()
+	var rusak := Rekor.new(JALUR_REKOR_UJI)
+	_cek("File rekor rusak: tidak crash, dimulai dari 0", rusak.bintang("1-1") == 0)
+	_cek("File rusak tertimpa rekor baru yang sah", rusak.catat("1-1", 2) and Rekor.new(JALUR_REKOR_UJI).bintang("1-1") == 2)
+
+	f = FileAccess.open(JALUR_REKOR_UJI, FileAccess.WRITE)
+	f.store_string('{"versi": 1, "bintang": {"1-1": 99, "1-2": "tiga"}}')
+	f.close()
+	var aneh := Rekor.new(JALUR_REKOR_UJI)
+	_cek("Nilai di luar batas dipotong ke maksimum, nilai bukan angka diabaikan",
+		aneh.bintang("1-1") == Bintang.BINTANG_MAKS and aneh.bintang("1-2") == 0)
+	_hapus_rekor_uji()
+
+
+func _hapus_rekor_uji() -> void:
+	for jalur in [JALUR_REKOR_UJI, JALUR_REKOR_UJI + Rekor.AKHIRAN_SEMENTARA]:
+		if FileAccess.file_exists(jalur):
+			DirAccess.remove_absolute(jalur)
 
 
 func _uji_aturan_tanah() -> void:

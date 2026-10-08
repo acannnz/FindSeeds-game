@@ -1,7 +1,8 @@
 extends "res://tools/dasar_uji.gd"
 ## Uji timer dan alur stage lewat adegan utama: hitung mundur, jeda saat
 ## aplikasi ke latar belakang, timer merah, waktu habis + ulang < 1 detik,
-## layar menang dengan bintang, lanjut ke stage berikutnya, dan kembali ke awal.
+## layar menang dengan bintang dan rekor, lanjut ke stage berikutnya, dan
+## kembali ke awal. Rekor ditulis ke file khusus uji, bukan rekor pemain.
 ##
 ## Jalankan dari root proyek:
 ##   tools\periksa.bat --uji-alur
@@ -12,6 +13,8 @@ const FPS := 60
 const FRAME_LEBIH := 3
 ## Batas dari dokumen: stage diulang dalam kurang dari 1 detik.
 const BATAS_ULANG_DETIK := 1.0
+const Rekor := preload("res://scripts/inti/rekor.gd")
+const JALUR_REKOR_UJI := "user://uji_alur_rekor.json"
 
 var _main: Node
 
@@ -26,12 +29,15 @@ func _jalankan() -> void:
 		print("GAGAL: data stage bermasalah, jalankan tools\\periksa.bat.")
 		quit(1)
 		return
+	_hapus_rekor_uji()
 	_main = ADEGAN_MAIN.instantiate()
+	_main.jalur_rekor = JALUR_REKOR_UJI
 	root.add_child(_main)
 	await process_frame
 	await _uji_timer_dan_jeda()
 	await _uji_waktu_habis()
 	await _uji_menang_dan_lanjut()
+	_hapus_rekor_uji()
 	_selesai("uji alur")
 
 
@@ -106,7 +112,10 @@ func _uji_menang_dan_lanjut() -> void:
 	var ambang: Dictionary = stage.data.bintang_sisa_detik
 	# Selesaikan pesanan langsung (alur tanam/panen sudah diuji di uji_main).
 	await _menangkan(stage, ambang.tiga + 1.0)
+	var id_pertama: String = stage.data.id
+	_cek("Belum ada rekor: judul HUD tanpa rekor", not "rekor" in stage.hud.judul)
 	_cek("Menang dengan sisa ≥ ambang tiga: 3 bintang", _main.layar_hasil.jumlah_bintang() == 3)
+	_cek("Kemenangan pertama: \"Rekor baru!\"", _main.layar_hasil.teks_rekor() == "Rekor baru!")
 	_cek("Timer berhenti setelah menang", is_equal_approx(stage.sisa_detik, ambang.tiga + 1.0))
 
 	_main.layar_hasil.ulangi.emit()
@@ -114,6 +123,9 @@ func _uji_menang_dan_lanjut() -> void:
 	stage = _main.stage_aktif()
 	await _menangkan(stage, ambang.dua + 0.5)
 	_cek("Ulangi lalu menang dengan sisa di antara ambang: 2 bintang", _main.layar_hasil.jumlah_bintang() == 2)
+	_cek("2 bintang tidak menimpa rekor 3", _main.layar_hasil.teks_rekor() == "Rekor: 3 bintang"
+		and Rekor.new(JALUR_REKOR_UJI).bintang(id_pertama) == 3)
+	_cek("Judul HUD menampilkan rekor stage", "rekor 3/3" in stage.hud.judul, stage.hud.judul)
 
 	_main.layar_hasil.ulangi.emit()
 	await process_frame
@@ -141,6 +153,12 @@ func _menangkan(stage: Node, sisa: float) -> void:
 			stage.pesanan.terima(tanaman)
 	stage.interaksi.dipanen.emit(stage.pesanan.diminta.keys()[0], true)
 	await process_frame
+
+
+func _hapus_rekor_uji() -> void:
+	for jalur in [JALUR_REKOR_UJI, JALUR_REKOR_UJI + Rekor.AKHIRAN_SEMENTARA]:
+		if FileAccess.file_exists(jalur):
+			DirAccess.remove_absolute(jalur)
 
 
 func _tunggu(detik: float) -> void:
