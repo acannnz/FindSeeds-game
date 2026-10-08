@@ -9,7 +9,7 @@ Baca dokumen lengkapnya hanya jika butuh detail yang tidak ada di sini.
 | --- | --- | --- |
 | 1 | Rencana: struktur folder, daftar file | Selesai |
 | 2 | Data: katalog, pengaturan, 3 file stage | Selesai |
-| 3 | Pemeriksa stage (6 pengecekan, CLI) | Belum |
+| 3 | Pemeriksa stage (6 pengecekan, CLI) | Selesai |
 | 4 | Pemuat peta, gerak, tabrakan | Belum |
 | 5 | Interaksi: aksi kontekstual, identifikasi, alat, wadah, kantong | Belum |
 | 6 | Tanam, panen, pesanan, menang otomatis | Belum |
@@ -70,7 +70,9 @@ data/
   stage/stage_1-1.json …     peta, legenda, pesanan, ambang bintang
 scripts/
   inti/                      logika murni (bukan Node), dipakai game dan pemeriksa
-    pemuat_data.gd, kantong.gd, pesanan.gd, bintang.gd
+    pemuat_data.gd           baca JSON, simbol umum, jenis benda (dipakai game + pemeriksa)
+    pemeriksa.gd             logika 6 pengecekan + cek format, mengembalikan daftar temuan
+    kantong.gd, pesanan.gd, bintang.gd   (fase berikutnya)
   autoload/
     data_game.gd             memuat pengaturan + katalog
     alur_stage.gd            stage aktif, urutan stage (dari id file)
@@ -80,7 +82,8 @@ scripts/
     hud.gd, joystick.gd, tombol_aksi.gd, layar_hasil.gd
 scenes/                      main.tscn, stage.tscn, pemain.tscn, ui/*.tscn
 tools/
-  pemeriksa_stage.gd         extends SceneTree, 6 pengecekan, exit code 1 jika gagal
+  pemeriksa_stage.gd         CLI (extends SceneTree), cetak laporan, exit code 1 jika gagal
+  uji_pemeriksa.gd           uji mandiri: data asli lolos, tiap kerusakan memicu cek yang tepat
   periksa.bat                pembungkus command line
 ```
 
@@ -98,4 +101,20 @@ Legenda penghalang selalu menunjuk id `penghalang`. Benda cadangan (krayon, kemo
 
 ## Menjalankan pemeriksa stage
 
-(Diisi di Fase 3.)
+```bat
+tools\periksa.bat                 :: periksa data\stage, exit 0 = lolos, 1 = ada masalah
+tools\periksa.bat --uji           :: uji mandiri pemeriksa (8 kasus)
+tools\periksa.bat --stage=FOLDER  :: periksa folder stage lain (--data=FOLDER untuk katalog/pengaturan lain)
+```
+
+Langsung tanpa .bat: `godot --headless --path . --script res://tools/pemeriksa_stage.gd -- --stage=FOLDER`.
+Lokasi Godot bisa diganti lewat variabel lingkungan `GODOT`. Jalankan pemeriksa + uji setiap kali mengubah `data/` atau `scripts/inti/`.
+
+Pengecekan (nomor sama dengan dokumen):
+0. Format: kolom wajib, ukuran peta sesuai pengaturan, tepat satu `@`, ada `T`, tepi peta tidak bisa diinjak, legenda → katalog, pembeli ada, 0 ≤ dua ≤ tiga ≤ waktu, nama file = `stage_<id>.json`. Juga validasi katalog (wadah → alat & isi valid, sumber punya `logika`).
+1. Tiap tanaman di pesanan punya cukup benda sumber (isi wadah dihitung).
+2. Tiap wadah punya alat yang dibutuhkan di peta yang sama.
+3. Tiap huruf peta ada di legenda atau simbol umum.
+4. Flood fill 4 arah dari `@` lewat `. @ T`. Tiap `T` harus tercapai; tiap benda (bukan penghalang) harus punya tetangga yang tercapai.
+5. Benda sumber/kosong/pengecoh (termasuk isi wadah) tidak muncul lagi sebelum selang `jeda_kemunculan_benda_stage` stage. Selang = selisih posisi dalam daftar stage yang sudah diurutkan, jadi semua stage harus ada di folder.
+6. Logika benda sumber sudah diperkenalkan di musim stage itu atau sebelumnya (`logika_per_musim`).
