@@ -210,9 +210,11 @@ Stage kedua mengenalkan benda kosong dan pengecoh: tiga benda di dekat jalur pem
 
 **Solusi tercepat, sekitar 13 detik:**
 
-1. Memutari meja ke jam weker merah, lalu identifikasi (4 detik).
-2. Ke kerucut lalu lintas, lalu identifikasi (2,7 detik).
-3. Ke petak tanah, tanam dua benih, panen keduanya begitu matang. Pesanan terisi dan stage selesai (5,9 detik).
+1. Memutari meja lewat sisi kanan ke jam weker merah, lalu identifikasi (4 detik).
+2. Ke kerucut lalu lintas, lalu identifikasi (2,4 detik).
+3. Kembali memutari meja lewat kanan ke petak tanah, tanam dua benih, panen keduanya begitu matang. Pesanan terisi dan stage selesai (6,5 detik: jalan 2,5 detik, lalu tanam, tanam, panen, panen tanpa berpindah petak).
+
+Rute lewat sisi kiri meja lebih pendek ke jam weker, tetapi sekitar 4 detik lebih lambat secara keseluruhan: celah diagonal kucing–jam weker dan pot bunga–pembeli tertutup, jadi pemain harus memutari meja lagi untuk mencapai kerucut.
 
 **Bintang:** 3 bintang jika sisa waktu minimal 55 detik, 2 bintang jika minimal 35 detik.
 

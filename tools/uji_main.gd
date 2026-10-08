@@ -2,6 +2,10 @@ extends "res://tools/dasar_uji.gd"
 ## Uji main penuh: bot memainkan Stage 1-1, 1-2, dan 1-3 mengikuti "solusi
 ## tercepat" di dokumen rancangan. Bot berjalan sungguhan (rute BFS dari data
 ## peta, tanpa posisi tertulis), menekan tombol aksi, lalu mengukur waktunya.
+## Saat mendekati benda, bot memilih sisi yang total jaraknya (ke benda ini
+## lalu ke langkah berikutnya) paling pendek, seperti pemain yang berpikir
+## satu langkah ke depan. Bot berjalan per petak (tidak diagonal), jadi
+## waktunya sedikit di atas perkiraan dokumen yang memakai gerak bebas.
 ## Memastikan stage selesai otomatis dan solusi tercepat cukup untuk 3 bintang.
 ##
 ## Jalankan dari root proyek:
@@ -65,7 +69,8 @@ func _mainkan(id: String) -> void:
 	var langkah_ke := 0
 	for langkah in SOLUSI[id]:
 		langkah_ke += 1
-		var berhasil: bool = await _jalankan_langkah(langkah)
+		var berikutnya: Array = SOLUSI[id][langkah_ke] if langkah_ke < SOLUSI[id].size() else []
+		var berhasil: bool = await _jalankan_langkah(langkah, berikutnya)
 		if not berhasil:
 			_cek("Stage %s: langkah %d %s" % [id, langkah_ke, str(langkah)], false, _rincian_aksi())
 			return
@@ -83,13 +88,13 @@ func _mainkan(id: String) -> void:
 	_cek("Stage %s: timer stage mencatat sisa %.1f dtk = 3 bintang" % [id, _stage.sisa_detik], bintang == 3)
 
 
-func _jalankan_langkah(langkah: Array) -> bool:
+func _jalankan_langkah(langkah: Array, berikutnya: Array) -> bool:
 	var aksi: String = langkah[0]
 	var target: Node2D
 	if aksi == AturanAksi.AKSI_TANAM or aksi == AturanAksi.AKSI_PANEN:
 		target = await _ke_tanah(aksi)
 	else:
-		target = await _ke_benda(langkah[1])
+		target = await _ke_benda(langkah[1], berikutnya)
 	if target == null:
 		return false
 	var a: Dictionary = _stage.interaksi.aksi_kini
@@ -104,19 +109,22 @@ func _jalankan_langkah(langkah: Array) -> bool:
 	return batas > 0
 
 
-func _ke_benda(id: String) -> Node2D:
-	var benda: Node2D = null
-	for b in _stage.peta.daftar_benda:
-		if b.id == id:
-			benda = b
-			break
+func _ke_benda(id: String, berikutnya: Array) -> Node2D:
+	var benda := _cari_benda(id)
 	if benda == null:
 		return null
-	var tujuan: Array[Vector2i] = []
-	for arah in ARAH:
-		if _stage.peta.bisa_diinjak(benda.sel + arah):
-			tujuan.append(benda.sel + arah)
-	if not await _jalan_ke(tujuan):
+	# Pilih sisi benda dengan jarak (ke sini + ke langkah berikutnya) terpendek.
+	var terbaik: Array[Vector2i] = []
+	var jarak_terbaik := INF
+	for sel in _sel_sebelah(benda):
+		var jalur := _cari_jalur(_sel_pemain(), [sel])
+		if jalur.is_empty():
+			continue
+		var jarak := jalur.size() + _jarak_ke_langkah(sel, berikutnya)
+		if jarak < jarak_terbaik:
+			jarak_terbaik = jarak
+			terbaik = [sel]
+	if terbaik.is_empty() or not await _jalan_ke(terbaik):
 		return null
 	# Dorong sedikit ke arah benda supaya benda ini yang paling dekat.
 	_stage.pemain.arah_paksa = (benda.position - _stage.pemain.position).normalized()
@@ -124,6 +132,39 @@ func _ke_benda(id: String) -> Node2D:
 	_stage.pemain.arah_paksa = Vector2.ZERO
 	await _tunggu(2.0 / FPS)
 	return benda
+
+
+func _cari_benda(id: String) -> Node2D:
+	for b in _stage.peta.daftar_benda:
+		if b.id == id:
+			return b
+	return null
+
+
+func _sel_sebelah(benda: Node2D) -> Array[Vector2i]:
+	var hasil: Array[Vector2i] = []
+	for arah in ARAH:
+		if _stage.peta.bisa_diinjak(benda.sel + arah):
+			hasil.append(benda.sel + arah)
+	return hasil
+
+
+## Jarak BFS (petak) dari sel ke tempat langkah berikutnya dikerjakan.
+## 0 jika tidak ada langkah berikutnya atau bendanya belum muncul (isi wadah).
+func _jarak_ke_langkah(dari: Vector2i, langkah: Array) -> int:
+	if langkah.is_empty():
+		return 0
+	var tujuan: Array[Vector2i] = []
+	if langkah[0] == AturanAksi.AKSI_TANAM or langkah[0] == AturanAksi.AKSI_PANEN:
+		for t in _stage.peta.daftar_tanah:
+			tujuan.append(t.sel)
+	else:
+		var benda := _cari_benda(langkah[1])
+		if benda == null:
+			return 0
+		tujuan = _sel_sebelah(benda)
+	var jalur := _cari_jalur(dari, tujuan)
+	return jalur.size() - 1 if not jalur.is_empty() else 0
 
 
 ## Tanam: petak kosong terdekat. Panen: petak matang, atau tunggu yang tumbuh.

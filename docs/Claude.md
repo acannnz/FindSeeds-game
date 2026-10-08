@@ -115,7 +115,7 @@ tools/
   uji_logika.gd              uji kantong + aturan aksi
   uji_gerak.gd               uji gerak: kecepatan, dinding, penghalang, benda & B padat, celah 1-3
   uji_interaksi.gd           uji interaksi di 1-3 sungguhan, tukar alat, panen pengecoh di 1-2
-  uji_main.gd                bot (rute BFS) memainkan solusi tercepat dokumen tiap stage, ukur waktu vs ambang 3 bintang
+  uji_main.gd                bot (rute BFS + pilih sisi benda dengan melihat 1 langkah ke depan) memainkan solusi tercepat dokumen, ukur waktu vs ambang 3 bintang
   uji_alur.gd                timer, jeda latar belakang, timer merah, waktu habis + ulang < 1 dtk, bintang 3/2/1, lanjut, kembali ke awal
   uji_plugin.gd              logika plugin pemeriksa: Run dibatalkan / export melapor jika stage salah
   periksa.bat                pembungkus command line
@@ -162,7 +162,7 @@ tools\periksa.bat --semua         :: pemeriksa stage + SEMUA uji (jalankan sebel
 tools\periksa.bat --uji-logika    :: uji kantong dan aturan aksi
 tools\periksa.bat --uji-gerak     :: uji gerak dan tabrakan
 tools\periksa.bat --uji-interaksi :: uji identifikasi, alat, wadah, kantong penuh, tukar alat, tanam/panen pengecoh
-tools\periksa.bat --uji-main      :: bot memainkan solusi tercepat 1-1/1-2/1-3 (hasil: 8,9 / 16,9 / 24,7 dtk)
+tools\periksa.bat --uji-main      :: bot memainkan solusi tercepat 1-1/1-2/1-3 (bot per petak: 9,0 / 14,8 / 24,7 dtk; gerak bebas 1-2 terukur 13,1 dtk = dokumen)
 tools\periksa.bat --uji-alur      :: timer, jeda, waktu habis + ulang (0,78 dtk), bintang, lanjut
 tools\periksa.bat --uji-plugin    :: plugin editor: Run dibatalkan & export melapor saat stage salah
 tools\periksa.bat --stage=FOLDER  :: periksa folder stage lain (--data=FOLDER untuk katalog/pengaturan lain)
