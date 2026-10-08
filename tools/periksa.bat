@@ -8,6 +8,7 @@ rem   tools\periksa.bat --uji-gerak      uji gerak dan tabrakan
 rem   tools\periksa.bat --uji-interaksi  uji interaksi di stage sungguhan
 rem   tools\periksa.bat --uji-main       bot memainkan solusi tercepat tiap stage
 rem   tools\periksa.bat --uji-alur       timer, jeda, waktu habis, bintang, lanjut
+rem   tools\periksa.bat --uji-plugin     plugin editor pemeriksa (Run dibatalkan jika stage salah)
 rem   tools\periksa.bat --data=FOLDER    periksa data di folder lain
 rem   tools\periksa.bat --stage=FOLDER   periksa file stage di folder lain
 rem Lokasi Godot bisa diganti lewat variabel lingkungan GODOT.
@@ -27,13 +28,14 @@ if /i "%~1"=="--uji-gerak" (%JALAN% res://tools/uji_gerak.gd & exit /b)
 if /i "%~1"=="--uji-interaksi" (%JALAN% res://tools/uji_interaksi.gd & exit /b)
 if /i "%~1"=="--uji-main" (%JALAN% res://tools/uji_main.gd & exit /b)
 if /i "%~1"=="--uji-alur" (%JALAN% res://tools/uji_alur.gd & exit /b)
+if /i "%~1"=="--uji-plugin" (%JALAN% res://tools/uji_plugin.gd & exit /b)
 
 %JALAN% res://tools/pemeriksa_stage.gd -- %*
 exit /b %ERRORLEVEL%
 
 :semua
 set "GAGAL=0"
-for %%S in (pemeriksa_stage uji_pemeriksa uji_logika uji_gerak uji_interaksi uji_main uji_alur) do (
+for %%S in (pemeriksa_stage uji_pemeriksa uji_logika uji_gerak uji_interaksi uji_main uji_alur uji_plugin) do (
 	echo.
 	echo ===== %%S
 	%JALAN% res://tools/%%S.gd

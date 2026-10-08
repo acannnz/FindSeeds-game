@@ -2,7 +2,9 @@
 .godot/
 /android/
 *.import.tmp
-export_presets.cfg
+# export_presets.cfg sengaja di-commit (dipakai tools/build_android.bat);
+# kata sandi keystore Godot 4 disimpan terpisah di .godot/export_credentials.cfg.
+/build/
 *.apk
 *.aab
 

@@ -1,6 +1,8 @@
+@tool
 extends RefCounted
 ## Memuat file data JSON (pengaturan, katalog, pembeli, tanaman, stage).
-## Logika murni tanpa Node: dipakai oleh game dan oleh pemeriksa stage.
+## Logika murni tanpa Node: dipakai oleh game, pemeriksa stage, dan plugin
+## editor (karena itu @tool).
 
 const FOLDER_DATA := "res://data"
 const FILE_PENGATURAN := "pengaturan.json"

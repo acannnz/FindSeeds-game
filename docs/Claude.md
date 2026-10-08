@@ -15,6 +15,7 @@ Baca dokumen lengkapnya hanya jika butuh detail yang tidak ada di sini.
 | 6 | Tanam, panen, pesanan, menang otomatis | Selesai |
 | 7 | Timer, restart < 1 detik, bintang, stage berikutnya | Selesai |
 | + | Simpan rekor bintang (user://rekor.json) | Selesai |
+| + | Pemeriksa jalan saat build (plugin editor + tools/build_android.bat) | Selesai |
 
 Kerjakan per fase. Setelah tiap fase: jelaskan singkat, commit, push ke `origin main`, lalu tunggu konfirmasi.
 
@@ -116,7 +117,12 @@ tools/
   uji_interaksi.gd           uji interaksi di 1-3 sungguhan, tukar alat, panen pengecoh di 1-2
   uji_main.gd                bot (rute BFS) memainkan solusi tercepat dokumen tiap stage, ukur waktu vs ambang 3 bintang
   uji_alur.gd                timer, jeda latar belakang, timer merah, waktu habis + ulang < 1 dtk, bintang 3/2/1, lanjut, kembali ke awal
+  uji_plugin.gd              logika plugin pemeriksa: Run dibatalkan / export melapor jika stage salah
   periksa.bat                pembungkus command line
+  build_android.bat          periksa --semua dulu; export Android HANYA jika semua lolos
+addons/pemeriksa_stage/      plugin editor (aktif di project.godot)
+  plugin.gd                  EditorPlugin: _build() membatalkan Run (F5/F6); export plugin melapor di _export_begin
+  penjaga_build.gd           logika plugin (@tool RefCounted, bisa diuji; EditorPlugin hanya bisa dibuat editor)
 ```
 
 Aturan kode: tidak ada angka penyetelan atau posisi benda di kode; semuanya dari `data/`.
@@ -138,7 +144,10 @@ Legenda penghalang selalu menunjuk id `penghalang`. Benda cadangan (krayon, kemo
 - **Jangan pakai autoload.** Di mode `--script` (skrip uji), nama autoload tidak dikenali saat kompilasi. Data bersama ada di `scripts/inti/data_game.gd`, dipakai lewat `const DataGame := preload("res://scripts/inti/data_game.gd")`.
 - **Rekor di uji:** skrip uji yang memakai main.tscn WAJIB mengisi `main.jalur_rekor` dengan file khusus uji sebelum `add_child`, lalu menghapusnya, supaya rekor pemain tidak tertimpa.
 - **Skrip uji** extends `res://tools/dasar_uji.gd`, harus `await process_frame` dulu sebelum menambah node ke `root` (pohon belum siap di `_initialize`), dan dijalankan dengan `--fixed-fps 60`.
-- **Pemeriksa** dipanggil `Pemeriksa.new().periksa(data)` dengan `data` = hasil `PemuatData.muat_semua()`.
+- **Pemeriksa** dipanggil `Pemeriksa.new().periksa(data)` dengan `data` = hasil `PemuatData.muat_semua()`, atau ringkas `Pemeriksa.periksa_folder()` → daftar pesan. `pemuat_data.gd` dan `pemeriksa.gd` ber-`@tool` karena dipakai plugin editor; skrip lain yang dipanggil plugin juga harus `@tool`.
+- **Galat yang disengaja di uji:** bungkus dengan `_dengan_galat_diharapkan(callable)` (mengembalikan hasil callable; jumlah galat di `_galat_diharapkan`). Lambda GDScript menyalin variabel lokal, jadi jangan menulis ke variabel luar dari dalam lambda.
+- **Garis miring terbalik di heredoc bash** bisa berubah jadi tunggal; tulis string GDScript berisi `\\` lewat Write/Edit, bukan heredoc.
+- **Build:** Godot tidak mengizinkan plugin membatalkan export. Plugin hanya membatalkan Run dan melapor saat export; build yang benar-benar berhenti = `tools\build_android.bat`. `export_presets.cfg` sengaja di-commit (kata sandi keystore ada di `.godot/export_credentials.cfg`). Export template Godot 4.7.2 dan Android SDK belum terpasang (per 2026-10-08).
 - **Satuan dunia** `Stage.UKURAN_PETAK = 64` per petak. Camera2D (jangkar kiri atas) di-zoom agar peta pas di area `porsi_tinggi_peta` bagian atas layar dan berada di tengah.
 - **Benda, `B`, `#`, dan penghalang padat.** `.`, `@`, `T` bisa diinjak. Pemain berupa lingkaran dengan radius `radius_pemain_petak`.
 - **Pintasan debug** (build debug saja): tombol 1–9 memilih stage, R mengulang stage, panah untuk bergerak.
@@ -155,8 +164,12 @@ tools\periksa.bat --uji-gerak     :: uji gerak dan tabrakan
 tools\periksa.bat --uji-interaksi :: uji identifikasi, alat, wadah, kantong penuh, tukar alat, tanam/panen pengecoh
 tools\periksa.bat --uji-main      :: bot memainkan solusi tercepat 1-1/1-2/1-3 (hasil: 8,9 / 16,9 / 24,7 dtk)
 tools\periksa.bat --uji-alur      :: timer, jeda, waktu habis + ulang (0,78 dtk), bintang, lanjut
+tools\periksa.bat --uji-plugin    :: plugin editor: Run dibatalkan & export melapor saat stage salah
 tools\periksa.bat --stage=FOLDER  :: periksa folder stage lain (--data=FOLDER untuk katalog/pengaturan lain)
+tools\build_android.bat [release] :: --semua dulu, lalu export preset "Android" ke build\ (exit 1 = gagal, 2 = preset belum ada)
 ```
+
+Pemeriksa juga jalan otomatis di editor: setiap Run (F5/F6) dan setiap export (plugin `addons/pemeriksa_stage`).
 
 Langsung tanpa .bat: `godot --headless --path . --script res://tools/pemeriksa_stage.gd -- --stage=FOLDER`.
 Lokasi Godot bisa diganti lewat variabel lingkungan `GODOT`. Jalankan pemeriksa + uji setiap kali mengubah `data/` atau `scripts/inti/`.

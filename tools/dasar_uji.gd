@@ -29,6 +29,8 @@ const BATAS_DETIK := 120.0
 
 var _gagal := 0
 var _penghitung := PenghitungGalat.new()
+## Jumlah galat dari panggilan _dengan_galat_diharapkan() terakhir.
+var _galat_diharapkan := 0
 
 
 func _init() -> void:
@@ -48,6 +50,19 @@ func _cek(judul: String, lolos: bool, rincian: String = "") -> void:
 	else:
 		_gagal += 1
 		print("[GAGAL] %s %s" % [judul, rincian])
+
+
+## Menjalankan `kerja` yang memang diharapkan mencatat galat (misalnya
+## push_error untuk data yang sengaja dirusak). Galat itu tidak dihitung
+## sebagai kegagalan. Mengembalikan hasil `kerja`; jumlah galat yang tercatat
+## disimpan di `_galat_diharapkan`. (Lambda GDScript menyalin variabel lokal,
+## jadi hasil harus dikembalikan, bukan ditulis ke variabel luar.)
+func _dengan_galat_diharapkan(kerja: Callable) -> Variant:
+	var awal := _penghitung.jumlah
+	var hasil = kerja.call()
+	_galat_diharapkan = _penghitung.jumlah - awal
+	_penghitung.jumlah = awal
+	return hasil
 
 
 ## Mencetak ringkasan dan keluar: 0 jika semua lolos, 1 jika tidak.

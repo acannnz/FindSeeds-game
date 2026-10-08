@@ -1,7 +1,9 @@
+@tool
 extends RefCounted
 ## Enam pengecekan stage dari bagian "Saran implementasi" dokumen rancangan,
 ## ditambah pengecekan format dasar (cek 0). Logika murni: menerima data yang
 ## sudah dimuat dan mengembalikan daftar temuan tanpa mencetak apa pun.
+## @tool karena juga dijalankan plugin editor addons/pemeriksa_stage.
 
 const PemuatData := preload("res://scripts/inti/pemuat_data.gd")
 
@@ -65,6 +67,23 @@ func periksa(data: Dictionary) -> Array[Dictionary]:
 		_cek_logika_musim(s.file, s.data)
 	_cek_jeda_benda(stage_sah)
 	return _temuan
+
+
+## Satu baris pesan untuk satu temuan, dipakai game dan plugin editor.
+static func format_temuan(t: Dictionary) -> String:
+	return "%s: cek %d (%s): %s" % [t.file, t.cek, NAMA_CEK[t.cek], t.pesan]
+
+
+## Memuat data dari folder dan menjalankan semua pengecekan. Mengembalikan
+## daftar pesan (galat pemuatan atau temuan); kosong berarti semua lolos.
+static func periksa_folder(folder_data: String = PemuatData.FOLDER_DATA, folder_stage: String = "") -> Array[String]:
+	var muat := PemuatData.muat_semua(folder_data, folder_stage)
+	var pesan: Array[String] = []
+	pesan.assign(muat.galat)
+	if pesan.is_empty():
+		for t in new().periksa(muat):
+			pesan.append(format_temuan(t))
+	return pesan
 
 
 # --- Cek 0: format -----------------------------------------------------------

@@ -30,7 +30,7 @@ static func _static_init() -> void:
 	galat.assign(muat.galat)
 	if galat.is_empty():
 		for t in Pemeriksa.new().periksa(muat):
-			galat.append("%s: cek %d (%s): %s" % [t.file, t.cek, Pemeriksa.NAMA_CEK[t.cek], t.pesan])
+			galat.append(Pemeriksa.format_temuan(t))
 	for g in galat:
 		push_error(g)
 
