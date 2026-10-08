@@ -2,6 +2,7 @@
 rem Pemeriksa stage FindSeeds.
 rem   tools\periksa.bat                  periksa semua stage di data\stage
 rem   tools\periksa.bat --uji            jalankan uji mandiri pemeriksa
+rem   tools\periksa.bat --uji-gerak      jalankan uji gerak dan tabrakan
 rem   tools\periksa.bat --data=FOLDER    periksa data di folder lain
 rem   tools\periksa.bat --stage=FOLDER   periksa file stage di folder lain
 rem Lokasi Godot bisa diganti lewat variabel lingkungan GODOT.
@@ -13,10 +14,16 @@ if not exist "%GODOT%" (
 )
 set "PROYEK=%~dp0.."
 if /i "%~1"=="--uji" goto uji
+if /i "%~1"=="--uji-gerak" goto uji_gerak
 
 "%GODOT%" --headless --path "%PROYEK%" --script res://tools/pemeriksa_stage.gd -- %*
 exit /b %ERRORLEVEL%
 
 :uji
 "%GODOT%" --headless --path "%PROYEK%" --script res://tools/uji_pemeriksa.gd
+exit /b %ERRORLEVEL%
+
+:uji_gerak
+rem --fixed-fps membuat simulasi deterministik dan secepat mungkin.
+"%GODOT%" --headless --fixed-fps 60 --path "%PROYEK%" --script res://tools/uji_gerak.gd
 exit /b %ERRORLEVEL%

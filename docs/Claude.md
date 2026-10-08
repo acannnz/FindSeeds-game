@@ -10,7 +10,7 @@ Baca dokumen lengkapnya hanya jika butuh detail yang tidak ada di sini.
 | 1 | Rencana: struktur folder, daftar file | Selesai |
 | 2 | Data: katalog, pengaturan, 3 file stage | Selesai |
 | 3 | Pemeriksa stage (6 pengecekan, CLI) | Selesai |
-| 4 | Pemuat peta, gerak, tabrakan | Belum |
+| 4 | Pemuat peta, gerak, tabrakan | Selesai |
 | 5 | Interaksi: aksi kontekstual, identifikasi, alat, wadah, kantong | Belum |
 | 6 | Tanam, panen, pesanan, menang otomatis | Belum |
 | 7 | Timer, restart < 1 detik, bintang, stage berikutnya | Belum |
@@ -69,21 +69,27 @@ data/
   pembeli.json               nama tampilan pembeli (id → nama)
   stage/stage_1-1.json …     peta, legenda, pesanan, ambang bintang
 scripts/
-  inti/                      logika murni (bukan Node), dipakai game dan pemeriksa
+  inti/                      logika murni (bukan Node)
     pemuat_data.gd           baca JSON, simbol umum, jenis benda (dipakai game + pemeriksa)
     pemeriksa.gd             logika 6 pengecekan + cek format, mengembalikan daftar temuan
+    data_game.gd             data bersama via static var + _static_init (BUKAN autoload)
     kantong.gd, pesanan.gd, bintang.gd   (fase berikutnya)
-  autoload/
-    data_game.gd             memuat pengaturan + katalog
-    alur_stage.gd            stage aktif, urutan stage (dari id file)
   game/
-    stage.gd, peta.gd, pemain.gd, benda.gd, petak_tanah.gd
+    main.gd                  memuat stage; tampilkan galat data di layar; pintasan debug
+    stage.gd                 bangun peta, taruh pemain di @, tata letak + kamera
+    peta.gd                  gambar lantai/dinding/B/penghalang, tabrakan petak padat
+    benda.gd                 StaticBody2D per benda (padat), kotak warna + huruf
+    petak_tanah.gd           petak T (bisa diinjak)
+    pemain.gd                CharacterBody2D (motion floating), joystick/panah, `arah_paksa` utk uji
+    gambar.gd                pembantu gambar placeholder (huruf di tengah, warna kontras)
   ui/
-    hud.gd, joystick.gd, tombol_aksi.gd, layar_hasil.gd
-scenes/                      main.tscn, stage.tscn, pemain.tscn, ui/*.tscn
+    joystick.gd              joystick mengambang, melacak satu indeks sentuhan
+    tombol_aksi.gd, hud.gd, layar_hasil.gd   (fase berikutnya)
+scenes/                      main.tscn, stage.tscn, pemain.tscn
 tools/
   pemeriksa_stage.gd         CLI (extends SceneTree), cetak laporan, exit code 1 jika gagal
   uji_pemeriksa.gd           uji mandiri: data asli lolos, tiap kerusakan memicu cek yang tepat
+  uji_gerak.gd               uji gerak: kecepatan, dinding, penghalang, benda & B padat, celah 1-3
   periksa.bat                pembungkus command line
 ```
 
@@ -95,15 +101,24 @@ Aturan kode: tidak ada angka penyetelan atau posisi benda di kode; semuanya dari
 Kolom tambahan prototipe: `nama` (teks tampilan), `warna` (warna kotak placeholder), `teks_reaksi` (benda kosong), `label` (tulisan di wadah).
 Legenda penghalang selalu menunjuk id `penghalang`. Benda cadangan (krayon, kemoceng, bantal hati, bola kertas, rok tutu) dan `sekop` sudah ada di katalog walau belum dipakai.
 
-**`data/pengaturan.json`** — `peta_lebar_petak`, `peta_tinggi_petak`, `kapasitas_kantong`, `kecepatan_jalan_petak_per_detik`, `jarak_interaksi_petak`, `durasi_detik.{identifikasi, ambil_alat, pakai_alat, tanam, tumbuh, panen}`, `timer_merah_sisa_detik`, `jeda_ulang_detik`, `jeda_kemunculan_benda_stage`, `logika_per_musim` (angka musim → id logika).
+**`data/pengaturan.json`** — `peta_lebar_petak`, `peta_tinggi_petak`, `porsi_tinggi_peta`, `radius_pemain_petak`, `joystick_radius_px`, `joystick_zona_mati`, `kapasitas_kantong`, `kecepatan_jalan_petak_per_detik`, `jarak_interaksi_petak`, `durasi_detik.{identifikasi, ambil_alat, pakai_alat, tanam, tumbuh, panen}`, `timer_merah_sisa_detik`, `jeda_ulang_detik`, `jeda_kemunculan_benda_stage`, `logika_per_musim` (angka musim → id logika).
 
 **`data/stage/stage_<id>.json`** — `id`, `nama`, `waktu_detik`, `bintang_sisa_detik.{tiga, dua}`, `pesanan.{pembeli, isi}`, `peta` (12 string × 8 karakter), `legenda` (huruf → id katalog). Urutan stage = urutan id (musim, nomor).
+
+## Catatan teknis Godot
+
+- **Jangan pakai autoload.** Di mode `--script` (skrip uji), nama autoload tidak dikenali saat kompilasi. Data bersama ada di `scripts/inti/data_game.gd`, dipakai lewat `const DataGame := preload("res://scripts/inti/data_game.gd")`.
+- **Satuan dunia** `Stage.UKURAN_PETAK = 64` per petak. Camera2D (jangkar kiri atas) di-zoom agar peta pas di area `porsi_tinggi_peta` bagian atas layar dan berada di tengah.
+- **Benda, `B`, `#`, dan penghalang padat.** `.`, `@`, `T` bisa diinjak. Pemain berupa lingkaran dengan radius `radius_pemain_petak`.
+- **Pintasan debug** (build debug saja): tombol 1–9 memilih stage, R mengulang stage, panah untuk bergerak.
+- **Menjalankan game:** buka proyek di editor Godot 4.7.2 lalu F5. Bisa juga `Godot_v4.7.2-stable_win64.exe --path . --resolution 360x640`.
 
 ## Menjalankan pemeriksa stage
 
 ```bat
 tools\periksa.bat                 :: periksa data\stage, exit 0 = lolos, 1 = ada masalah
 tools\periksa.bat --uji           :: uji mandiri pemeriksa (8 kasus)
+tools\periksa.bat --uji-gerak     :: uji gerak dan tabrakan (6 kasus, --fixed-fps 60)
 tools\periksa.bat --stage=FOLDER  :: periksa folder stage lain (--data=FOLDER untuk katalog/pengaturan lain)
 ```
 

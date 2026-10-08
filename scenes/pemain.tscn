@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/game/pemain.gd" id="1_pemain"]
+
+[node name="Pemain" type="CharacterBody2D"]
+motion_mode = 1
+script = ExtResource("1_pemain")
+
+[node name="Bentuk" type="CollisionShape2D" parent="."]

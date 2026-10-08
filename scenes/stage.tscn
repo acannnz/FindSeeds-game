@@ -1,0 +1,40 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/game/stage.gd" id="1_stage"]
+[ext_resource type="Script" path="res://scripts/game/peta.gd" id="2_peta"]
+[ext_resource type="PackedScene" path="res://scenes/pemain.tscn" id="3_pemain"]
+[ext_resource type="Script" path="res://scripts/ui/joystick.gd" id="4_joystick"]
+
+[node name="Stage" type="Node2D"]
+script = ExtResource("1_stage")
+
+[node name="Kamera" type="Camera2D" parent="."]
+anchor_mode = 0
+
+[node name="Peta" type="Node2D" parent="."]
+script = ExtResource("2_peta")
+
+[node name="Pemain" parent="." instance=ExtResource("3_pemain")]
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="AreaKontrol" type="ColorRect" parent="UI"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0.16, 0.2, 0.17, 1)
+
+[node name="Joystick" type="Control" parent="UI/AreaKontrol"]
+layout_mode = 1
+anchor_right = 0.5
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("4_joystick")
+
+[node name="Judul" type="Label" parent="UI/AreaKontrol"]
+layout_mode = 1
+anchor_right = 1.0
+offset_bottom = 48.0
+mouse_filter = 2
+horizontal_alignment = 1
+vertical_alignment = 1
