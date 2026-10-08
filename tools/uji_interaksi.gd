@@ -58,7 +58,7 @@ func _uji_stage_1_3() -> void:
 	# Wadah tanpa alat: tombol terkunci dan ikon alat muncul.
 	await _berdiri_di(Vector2i(4, 9))
 	_cek_aksi("Kardus MAINAN tanpa gunting: Potong terkunci", "kardus_mainan", "potong", false)
-	_cek("Ikon gunting muncul di atas kardus", _benda_di(Vector2i(4, 10)).ikon_alat == DataGame.nama_benda("gunting"))
+	_cek("Ikon gunting muncul di atas kardus", _benda_di(Vector2i(4, 10)).ikon_alat == "gunting")
 	_interaksi.tekan_aksi()
 	await _tunggu(0.1)
 	_cek("Menekan tombol terkunci tidak memotong waktu", not _interaksi.sibuk())

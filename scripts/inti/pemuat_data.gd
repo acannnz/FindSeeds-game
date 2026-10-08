@@ -1,6 +1,6 @@
 @tool
 extends RefCounted
-## Memuat file data JSON (pengaturan, katalog, pembeli, tanaman, stage).
+## Memuat file data JSON (pengaturan, katalog, pembeli, tanaman, tema, stage).
 ## Logika murni tanpa Node: dipakai oleh game, pemeriksa stage, dan plugin
 ## editor (karena itu @tool).
 
@@ -9,6 +9,7 @@ const FILE_PENGATURAN := "pengaturan.json"
 const FILE_KATALOG := "katalog_benda.json"
 const FILE_PEMBELI := "pembeli.json"
 const FILE_TANAMAN := "tanaman.json"
+const FILE_TEMA := "tema.json"
 const SUBFOLDER_STAGE := "stage"
 const AWALAN_FILE_STAGE := "stage_"
 
@@ -42,13 +43,13 @@ static func baca_json(jalur: String) -> Dictionary:
 	return {"data": json.data, "galat": ""}
 
 
-## Membaca pengaturan, katalog, pembeli, tanaman, dan semua stage sekaligus.
-## Mengembalikan {"pengaturan", "katalog", "pembeli", "tanaman", "stage", "galat": Array[String]}.
+## Membaca pengaturan, katalog, pembeli, tanaman, tema, dan semua stage sekaligus.
+## Mengembalikan {"pengaturan", "katalog", "pembeli", "tanaman", "tema", "stage", "galat": Array[String]}.
 static func muat_semua(folder_data: String = FOLDER_DATA, folder_stage: String = "") -> Dictionary:
 	if folder_stage == "":
 		folder_stage = folder_data.path_join(SUBFOLDER_STAGE)
-	var hasil := {"pengaturan": {}, "katalog": {}, "pembeli": {}, "tanaman": {}, "stage": [], "galat": []}
-	for pasangan in [["pengaturan", FILE_PENGATURAN], ["katalog", FILE_KATALOG], ["pembeli", FILE_PEMBELI], ["tanaman", FILE_TANAMAN]]:
+	var hasil := {"pengaturan": {}, "katalog": {}, "pembeli": {}, "tanaman": {}, "tema": {}, "stage": [], "galat": []}
+	for pasangan in [["pengaturan", FILE_PENGATURAN], ["katalog", FILE_KATALOG], ["pembeli", FILE_PEMBELI], ["tanaman", FILE_TANAMAN], ["tema", FILE_TEMA]]:
 		var baca := baca_json(folder_data.path_join(pasangan[1]))
 		if baca.galat != "":
 			hasil.galat.append(baca.galat)

@@ -6,6 +6,7 @@ extends Node2D
 
 const DataGame := preload("res://scripts/inti/data_game.gd")
 const Gambar := preload("res://scripts/game/gambar.gd")
+const Aset := preload("res://scripts/inti/aset.gd")
 
 const WARNA_BADAN := Color("#3949ab")
 const WARNA_GELEMBUNG := Color(1, 1, 1, 0.95)
@@ -27,6 +28,9 @@ var _lama_reaksi := 0.0
 var _sisa_geleng := 0.0
 var _sisa_sorot := 0.0
 var _tanaman_disorot := ""
+var _tekstur: Texture2D
+## id tanaman -> tekstur buah untuk ikon di gelembung pesanan.
+var _ikon_buah := {}
 
 
 ## kotak_gelembung: kotak gelembung dalam koordinat lokal (dihitung peta).
@@ -36,6 +40,9 @@ func siapkan(id_pembeli: String, pesanan_stage: RefCounted, ukuran_petak: float,
 	_ukuran = ukuran_petak
 	_gelembung = kotak_gelembung
 	_lama_reaksi = DataGame.pengaturan.lama_reaksi_pembeli_detik
+	_tekstur = Aset.tekstur(Aset.pembeli(id_pembeli))
+	for tanaman in pesanan.diminta:
+		_ikon_buah[tanaman] = Aset.tekstur(Aset.tanaman(tanaman, "buah"))
 	z_index = 2
 	queue_redraw()
 
@@ -67,9 +74,12 @@ func _draw() -> void:
 		var t := 1.0 - _sisa_geleng / _lama_reaksi
 		geser = sin(t * TAU * AYUNAN_GELENG) * _ukuran * PORSI_GELENG
 	var pusat := Vector2(geser, 0)
-	draw_circle(pusat, _ukuran * PORSI_RADIUS_BADAN, WARNA_BADAN)
 	var kotak_badan := Rect2(pusat - Vector2.ONE * _ukuran / 2.0, Vector2.ONE * _ukuran)
-	Gambar.huruf_tengah(self, "B", kotak_badan, Color.WHITE)
+	if _tekstur != null:
+		draw_texture_rect(_tekstur, kotak_badan, false)
+	else:
+		draw_circle(pusat, _ukuran * PORSI_RADIUS_BADAN, WARNA_BADAN)
+		Gambar.huruf_tengah(self, "B", kotak_badan, Color.WHITE)
 	if pesanan == null or _gelembung.size.x <= 0.0:
 		return
 
@@ -91,9 +101,13 @@ func _draw() -> void:
 func _gambar_item(tanaman: String, kotak: Rect2) -> void:
 	var sisi := kotak.size.y
 	var ikon := Rect2(kotak.position + Vector2(sisi * 0.1, sisi * 0.15), Vector2.ONE * sisi * 0.7)
-	var warna := DataGame.warna_tanaman(tanaman)
-	draw_rect(ikon, warna)
-	Gambar.huruf_tengah(self, DataGame.nama_tanaman(tanaman).left(1), ikon, Gambar.warna_kontras(warna), 0.7)
+	var gambar: Texture2D = _ikon_buah.get(tanaman)
+	if gambar != null:
+		draw_texture_rect(gambar, ikon.grow(sisi * 0.08), false)
+	else:
+		var warna := DataGame.warna_tanaman(tanaman)
+		draw_rect(ikon, warna)
+		Gambar.huruf_tengah(self, DataGame.nama_tanaman(tanaman).left(1), ikon, Gambar.warna_kontras(warna), 0.7)
 	var kotak_angka := Rect2(Vector2(ikon.end.x, kotak.position.y), Vector2(kotak.end.x - ikon.end.x, sisi))
 	if pesanan.tanaman_lengkap(tanaman):
 		_gambar_centang(kotak_angka.grow(-sisi * 0.18))

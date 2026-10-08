@@ -33,6 +33,7 @@ var _pengaturan: Dictionary
 var _katalog: Dictionary
 var _pembeli: Dictionary
 var _tanaman: Dictionary
+var _tema: Dictionary
 var _temuan: Array[Dictionary] = []
 
 
@@ -45,6 +46,7 @@ func periksa(data: Dictionary) -> Array[Dictionary]:
 	_katalog = katalog
 	_pembeli = data.pembeli
 	_tanaman = data.tanaman
+	_tema = data.get("tema", {})
 	var daftar_stage: Array = data.stage
 	_temuan = []
 	if not _periksa_pengaturan():
@@ -137,6 +139,9 @@ func _periksa_format(f: String, d: Dictionary) -> bool:
 
 	if typeof(d.get("nama")) != TYPE_STRING or d.nama.is_empty():
 		_lapor(f, CEK_FORMAT, "'nama' harus teks yang tidak kosong.")
+
+	if not _tema.has(d.get("tema")):
+		_lapor(f, CEK_FORMAT, "'tema' \"%s\" tidak ada di %s (pilihan: %s)." % [d.get("tema"), PemuatData.FILE_TEMA, ", ".join(_tema.keys())])
 
 	var waktu = d.get("waktu_detik")
 	if not _bilangan(waktu) or waktu <= 0:

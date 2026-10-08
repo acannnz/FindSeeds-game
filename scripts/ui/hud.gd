@@ -6,6 +6,7 @@ extends Control
 
 const DataGame := preload("res://scripts/inti/data_game.gd")
 const Gambar := preload("res://scripts/game/gambar.gd")
+const Aset := preload("res://scripts/inti/aset.gd")
 
 const WARNA_LATAR := Color(0.06, 0.08, 0.07, 0.6)
 const WARNA_SLOT_KOSONG := Color(1, 1, 1, 0.12)
@@ -78,7 +79,12 @@ func _draw() -> void:
 	draw_rect(kotak_tangan, WARNA_LATAR)
 	Gambar.huruf_tengah(self, "Tangan", Rect2(kotak_tangan.position, Vector2(LEBAR_TANGAN, TINGGI_LABEL + 4.0)), WARNA_TEKS_SAMAR, 0.75)
 	var isi_tangan := Rect2(kotak_tangan.position + Vector2(0, TINGGI_LABEL), Vector2(LEBAR_TANGAN, tinggi_isi - TINGGI_LABEL))
-	Gambar.huruf_tengah(self, DataGame.nama_benda(_alat) if _alat != "" else "-", isi_tangan, WARNA_TEKS, 0.45)
+	var ikon_alat := Aset.tekstur(Aset.benda(_alat, DataGame.entri_benda(_alat))) if _alat != "" else null
+	if ikon_alat != null:
+		var sisi := isi_tangan.size.y
+		draw_texture_rect(ikon_alat, Rect2(isi_tangan.get_center() - Vector2.ONE * sisi / 2.0, Vector2.ONE * sisi), false)
+	else:
+		Gambar.huruf_tengah(self, DataGame.nama_benda(_alat) if _alat != "" else "-", isi_tangan, WARNA_TEKS, 0.45)
 
 	# Tengah: slot kantong benih.
 	var lebar_kantong := _kapasitas * SISI_SLOT + (_kapasitas + 1) * JARAK_SLOT
@@ -89,7 +95,11 @@ func _draw() -> void:
 	var sisi := minf(SISI_SLOT, tinggi_isi - TINGGI_LABEL - JARAK_SLOT)
 	for i in _kapasitas:
 		var kotak := Rect2(Vector2(x_kantong + JARAK_SLOT + i * (SISI_SLOT + JARAK_SLOT), y + TINGGI_LABEL + 2.0), Vector2(SISI_SLOT, sisi))
-		if i < _isi_kantong.size():
+		var ikon_buah := Aset.tekstur(Aset.tanaman(_isi_kantong[i], "buah")) if i < _isi_kantong.size() else null
+		if ikon_buah != null:
+			draw_rect(kotak, WARNA_SLOT_KOSONG)
+			draw_texture_rect(ikon_buah, kotak.grow(-3.0), false)
+		elif i < _isi_kantong.size():
 			var warna := DataGame.warna_tanaman(_isi_kantong[i])
 			draw_rect(kotak, warna)
 			Gambar.huruf_tengah(self, DataGame.nama_tanaman(_isi_kantong[i]), kotak, Gambar.warna_kontras(warna), 0.32)

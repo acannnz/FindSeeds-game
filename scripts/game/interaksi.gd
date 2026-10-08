@@ -99,7 +99,7 @@ func _perbarui_target() -> void:
 		var dalam_jangkauan := jarak <= jangkauan
 		var aksi := AturanAksi.untuk_benda(benda.entri, benda.status, kantong.penuh(), alat_di_tangan)
 		# Wadah tertutup memunculkan ikon alat saat didekati, tanpa memotong waktu.
-		benda.ikon_alat = DataGame.nama_benda(aksi.butuh_alat) if dalam_jangkauan and aksi.butuh_alat != "" else ""
+		benda.ikon_alat = aksi.butuh_alat if dalam_jangkauan else ""
 		if dalam_jangkauan and aksi.aksi != AturanAksi.AKSI_TIDAK_ADA:
 			calon.append({"target": benda, "aksi": aksi, "jarak": jarak})
 	for tanah in _peta.daftar_tanah:
@@ -122,7 +122,7 @@ func _perbarui_target() -> void:
 	var alasan: String = aksi_kini.alasan
 	if aksi_kini.butuh_alat != "":
 		alasan = "Butuh %s" % DataGame.nama_benda(aksi_kini.butuh_alat)
-	_tombol.tampilkan(aksi_kini.label, aksi_kini.aktif, alasan)
+	_tombol.tampilkan(aksi_kini.label, aksi_kini.aktif, alasan, aksi_kini.aksi)
 	var ada_ikon: bool = "ikon_alat" in terdekat and terdekat.ikon_alat != ""
 	# Pemain di atas target: label di bawah agar tidak menutupi pemain.
 	var di_bawah := _pemain.position.y < terdekat.position.y - _ukuran * 0.25

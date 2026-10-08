@@ -11,6 +11,7 @@ signal ditekan
 
 const DataGame := preload("res://scripts/inti/data_game.gd")
 const Gambar := preload("res://scripts/game/gambar.gd")
+const Aset := preload("res://scripts/inti/aset.gd")
 
 const WARNA_AKTIF := Color(0.26, 0.63, 0.28, 0.9)
 const WARNA_NONAKTIF := Color(0.38, 0.38, 0.38, 0.75)
@@ -41,6 +42,7 @@ var inset_bawah := 0.0:
 var _radius := 0.0
 var _jarak_tepi := 0.0
 var _label := ""
+var _ikon: Texture2D
 var _aktif := false
 var _alasan := ""
 var _skala := SKALA_DIAM
@@ -53,9 +55,12 @@ func _ready() -> void:
 	_jarak_tepi = DataGame.pengaturan.tombol_aksi_jarak_tepi_px
 
 
-func tampilkan(label: String, aktif: bool, alasan: String) -> void:
-	if label == _label and aktif == _aktif and alasan == _alasan:
+## aksi: id aksi (identifikasi, ambil, ...) untuk ikon di tombol; "" = tanpa ikon.
+func tampilkan(label: String, aktif: bool, alasan: String, aksi: String = "") -> void:
+	var ikon := Aset.tekstur(Aset.aksi(aksi)) if aksi != "" else null
+	if label == _label and aktif == _aktif and alasan == _alasan and ikon == _ikon:
 		return
+	_ikon = ikon
 	_label = label
 	_aktif = aktif
 	_alasan = alasan
@@ -98,8 +103,16 @@ func _draw() -> void:
 		return
 	draw_circle(p, r, WARNA_AKTIF if _aktif else WARNA_NONAKTIF)
 	draw_arc(p, r, 0.0, TAU, 48, WARNA_TEPI, 3.0, true)
+	var warna_isi := Color.WHITE if _aktif else Color(1, 1, 1, 0.65)
 	var kotak_label := Rect2(p - Vector2(r, TINGGI_TEKS / 2.0), Vector2(r * 2.0, TINGGI_TEKS))
-	Gambar.huruf_tengah(self, _label, kotak_label, Color.WHITE if _aktif else Color(1, 1, 1, 0.65), 0.8)
+	if _ikon != null:
+		# Ikon di atas, label kecil di bawahnya.
+		var sisi := r * 0.9
+		draw_texture_rect(_ikon, Rect2(p - Vector2(sisi / 2.0, sisi * 0.78), Vector2.ONE * sisi), false, warna_isi)
+		kotak_label.position.y = p.y + r * 0.22
+		Gambar.huruf_tengah(self, _label, kotak_label, warna_isi, 0.62)
+	else:
+		Gambar.huruf_tengah(self, _label, kotak_label, warna_isi, 0.8)
 	if progres >= 0.0:
 		draw_arc(p, r - 6.0, -PI / 2.0, -PI / 2.0 + TAU * clampf(progres, 0.0, 1.0), 48, WARNA_PROGRES, 8.0, true)
 	if _alasan != "":

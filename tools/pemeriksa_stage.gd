@@ -15,6 +15,7 @@ extends SceneTree
 
 const PemuatData := preload("res://scripts/inti/pemuat_data.gd")
 const Pemeriksa := preload("res://scripts/inti/pemeriksa.gd")
+const Aset := preload("res://scripts/inti/aset.gd")
 
 
 func _initialize() -> void:
@@ -63,6 +64,16 @@ func _jalankan() -> int:
 		daftar.sort_custom(func(a, b): return a.cek < b.cek)
 		for t in daftar:
 			print("    Cek %d (%s): %s" % [t.cek, Pemeriksa.NAMA_CEK[t.cek], t.pesan])
+
+	# Aset gambar yang belum ada hanya dilaporkan: game memakai kotak warna.
+	var hilang := Aset.hilang(muat)
+	print("")
+	if hilang.is_empty():
+		print("[INFO] Semua %d aset gambar tersedia." % Aset.kebutuhan(muat).size())
+	else:
+		print("[INFO] %d aset gambar belum ada (game memakai kotak warna):" % hilang.size())
+		for j in hilang:
+			print("    %s" % j)
 
 	print("")
 	if temuan.is_empty():

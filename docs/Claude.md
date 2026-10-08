@@ -17,6 +17,7 @@ Baca dokumen lengkapnya hanya jika butuh detail yang tidak ada di sini.
 | + | Simpan rekor bintang (user://rekor.json) | Selesai |
 | + | Pemeriksa jalan saat build (plugin editor + tools/build_android.bat) | Selesai |
 | + | Kontrol modern: satu kanvas, joystick dinamis, tombol melayang, label target, HUD atas | Selesai, diuji pengguna di HP Android (2026-10-08): OK |
+| + | Aset vektor SVG (66 file, gaya kartun datar bergaris tebal) + pemuat dengan cadangan kotak warna | Selesai |
 
 Kerjakan per fase. Setelah tiap fase: jelaskan singkat, commit, push ke `origin main`, lalu tunggu konfirmasi.
 
@@ -55,7 +56,7 @@ Durasi (semua dari `data/pengaturan.json`): jalan 4 petak/detik, identifikasi 2,
 
 ## Tafsiran dokumen yang dipakai
 
-1. Format stage persis contoh `stage_1-3.json`: peta string tanpa spasi; penghalang di legenda ditulis `"penghalang"`.
+1. Format stage mengikuti contoh `stage_1-3.json` (peta string tanpa spasi), DITAMBAH kolom `tema`. Atas keputusan pengguna, penghalang di legenda menunjuk id sendiri (`rumah`, `meja`, `rak`, `wastafel`, semuanya `jenis: "penghalang"`) agar bisa digambar berbeda; id umum `penghalang` tetap ada.
 2. Simbol umum dibaca kode, tidak masuk legenda: `#` dinding, `.` lantai, `@` awal pemain, `T` tanah, `B` pembeli.
 3. `B` padat dan tidak wajib dijangkau flood fill. `T` bisa diinjak.
 4. Jenis benda disimpulkan dari katalog: `hasil` ≠ null → sumber; `hasil: null` → kosong; `butuh_alat` → wadah; `jenis: "alat"` → alat; `jenis: "penghalang"` → penghalang. Pengecoh = sumber yang hasilnya tidak ada di pesanan stage itu.
@@ -81,6 +82,7 @@ data/
   katalog_benda.json         sifat semua benda
   pengaturan.json            semua angka penyetelan
   pembeli.json               nama tampilan pembeli (id → nama)
+  tema.json                  tema stage (halaman, teras, gudang) → nama, warna_latar
   stage/stage_1-1.json …     peta, legenda, pesanan, ambang bintang
 scripts/
   inti/                      logika murni (bukan Node)
@@ -100,6 +102,7 @@ scripts/
     interaksi.gd             target terdekat (benda + tanah), aksi berdurasi (kunci gerak), kantong, alat, panen → pesanan; hentikan()
     teks_melayang.gd         teks reaksi / "+ Benih tomat" yang naik lalu memudar
     label_target.gd          label nama + aksi yang menempel pada target tombol aksi di dunia game
+    abu.gdshader             shader abu-abu untuk benda kosong yang sudah dicoba
     petak_tanah.gd           petak T (bisa diinjak): kosong → tumbuh (durasi tumbuh) → matang; tanam(), panen()
     pembeli.gd               pembeli B + gelembung pesanan, centang, geleng
     pemain.gd                CharacterBody2D (motion floating), joystick/panah, `arah_paksa` utk uji
@@ -111,6 +114,8 @@ scripts/
     layar_hasil.gd           layar menang / "Waktu habis!" / "Dijeda" (scenes/layar_hasil.tscn)
     tampilan_bintang.gd      bintang digambar poligon
 scenes/                      main.tscn, stage.tscn, pemain.tscn, layar_hasil.tscn
+aset/                        66 SVG (256 px, viewBox 128) + .import; lihat scripts/inti/aset.gd untuk konvensi nama
+  benda/ tanaman/ karakter/ pembeli/ petak/ ui/
 tools/
   pemeriksa_stage.gd         CLI (extends SceneTree), cetak laporan, exit code 1 jika gagal
   uji_pemeriksa.gd           uji mandiri: data asli lolos, tiap kerusakan memicu cek yang tepat
@@ -122,6 +127,8 @@ tools/
   uji_alur.gd                timer, jeda latar belakang, timer merah, waktu habis + ulang < 1 dtk, bintang 3/2/1, lanjut, kembali ke awal
   uji_plugin.gd              logika plugin pemeriksa: Run dibatalkan / export melapor jika stage salah
   uji_kontrol.gd             joystick (event sentuh via root.push_input), tombol, label target, tata letak 9:16–9:20
+  uji_aset.gd                semua aset ada & termuat, kolom gambar, cadangan placeholder, blok penghalang, pemain 4 arah
+  buat_aset.py               generator SVG awal (MENIMPA aset/ jika dijalankan lagi; edit SVG langsung saja)
   periksa.bat                pembungkus command line
   build_android.bat          periksa --semua dulu; export Android HANYA jika semua lolos
 addons/pemeriksa_stage/      plugin editor (aktif di project.godot)
@@ -134,14 +141,16 @@ Aturan kode: tidak ada angka penyetelan atau posisi benda di kode; semuanya dari
 ## Format data
 
 **`data/katalog_benda.json`** — kunci = id benda. Kolom dari dokumen: `hasil`, `logika`, `reaksi`, `butuh_alat`, `isi`, `jenis`.
-Kolom tambahan prototipe: `nama` (teks tampilan), `warna` (warna kotak placeholder), `teks_reaksi` (benda kosong), `label` (tulisan di wadah).
-Legenda penghalang selalu menunjuk id `penghalang`. Benda cadangan (krayon, kemoceng, bantal hati, bola kertas, rok tutu) dan `sekop` sudah ada di katalog walau belum dipakai.
+Kolom tambahan prototipe: `nama` (teks tampilan), `warna` (warna kotak placeholder), `teks_reaksi` (benda kosong), `label` (tulisan di wadah, digambar oleh game di atas gambar kardus), `gambar` (opsional: nama file SVG lain, mis. kedua kardus memakai `kardus`).
+Penghalang punya id sendiri: `rumah`, `meja`, `rak`, `wastafel` (+ `penghalang` umum). Benda cadangan (krayon, kemoceng, bantal hati, bola kertas, rok tutu) dan `sekop` sudah ada di katalog walau belum dipakai.
 
 **`data/tanaman.json`** — id tanaman → `nama`, `warna` (slot kantong, teks benih). Semua `hasil` katalog dan isi pesanan harus ada di sini (cek 0).
 
 **`data/pengaturan.json`** — `peta_lebar_petak`, `peta_tinggi_petak`, `tinggi_hud_atas_px`, `porsi_bawah_minimal`, `radius_pemain_petak`, `joystick_radius_px`, `joystick_zona_mati`, `tombol_aksi_radius_px`, `tombol_aksi_jarak_tepi_px`, `lama_teks_melayang_detik`, `lama_reaksi_pembeli_detik`, `kapasitas_kantong`, `kecepatan_jalan_petak_per_detik`, `jarak_interaksi_petak`, `toleransi_seri_petak`, `durasi_detik.{identifikasi, ambil_alat, pakai_alat, tanam, tumbuh, panen}`, `timer_merah_sisa_detik`, `jeda_ulang_detik`, `jeda_kemunculan_benda_stage`, `logika_per_musim` (angka musim → id logika).
 
-**`data/stage/stage_<id>.json`** — `id`, `nama`, `waktu_detik`, `bintang_sisa_detik.{tiga, dua}`, `pesanan.{pembeli, isi}`, `peta` (12 string × 8 karakter), `legenda` (huruf → id katalog). Urutan stage = urutan id (musim, nomor).
+**`data/tema.json`** — id tema → `nama`, `warna_latar` (warna dunia di luar peta). Lantai/dinding dari `aset/petak/<tema>_lantai.svg` dan `_dinding.svg`.
+
+**`data/stage/stage_<id>.json`** — `id`, `nama`, `tema` (harus ada di tema.json, cek 0), `waktu_detik`, `bintang_sisa_detik.{tiga, dua}`, `pesanan.{pembeli, isi}`, `peta` (12 string × 8 karakter), `legenda` (huruf → id katalog). Urutan stage = urutan id (musim, nomor).
 
 ## Catatan teknis Godot
 
@@ -155,6 +164,7 @@ Legenda penghalang selalu menunjuk id `penghalang`. Benda cadangan (krayon, kemo
 - **Satuan dunia** `Stage.UKURAN_PETAK = 64` per petak. Camera2D (jangkar kiri atas) di-zoom lewat `Stage.hitung_tata_letak()` (statis, diuji): peta selebar layar di bawah HUD. Di HP (`OS.has_feature("mobile")`) area aman (poni/bilah gestur) menggeser HUD dan tombol aksi.
 - **Benda, `B`, `#`, dan penghalang padat.** `.`, `@`, `T` bisa diinjak. Pemain berupa lingkaran dengan radius `radius_pemain_petak`.
 - **Pintasan debug** (build debug saja): tombol 1–9 memilih stage, R mengulang stage, panah untuk bergerak.
+- **Aset:** `scripts/inti/aset.gd` menentukan jalur dari id (benda/<id>.svg, tanaman/<id>_<muda|matang|buah>.svg + tunas.svg, karakter/pemain_<arah>.svg, pembeli/<id>.svg, petak/<tema>_<lantai|dinding>.svg + tanah.svg, ui/aksi_<aksi>.svg). Aset hilang → `tekstur()` null → kotak warna lama. `main.gd` memuat SEMUA tekstur di awal (`Aset.muat_semua`); tekstur yang pertama dimuat di dalam `_draw()` bisa tampil putih. Node mengambil tekstur di `siapkan()`, bukan di `_draw()`. Penghalang bersambung (huruf sama) digambar sebagai satu blok diregangkan (rumah 2×4, meja 2×3, rak 1×3). Pemeriksa CLI melaporkan aset hilang sebagai `[INFO]` (tidak gagal). Mipmap + filter linear diaktifkan (`[importer_defaults]` dan `default_texture_filter=2` di project.godot). Kredit/lisensi: `docs/kredit_aset.md`.
 - **Menjalankan game:** buka proyek di editor Godot 4.7.2 lalu F5. Bisa juga `Godot_v4.7.2-stable_win64.exe --path . --resolution 360x640`.
 
 ## Menjalankan pemeriksa stage
@@ -170,6 +180,7 @@ tools\periksa.bat --uji-main      :: bot memainkan solusi tercepat 1-1/1-2/1-3 (
 tools\periksa.bat --uji-alur      :: timer, jeda, waktu habis + ulang (0,78 dtk), bintang, lanjut
 tools\periksa.bat --uji-plugin    :: plugin editor: Run dibatalkan & export melapor saat stage salah
 tools\periksa.bat --uji-kontrol   :: joystick dinamis, tombol melayang, label target, tata letak berbagai rasio layar
+tools\periksa.bat --uji-aset      :: aset gambar lengkap & termuat (--semua mengimpor aset lebih dulu)
 tools\periksa.bat --stage=FOLDER  :: periksa folder stage lain (--data=FOLDER untuk katalog/pengaturan lain)
 tools\build_android.bat [release] :: --semua dulu, lalu export preset "Android" ke build\ (exit 1 = gagal, 2 = preset belum ada)
 ```

@@ -40,6 +40,10 @@ var rekor_bintang := 0
 
 
 func _ready() -> void:
+	# Latar di luar peta (area jempol) mengikuti tema stage.
+	var tema: Dictionary = DataGame.tema.get(data.get("tema", ""), {})
+	if tema.has("warna_latar"):
+		RenderingServer.set_default_clear_color(Color(tema.warna_latar))
 	pesanan = Pesanan.new(data.pesanan.isi)
 	sisa_detik = float(data.waktu_detik)
 	peta.bangun(data, UKURAN_PETAK, pesanan)

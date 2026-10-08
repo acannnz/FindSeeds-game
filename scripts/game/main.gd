@@ -10,6 +10,7 @@ const DataGame := preload("res://scripts/inti/data_game.gd")
 const Bintang := preload("res://scripts/inti/bintang.gd")
 const Rekor := preload("res://scripts/inti/rekor.gd")
 const ADEGAN_STAGE := preload("res://scenes/stage.tscn")
+const Aset := preload("res://scripts/inti/aset.gd")
 
 ## Lokasi file rekor. Skrip uji menggantinya sebelum Main masuk pohon agar
 ## rekor pemain tidak tertimpa.
@@ -30,6 +31,7 @@ func _ready() -> void:
 	if not DataGame.galat.is_empty():
 		_tampilkan_galat()
 		return
+	Aset.muat_semua(Aset.kebutuhan(DataGame.sebagai_data()))
 	muat_stage(0)
 
 

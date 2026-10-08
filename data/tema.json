@@ -1,0 +1,5 @@
+{
+  "halaman": { "nama": "Halaman", "warna_latar": "#6a9e3f" },
+  "teras":   { "nama": "Teras",   "warna_latar": "#7a8f4a" },
+  "gudang":  { "nama": "Gudang",  "warna_latar": "#5f5a52" }
+}

@@ -1,5 +1,5 @@
 extends RefCounted
-## Data game bersama: pengaturan, katalog, pembeli, tanaman, dan semua stage. Dimuat
+## Data game bersama: pengaturan, katalog, pembeli, tanaman, tema, dan semua stage. Dimuat
 ## sekali saat skrip ini pertama kali dipakai, lalu divalidasi pemeriksa stage.
 ##
 ## Pakai lewat preload, bukan autoload, supaya juga bisa dipakai skrip uji
@@ -14,6 +14,7 @@ static var pengaturan: Dictionary = {}
 static var katalog: Dictionary = {}
 static var pembeli: Dictionary = {}
 static var tanaman: Dictionary = {}
+static var tema: Dictionary = {}
 ## Array berisi {"file", "data"}, urut menurut id stage.
 static var daftar_stage: Array = []
 ## Pesan galat pemuatan dan temuan pemeriksa. Kosong berarti data sehat.
@@ -26,6 +27,7 @@ static func _static_init() -> void:
 	katalog = muat.katalog
 	pembeli = muat.pembeli
 	tanaman = muat.tanaman
+	tema = muat.tema
 	daftar_stage = muat.stage
 	galat.assign(muat.galat)
 	if galat.is_empty():
@@ -33,6 +35,12 @@ static func _static_init() -> void:
 			galat.append(Pemeriksa.format_temuan(t))
 	for g in galat:
 		push_error(g)
+
+
+## Data dalam bentuk kamus seperti hasil PemuatData.muat_semua().
+static func sebagai_data() -> Dictionary:
+	return {"pengaturan": pengaturan, "katalog": katalog, "pembeli": pembeli,
+		"tanaman": tanaman, "tema": tema, "stage": daftar_stage}
 
 
 static func stage_dengan_id(id: String) -> Dictionary:

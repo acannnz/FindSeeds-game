@@ -1,6 +1,7 @@
 {
   "id": "1-1",
   "nama": "Halaman Rumah",
+  "tema": "halaman",
   "waktu_detik": 90,
   "bintang_sisa_detik": { "tiga": 60, "dua": 40 },
   "pesanan": { "pembeli": "bu_ijah", "isi": { "tomat": 1 } },
@@ -20,6 +21,6 @@
   ],
   "legenda": {
     "O": "bola_karet_merah", "E": "ember", "S": "sandal_jepit",
-    "R": "penghalang"
+    "R": "rumah"
   }
 }

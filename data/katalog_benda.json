@@ -21,11 +21,15 @@
   "ember":               { "nama": "Ember",            "warna": "#607d8b", "hasil": null, "reaksi": "klontang",          "teks_reaksi": "Klontang!" },
   "sandal_jepit":        { "nama": "Sandal jepit",     "warna": "#4fc3f7", "hasil": null, "reaksi": "plak",              "teks_reaksi": "Plak!" },
 
-  "kardus_mainan":       { "nama": "Kardus MAINAN", "warna": "#a1887f", "label": "MAINAN", "butuh_alat": "gunting", "isi": "hidung_badut" },
-  "kardus_sepatu":       { "nama": "Kardus SEPATU", "warna": "#a1887f", "label": "SEPATU", "butuh_alat": "gunting", "isi": "sepatu" },
+  "kardus_mainan":       { "nama": "Kardus MAINAN", "warna": "#a1887f", "label": "MAINAN", "gambar": "kardus", "butuh_alat": "gunting", "isi": "hidung_badut" },
+  "kardus_sepatu":       { "nama": "Kardus SEPATU", "warna": "#a1887f", "label": "SEPATU", "gambar": "kardus", "butuh_alat": "gunting", "isi": "sepatu" },
 
   "gunting":             { "nama": "Gunting", "warna": "#90a4ae", "jenis": "alat" },
   "sekop":               { "nama": "Sekop",   "warna": "#78909c", "jenis": "alat" },
 
-  "penghalang":          { "nama": "Penghalang", "warna": "#4e342e", "jenis": "penghalang" }
+  "penghalang":          { "nama": "Penghalang", "warna": "#4e342e", "jenis": "penghalang" },
+  "rumah":               { "nama": "Rumah",      "warna": "#8d4b3a", "jenis": "penghalang" },
+  "meja":                { "nama": "Meja",       "warna": "#a1673f", "jenis": "penghalang" },
+  "rak":                 { "nama": "Rak",        "warna": "#6d4c41", "jenis": "penghalang" },
+  "wastafel":            { "nama": "Wastafel",   "warna": "#90a4ae", "jenis": "penghalang" }
 }
