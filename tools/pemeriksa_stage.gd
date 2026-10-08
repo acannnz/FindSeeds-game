@@ -8,7 +8,7 @@ extends SceneTree
 ##   godot --headless --path . --script res://tools/pemeriksa_stage.gd
 ##
 ## Opsi setelah "--":
-##   --data=<folder>   folder pengaturan.json, katalog_benda.json, pembeli.json (bawaan res://data)
+##   --data=<folder>   folder pengaturan.json, katalog_benda.json, pembeli.json, tanaman.json (bawaan res://data)
 ##   --stage=<folder>  folder file stage (bawaan <data>/stage)
 ##
 ## Kode keluar: 0 jika semua lolos, 1 jika ada masalah.
@@ -38,7 +38,7 @@ func _jalankan() -> int:
 		print("GAGAL: tidak ada file %s*.json di %s." % [PemuatData.AWALAN_FILE_STAGE, opsi.stage])
 		return 1
 
-	var temuan := Pemeriksa.new().periksa(muat.pengaturan, muat.katalog, muat.pembeli, muat.stage)
+	var temuan := Pemeriksa.new().periksa(muat)
 
 	var per_file := {}
 	for t in temuan:

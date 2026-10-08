@@ -1,6 +1,7 @@
 extends Node2D
 ## Satu stage yang sedang dimainkan: membangun peta dari data, menaruh pemain
-## di '@', dan mengatur tata letak layar (peta di atas, kontrol di bawah).
+## di '@', menyambungkan interaksi dengan tombol aksi dan HUD, dan mengatur
+## tata letak layar (peta di atas, kontrol di bawah).
 
 const DataGame := preload("res://scripts/inti/data_game.gd")
 
@@ -16,16 +17,25 @@ var data: Dictionary
 @onready var pemain: CharacterBody2D = $Pemain
 @onready var area_kontrol: Control = $UI/AreaKontrol
 @onready var joystick: Control = $UI/AreaKontrol/Joystick
-@onready var label_judul: Label = $UI/AreaKontrol/Judul
+@onready var tombol_aksi: Control = $UI/AreaKontrol/TombolAksi
+@onready var hud: Control = $UI/AreaKontrol/Hud
+@onready var interaksi: Node = $Interaksi
 
 
 func _ready() -> void:
 	peta.bangun(data, UKURAN_PETAK)
 	pemain.position = peta.posisi_awal
 	pemain.siapkan(UKURAN_PETAK, joystick)
-	label_judul.text = "Stage %s: %s" % [data.id, data.nama]
+	interaksi.siapkan(pemain, peta, tombol_aksi, UKURAN_PETAK)
+	interaksi.bawaan_berubah.connect(_perbarui_hud)
+	hud.judul = "Stage %s: %s" % [data.id, data.nama]
+	_perbarui_hud()
 	get_viewport().size_changed.connect(_atur_tata_letak)
 	_atur_tata_letak()
+
+
+func _perbarui_hud() -> void:
+	hud.perbarui(interaksi.kantong, interaksi.alat_di_tangan)
 
 
 ## Peta mengisi bagian atas layar sebesar porsi_tinggi_peta, sisanya kontrol.

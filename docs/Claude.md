@@ -11,7 +11,7 @@ Baca dokumen lengkapnya hanya jika butuh detail yang tidak ada di sini.
 | 2 | Data: katalog, pengaturan, 3 file stage | Selesai |
 | 3 | Pemeriksa stage (6 pengecekan, CLI) | Selesai |
 | 4 | Pemuat peta, gerak, tabrakan | Selesai |
-| 5 | Interaksi: aksi kontekstual, identifikasi, alat, wadah, kantong | Belum |
+| 5 | Interaksi: aksi kontekstual, identifikasi, alat, wadah, kantong | Selesai |
 | 6 | Tanam, panen, pesanan, menang otomatis | Belum |
 | 7 | Timer, restart < 1 detik, bintang, stage berikutnya | Belum |
 
@@ -45,6 +45,7 @@ Durasi (semua dari `data/pengaturan.json`): jalan 4 petak/detik, identifikasi 2,
 - **Benih yang ditanam:** urutan masuk (FIFO), paling lama ditanam duluan.
 - **Benda padat:** benda menempati petaknya dan tidak bisa dilewati; diinteraksi dari petak sebelah.
 - **Wadah tanpa alat:** ikon alat di atas wadah, tombol tampil abu-abu "Potong" dan tidak bisa ditekan.
+- **Kantong penuh:** Identifikasi dikunci untuk SEMUA benda yang belum dicoba (tombol abu-abu "Kantong penuh"), supaya tidak membocorkan mana yang sumber. Ambil dan Potong tetap bisa.
 - **Git:** commit tiap fase lalu push ke `origin main` (https://github.com/acannnz/FindSeeds-game.git).
 
 ## Tafsiran dokumen yang dipakai
@@ -56,7 +57,10 @@ Durasi (semua dari `data/pengaturan.json`): jalan 4 petak/detik, identifikasi 2,
 5. Jeda 4 stage hanya untuk benda sumber, kosong, dan pengecoh (termasuk isi wadah). Alat, wadah, penghalang dikecualikan. Selisih urutan stage ≥ 4.
 6. Pengecekan "cukup benda sumber" menghitung isi wadah.
 7. Panen melebihi jumlah pesanan dianggap tidak dipesan.
-8. Di luar lingkup sekarang: tutorial (timer langsung jalan), musik, animasi reaksi (cukup teks). Setelah 1-3 kembali ke 1-1.
+8. Sumber/pengecoh yang diidentifikasi hilang dari peta (berubah jadi benih). Benda kosong tetap di tempat, abu-abu, padat.
+9. Jarak interaksi diukur pusat pemain ke pusat petak benda ≤ `jarak_interaksi_petak` (+0,5 satuan). Target = benda terdekat yang punya aksi; benda abu-abu diabaikan.
+10. Tukar alat: alat lama ditaruh di petak alat yang baru diambil. Benda hasil buka wadah / alat tukaran memakai huruf pertama namanya.
+11. Di luar lingkup sekarang: tutorial (timer langsung jalan), musik, animasi reaksi (cukup teks). Setelah 1-3 kembali ke 1-1.
 
 ## Struktur folder
 
@@ -73,23 +77,32 @@ scripts/
     pemuat_data.gd           baca JSON, simbol umum, jenis benda (dipakai game + pemeriksa)
     pemeriksa.gd             logika 6 pengecekan + cek format, mengembalikan daftar temuan
     data_game.gd             data bersama via static var + _static_init (BUKAN autoload)
-    kantong.gd, pesanan.gd, bintang.gd   (fase berikutnya)
+    kantong.gd               kantong benih FIFO, kapasitas dari pengaturan
+    aturan_aksi.gd           aksi kontekstual per benda (label, aktif, alasan, butuh_alat)
+    pesanan.gd, bintang.gd   (fase berikutnya)
   game/
     main.gd                  memuat stage; tampilkan galat data di layar; pintasan debug
     stage.gd                 bangun peta, taruh pemain di @, tata letak + kamera
     peta.gd                  gambar lantai/dinding/B/penghalang, tabrakan petak padat
-    benda.gd                 StaticBody2D per benda (padat), kotak warna + huruf
+    benda.gd                 StaticBody2D per benda (padat): status normal/abu, buka(), ganti_menjadi(), sorot, ikon alat
+    interaksi.gd             cari target terdekat, tawarkan aksi, jalankan aksi berdurasi (kunci gerak), kantong + alat
+    teks_melayang.gd         teks reaksi / "+ Benih tomat" yang naik lalu memudar
     petak_tanah.gd           petak T (bisa diinjak)
     pemain.gd                CharacterBody2D (motion floating), joystick/panah, `arah_paksa` utk uji
     gambar.gd                pembantu gambar placeholder (huruf di tengah, warna kontras)
   ui/
     joystick.gd              joystick mengambang, melacak satu indeks sentuhan
-    tombol_aksi.gd, hud.gd, layar_hasil.gd   (fase berikutnya)
+    tombol_aksi.gd           tombol kontekstual: nama target, label, alasan, cincin progres; Spasi/Enter di desktop
+    hud.gd                   nama stage, slot kantong, alat di tangan
+    layar_hasil.gd           (fase berikutnya)
 scenes/                      main.tscn, stage.tscn, pemain.tscn
 tools/
   pemeriksa_stage.gd         CLI (extends SceneTree), cetak laporan, exit code 1 jika gagal
   uji_pemeriksa.gd           uji mandiri: data asli lolos, tiap kerusakan memicu cek yang tepat
+  dasar_uji.gd               dasar semua uji: _cek, _selesai, Logger penghitung galat, batas waktu 120 dtk simulasi
+  uji_logika.gd              uji kantong + aturan aksi
   uji_gerak.gd               uji gerak: kecepatan, dinding, penghalang, benda & B padat, celah 1-3
+  uji_interaksi.gd           uji interaksi di 1-3 sungguhan + tukar alat di 1-1 yang dimodifikasi
   periksa.bat                pembungkus command line
 ```
 
@@ -101,13 +114,17 @@ Aturan kode: tidak ada angka penyetelan atau posisi benda di kode; semuanya dari
 Kolom tambahan prototipe: `nama` (teks tampilan), `warna` (warna kotak placeholder), `teks_reaksi` (benda kosong), `label` (tulisan di wadah).
 Legenda penghalang selalu menunjuk id `penghalang`. Benda cadangan (krayon, kemoceng, bantal hati, bola kertas, rok tutu) dan `sekop` sudah ada di katalog walau belum dipakai.
 
-**`data/pengaturan.json`** — `peta_lebar_petak`, `peta_tinggi_petak`, `porsi_tinggi_peta`, `radius_pemain_petak`, `joystick_radius_px`, `joystick_zona_mati`, `kapasitas_kantong`, `kecepatan_jalan_petak_per_detik`, `jarak_interaksi_petak`, `durasi_detik.{identifikasi, ambil_alat, pakai_alat, tanam, tumbuh, panen}`, `timer_merah_sisa_detik`, `jeda_ulang_detik`, `jeda_kemunculan_benda_stage`, `logika_per_musim` (angka musim → id logika).
+**`data/tanaman.json`** — id tanaman → `nama`, `warna` (slot kantong, teks benih). Semua `hasil` katalog dan isi pesanan harus ada di sini (cek 0).
+
+**`data/pengaturan.json`** — `peta_lebar_petak`, `peta_tinggi_petak`, `porsi_tinggi_peta`, `radius_pemain_petak`, `joystick_radius_px`, `joystick_zona_mati`, `tombol_aksi_radius_px`, `lama_teks_melayang_detik`, `kapasitas_kantong`, `kecepatan_jalan_petak_per_detik`, `jarak_interaksi_petak`, `durasi_detik.{identifikasi, ambil_alat, pakai_alat, tanam, tumbuh, panen}`, `timer_merah_sisa_detik`, `jeda_ulang_detik`, `jeda_kemunculan_benda_stage`, `logika_per_musim` (angka musim → id logika).
 
 **`data/stage/stage_<id>.json`** — `id`, `nama`, `waktu_detik`, `bintang_sisa_detik.{tiga, dua}`, `pesanan.{pembeli, isi}`, `peta` (12 string × 8 karakter), `legenda` (huruf → id katalog). Urutan stage = urutan id (musim, nomor).
 
 ## Catatan teknis Godot
 
 - **Jangan pakai autoload.** Di mode `--script` (skrip uji), nama autoload tidak dikenali saat kompilasi. Data bersama ada di `scripts/inti/data_game.gd`, dipakai lewat `const DataGame := preload("res://scripts/inti/data_game.gd")`.
+- **Skrip uji** extends `res://tools/dasar_uji.gd`, harus `await process_frame` dulu sebelum menambah node ke `root` (pohon belum siap di `_initialize`), dan dijalankan dengan `--fixed-fps 60`.
+- **Pemeriksa** dipanggil `Pemeriksa.new().periksa(data)` dengan `data` = hasil `PemuatData.muat_semua()`.
 - **Satuan dunia** `Stage.UKURAN_PETAK = 64` per petak. Camera2D (jangkar kiri atas) di-zoom agar peta pas di area `porsi_tinggi_peta` bagian atas layar dan berada di tengah.
 - **Benda, `B`, `#`, dan penghalang padat.** `.`, `@`, `T` bisa diinjak. Pemain berupa lingkaran dengan radius `radius_pemain_petak`.
 - **Pintasan debug** (build debug saja): tombol 1–9 memilih stage, R mengulang stage, panah untuk bergerak.
@@ -118,7 +135,10 @@ Legenda penghalang selalu menunjuk id `penghalang`. Benda cadangan (krayon, kemo
 ```bat
 tools\periksa.bat                 :: periksa data\stage, exit 0 = lolos, 1 = ada masalah
 tools\periksa.bat --uji           :: uji mandiri pemeriksa (8 kasus)
-tools\periksa.bat --uji-gerak     :: uji gerak dan tabrakan (6 kasus, --fixed-fps 60)
+tools\periksa.bat --semua         :: pemeriksa stage + SEMUA uji (jalankan sebelum commit)
+tools\periksa.bat --uji-logika    :: uji kantong dan aturan aksi
+tools\periksa.bat --uji-gerak     :: uji gerak dan tabrakan
+tools\periksa.bat --uji-interaksi :: uji identifikasi, alat, wadah, kantong penuh, tukar alat
 tools\periksa.bat --stage=FOLDER  :: periksa folder stage lain (--data=FOLDER untuk katalog/pengaturan lain)
 ```
 

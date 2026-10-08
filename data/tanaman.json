@@ -1,0 +1,8 @@
+{
+  "tomat":    { "nama": "Tomat",    "warna": "#e53935" },
+  "wortel":   { "nama": "Wortel",   "warna": "#fb8c00" },
+  "jagung":   { "nama": "Jagung",   "warna": "#fdd835" },
+  "stroberi": { "nama": "Stroberi", "warna": "#d81b60" },
+  "kubis":    { "nama": "Kubis",    "warna": "#7cb342" },
+  "bunga":    { "nama": "Bunga",    "warna": "#ab47bc" }
+}

@@ -1,4 +1,4 @@
-extends SceneTree
+extends "res://tools/dasar_uji.gd"
 ## Uji gerak dan tabrakan: memuat stage sungguhan, menggerakkan pemain lewat
 ## `arah_paksa`, dan memeriksa posisi akhirnya.
 ##
@@ -16,7 +16,6 @@ const TOLERANSI_PETAK := 0.1
 const SAMPAI_PETAK := 0.1
 const FPS := 60
 
-var _gagal := 0
 var _u: float
 
 
@@ -25,6 +24,8 @@ func _initialize() -> void:
 
 
 func _jalankan() -> void:
+	# Pohon adegan baru siap setelah _initialize; tunggu satu frame.
+	await process_frame
 	if not DataGame.galat.is_empty():
 		print("GAGAL: data stage bermasalah, jalankan tools\\periksa.bat.")
 		quit(1)
@@ -72,12 +73,7 @@ func _jalankan() -> void:
 	_cek("Lewat celah dinding ke ruang atas (1-3)", sampai,
 		"berhenti di petak %s" % str((pemain.position / _u).floor()))
 
-	print("")
-	if _gagal == 0:
-		print("LOLOS: semua uji gerak berhasil.")
-	else:
-		print("GAGAL: %d uji gerak tidak sesuai harapan." % _gagal)
-	quit(1 if _gagal > 0 else 0)
+	_selesai("uji gerak")
 
 
 func _muat(id: String) -> Node:
@@ -114,11 +110,3 @@ func _ikuti_rute(pemain: CharacterBody2D, rute: Array[Vector2], batas_detik: flo
 			await physics_frame
 	pemain.arah_paksa = Vector2.ZERO
 	return true
-
-
-func _cek(judul: String, lolos: bool, rincian: String) -> void:
-	if lolos:
-		print("[LOLOS] %s (%s)" % [judul, rincian])
-	else:
-		_gagal += 1
-		print("[GAGAL] %s (%s)" % [judul, rincian])

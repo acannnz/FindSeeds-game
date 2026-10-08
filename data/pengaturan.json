@@ -6,6 +6,8 @@
   "radius_pemain_petak": 0.35,
   "joystick_radius_px": 110,
   "joystick_zona_mati": 0.15,
+  "tombol_aksi_radius_px": 95,
+  "lama_teks_melayang_detik": 1.5,
 
   "kapasitas_kantong": 3,
   "kecepatan_jalan_petak_per_detik": 4.0,

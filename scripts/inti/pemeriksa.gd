@@ -30,15 +30,20 @@ const BATAS_SARANG_WADAH := 8
 var _pengaturan: Dictionary
 var _katalog: Dictionary
 var _pembeli: Dictionary
+var _tanaman: Dictionary
 var _temuan: Array[Dictionary] = []
 
 
-## daftar_stage: Array berisi {"file", "data"}, sudah diurutkan menurut id.
+## data: hasil PemuatData.muat_semua() berisi pengaturan, katalog, pembeli,
+## tanaman, dan stage (Array {"file", "data"} yang sudah urut menurut id).
 ## Mengembalikan Array berisi {"file": String, "cek": int, "pesan": String}.
-func periksa(pengaturan: Dictionary, katalog: Dictionary, pembeli: Dictionary, daftar_stage: Array) -> Array[Dictionary]:
-	_pengaturan = pengaturan
+func periksa(data: Dictionary) -> Array[Dictionary]:
+	_pengaturan = data.pengaturan
+	var katalog: Dictionary = data.katalog
 	_katalog = katalog
-	_pembeli = pembeli
+	_pembeli = data.pembeli
+	_tanaman = data.tanaman
+	var daftar_stage: Array = data.stage
 	_temuan = []
 	if not _periksa_pengaturan():
 		return _temuan
@@ -88,8 +93,8 @@ func _periksa_katalog() -> void:
 			PemuatData.JENIS_TIDAK_DIKENAL:
 				_lapor(f, CEK_FORMAT, "Jenis benda '%s' tidak bisa disimpulkan (butuh 'hasil', 'butuh_alat', atau 'jenis')." % id)
 			PemuatData.JENIS_SUMBER:
-				if typeof(entri.hasil) != TYPE_STRING:
-					_lapor(f, CEK_FORMAT, "'%s': kolom 'hasil' harus nama tanaman atau null." % id)
+				if not _tanaman.has(entri.hasil):
+					_lapor(f, CEK_FORMAT, "'%s': hasil '%s' tidak ada di %s." % [id, entri.hasil, PemuatData.FILE_TANAMAN])
 				if not entri.has("logika"):
 					_lapor(f, CEK_FORMAT, "Benda sumber '%s' tidak punya kolom 'logika'." % id)
 			PemuatData.JENIS_WADAH:
@@ -133,6 +138,8 @@ func _periksa_format(f: String, d: Dictionary) -> bool:
 		if not _pembeli.has(pesanan.get("pembeli")):
 			_lapor(f, CEK_FORMAT, "Pembeli '%s' tidak ada di %s." % [pesanan.get("pembeli"), PemuatData.FILE_PEMBELI])
 		for tanaman in pesanan.isi:
+			if not _tanaman.has(tanaman):
+				_lapor(f, CEK_FORMAT, "Pesanan '%s' tidak ada di %s." % [tanaman, PemuatData.FILE_TANAMAN])
 			if not _bilangan_bulat_positif(pesanan.isi[tanaman]):
 				_lapor(f, CEK_FORMAT, "Jumlah pesanan '%s' harus bilangan bulat ≥ 1." % tanaman)
 				bisa_lanjut = false

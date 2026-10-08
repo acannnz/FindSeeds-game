@@ -65,6 +65,12 @@ func bangun(data_stage: Dictionary, ukuran_petak: float) -> void:
 	queue_redraw()
 
 
+## Menghapus benda dari peta (misalnya sumber yang sudah jadi benih).
+func hapus_benda(benda: Benda) -> void:
+	daftar_benda.erase(benda)
+	benda.queue_free()
+
+
 func pusat_petak(sel: Vector2i) -> Vector2:
 	return (Vector2(sel) + Vector2(0.5, 0.5)) * ukuran
 

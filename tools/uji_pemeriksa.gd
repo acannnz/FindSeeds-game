@@ -1,4 +1,4 @@
-extends SceneTree
+extends "res://tools/dasar_uji.gd"
 ## Uji mandiri pemeriksa stage: data asli harus lolos, dan setiap kerusakan
 ## yang disengaja harus memicu tepat pengecekan yang diharapkan.
 ##
@@ -11,7 +11,6 @@ const PemuatData := preload("res://scripts/inti/pemuat_data.gd")
 const Pemeriksa := preload("res://scripts/inti/pemeriksa.gd")
 
 var _asli: Dictionary
-var _gagal := 0
 
 
 func _initialize() -> void:
@@ -44,12 +43,7 @@ func _initialize() -> void:
 	_uji("Cek 6: logika musim Panas dipakai di Musim Semi", [Pemeriksa.CEK_LOGIKA_MUSIM], func(d):
 		d.katalog.bola_karet_merah.logika = "asosiasi")
 
-	print("")
-	if _gagal == 0:
-		print("LOLOS: semua uji pemeriksa berhasil.")
-	else:
-		print("GAGAL: %d uji pemeriksa tidak sesuai harapan." % _gagal)
-	quit(1 if _gagal > 0 else 0)
+	_selesai("uji pemeriksa")
 
 
 ## Menyalin data asli, merusaknya lewat `ubah`, lalu memastikan cek yang
@@ -57,7 +51,7 @@ func _initialize() -> void:
 func _uji(judul: String, cek_diharapkan: Array, ubah: Callable) -> void:
 	var d: Dictionary = _asli.duplicate(true)
 	ubah.call(d)
-	var temuan := Pemeriksa.new().periksa(d.pengaturan, d.katalog, d.pembeli, d.stage)
+	var temuan := Pemeriksa.new().periksa(d)
 	var cek_muncul := {}
 	for t in temuan:
 		cek_muncul[t.cek] = true
