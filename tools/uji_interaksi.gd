@@ -32,6 +32,7 @@ func _jalankan() -> void:
 	await _uji_stage_1_3()
 	await _uji_tukar_alat()
 	await _uji_panen_pengecoh()
+	await _uji_pemecah_seri()
 	_selesai("uji interaksi")
 
 
@@ -137,6 +138,24 @@ func _uji_panen_pengecoh() -> void:
 	_cek("Bunga tidak mengisi pesanan", pesanan.terisi.tomat == 0 and pesanan.terisi.wortel == 0)
 	_cek("Pembeli menggeleng", _stage.peta.daftar_pembeli[0].sedang_menggeleng())
 	_cek("Petak tanah kosong lagi, stage belum selesai", tanah.status == AturanAksi.TANAH_KOSONG and not _stage.sudah_selesai)
+
+
+## Stage 1-2, petak (4,2): jam weker di bawah dan kucing di kiri sama jauhnya.
+## Benda yang searah hadap pemain yang dipilih.
+func _uji_pemecah_seri() -> void:
+	await _muat(DataGame.stage_dengan_id("1-2"))
+	await _berdiri_di(Vector2i(4, 2))
+	_pemain.hadap = Vector2.DOWN
+	await _tunggu(2.0 / FPS)
+	_cek_aksi("Jarak seri, hadap bawah: jam weker", "jam_weker_merah", "identifikasi", true)
+	_pemain.hadap = Vector2.LEFT
+	await _tunggu(2.0 / FPS)
+	_cek_aksi("Jarak seri, hadap kiri: kucing tidur", "kucing_tidur", "identifikasi", true)
+	# Di luar toleransi seri, jarak tetap menentukan walau hadap berlawanan.
+	_pemain.position = _peta.pusat_petak(Vector2i(4, 2)) + Vector2(0, 0.2 * _stage.UKURAN_PETAK)
+	_pemain.hadap = Vector2.LEFT
+	await _tunggu(2.0 / FPS)
+	_cek_aksi("Jam weker jelas lebih dekat: dipilih walau hadap kiri", "jam_weker_merah", "identifikasi", true)
 
 
 func _tanah_di(sel: Vector2i) -> Node2D:

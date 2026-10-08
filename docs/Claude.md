@@ -13,7 +13,7 @@ Baca dokumen lengkapnya hanya jika butuh detail yang tidak ada di sini.
 | 4 | Pemuat peta, gerak, tabrakan | Selesai |
 | 5 | Interaksi: aksi kontekstual, identifikasi, alat, wadah, kantong | Selesai |
 | 6 | Tanam, panen, pesanan, menang otomatis | Selesai |
-| 7 | Timer, restart < 1 detik, bintang, stage berikutnya | Belum |
+| 7 | Timer, restart < 1 detik, bintang, stage berikutnya | Selesai |
 
 Kerjakan per fase. Setelah tiap fase: jelaskan singkat, commit, push ke `origin main`, lalu tunggu konfirmasi.
 
@@ -46,6 +46,7 @@ Durasi (semua dari `data/pengaturan.json`): jalan 4 petak/detik, identifikasi 2,
 - **Benda padat:** benda menempati petaknya dan tidak bisa dilewati; diinteraksi dari petak sebelah.
 - **Wadah tanpa alat:** ikon alat di atas wadah, tombol tampil abu-abu "Potong" dan tidak bisa ditekan.
 - **Kantong penuh:** Identifikasi dikunci untuk SEMUA benda yang belum dicoba (tombol abu-abu "Kantong penuh"), supaya tidak membocorkan mana yang sumber. Ambil dan Potong tetap bisa.
+- **Pemecah seri target:** jika dua target berselisih jarak ≤ `toleransi_seri_petak`, pilih yang paling searah dengan `pemain.hadap`.
 - **Git:** commit tiap fase lalu push ke `origin main` (https://github.com/acannnz/FindSeeds-game.git).
 
 ## Tafsiran dokumen yang dipakai
@@ -62,7 +63,9 @@ Durasi (semua dari `data/pengaturan.json`): jalan 4 petak/detik, identifikasi 2,
 10. Tukar alat: alat lama ditaruh di petak alat yang baru diambil. Benda hasil buka wadah / alat tukaran memakai huruf pertama namanya.
 11. Petak tanah: kosong tanpa benih dan tanaman yang sedang tumbuh tidak menawarkan aksi (tidak menutupi benda di sebelahnya). Pemain berdiri di atas petak untuk Tanam/Panen.
 12. Gelembung pesanan digambar di baris dinding atas, di atas/kanan pembeli, memanjang ke tepi kanan peta. Centang digambar dengan garis (font bawaan tak punya ✓).
-13. Di luar lingkup sekarang: tutorial (timer langsung jalan), musik, animasi reaksi (cukup teks). Setelah 1-3 kembali ke 1-1.
+13. Jeda latar belakang: NOTIFICATION_APPLICATION_PAUSED/FOCUS_OUT → `get_tree().paused` (timer, aksi, tanaman, jeda ulang ikut berhenti), layar "Dijeda". RESUMED/FOCUS_IN melanjutkan. Di desktop, klik di luar jendela juga menjeda.
+14. Menang → layar hasil (bintang, sisa waktu, Ulangi/Lanjut). Waktu habis → "Waktu habis!" selama `jeda_ulang_detik` (0,8) lalu stage dimuat ulang. Setelah stage terakhir, "Ke awal" kembali ke 1-1. Bintang belum disimpan antar sesi.
+15. Di luar lingkup sekarang: tutorial (timer langsung jalan), musik, animasi reaksi (cukup teks). Setelah 1-3 kembali ke 1-1.
 
 ## Struktur folder
 
@@ -82,10 +85,10 @@ scripts/
     kantong.gd               kantong benih FIFO, kapasitas dari pengaturan
     aturan_aksi.gd           aksi kontekstual per benda (label, aktif, alasan, butuh_alat)
     pesanan.gd               diminta/terisi per tanaman; terima() menolak yang tidak dipesan atau berlebih
-    bintang.gd               (fase berikutnya)
+    bintang.gd               hitung(sisa, ambang): ≥ tiga → 3, ≥ dua → 2, selain itu 1
   game/
-    main.gd                  memuat stage; tampilkan galat data di layar; pintasan debug
-    stage.gd                 bangun peta, pesanan, pemain di @, tata letak + kamera; sinyal `selesai` saat pesanan lengkap
+    main.gd                  alur stage (PROCESS_MODE_ALWAYS): muat/ulang/lanjut, bintang, waktu habis, jeda latar belakang; galat data; pintasan debug
+    stage.gd                 bangun peta, pesanan, pemain di @, timer mundur, tata letak + kamera; sinyal `selesai(sisa)` / `waktu_habis`
     peta.gd                  gambar lantai/dinding/B/penghalang, tabrakan petak padat
     benda.gd                 StaticBody2D per benda (padat): status normal/abu, buka(), ganti_menjadi(), sorot, ikon alat
     interaksi.gd             target terdekat (benda + tanah), aksi berdurasi (kunci gerak), kantong, alat, panen → pesanan; hentikan()
@@ -97,9 +100,10 @@ scripts/
   ui/
     joystick.gd              joystick mengambang, melacak satu indeks sentuhan
     tombol_aksi.gd           tombol kontekstual: nama target, label, alasan, cincin progres; Spasi/Enter di desktop
-    hud.gd                   nama stage, slot kantong, alat di tangan
-    layar_hasil.gd           (fase berikutnya)
-scenes/                      main.tscn, stage.tscn, pemain.tscn
+    hud.gd                   nama stage, timer m:ss (merah ≤ timer_merah_sisa_detik), slot kantong, alat di tangan
+    layar_hasil.gd           layar menang / "Waktu habis!" / "Dijeda" (scenes/layar_hasil.tscn)
+    tampilan_bintang.gd      bintang digambar poligon
+scenes/                      main.tscn, stage.tscn, pemain.tscn, layar_hasil.tscn
 tools/
   pemeriksa_stage.gd         CLI (extends SceneTree), cetak laporan, exit code 1 jika gagal
   uji_pemeriksa.gd           uji mandiri: data asli lolos, tiap kerusakan memicu cek yang tepat
@@ -108,6 +112,7 @@ tools/
   uji_gerak.gd               uji gerak: kecepatan, dinding, penghalang, benda & B padat, celah 1-3
   uji_interaksi.gd           uji interaksi di 1-3 sungguhan, tukar alat, panen pengecoh di 1-2
   uji_main.gd                bot (rute BFS) memainkan solusi tercepat dokumen tiap stage, ukur waktu vs ambang 3 bintang
+  uji_alur.gd                timer, jeda latar belakang, timer merah, waktu habis + ulang < 1 dtk, bintang 3/2/1, lanjut, kembali ke awal
   periksa.bat                pembungkus command line
 ```
 
@@ -121,7 +126,7 @@ Legenda penghalang selalu menunjuk id `penghalang`. Benda cadangan (krayon, kemo
 
 **`data/tanaman.json`** — id tanaman → `nama`, `warna` (slot kantong, teks benih). Semua `hasil` katalog dan isi pesanan harus ada di sini (cek 0).
 
-**`data/pengaturan.json`** — `peta_lebar_petak`, `peta_tinggi_petak`, `porsi_tinggi_peta`, `radius_pemain_petak`, `joystick_radius_px`, `joystick_zona_mati`, `tombol_aksi_radius_px`, `lama_teks_melayang_detik`, `lama_reaksi_pembeli_detik`, `kapasitas_kantong`, `kecepatan_jalan_petak_per_detik`, `jarak_interaksi_petak`, `durasi_detik.{identifikasi, ambil_alat, pakai_alat, tanam, tumbuh, panen}`, `timer_merah_sisa_detik`, `jeda_ulang_detik`, `jeda_kemunculan_benda_stage`, `logika_per_musim` (angka musim → id logika).
+**`data/pengaturan.json`** — `peta_lebar_petak`, `peta_tinggi_petak`, `porsi_tinggi_peta`, `radius_pemain_petak`, `joystick_radius_px`, `joystick_zona_mati`, `tombol_aksi_radius_px`, `lama_teks_melayang_detik`, `lama_reaksi_pembeli_detik`, `kapasitas_kantong`, `kecepatan_jalan_petak_per_detik`, `jarak_interaksi_petak`, `toleransi_seri_petak`, `durasi_detik.{identifikasi, ambil_alat, pakai_alat, tanam, tumbuh, panen}`, `timer_merah_sisa_detik`, `jeda_ulang_detik`, `jeda_kemunculan_benda_stage`, `logika_per_musim` (angka musim → id logika).
 
 **`data/stage/stage_<id>.json`** — `id`, `nama`, `waktu_detik`, `bintang_sisa_detik.{tiga, dua}`, `pesanan.{pembeli, isi}`, `peta` (12 string × 8 karakter), `legenda` (huruf → id katalog). Urutan stage = urutan id (musim, nomor).
 
@@ -145,6 +150,7 @@ tools\periksa.bat --uji-logika    :: uji kantong dan aturan aksi
 tools\periksa.bat --uji-gerak     :: uji gerak dan tabrakan
 tools\periksa.bat --uji-interaksi :: uji identifikasi, alat, wadah, kantong penuh, tukar alat, tanam/panen pengecoh
 tools\periksa.bat --uji-main      :: bot memainkan solusi tercepat 1-1/1-2/1-3 (hasil: 8,9 / 16,9 / 24,7 dtk)
+tools\periksa.bat --uji-alur      :: timer, jeda, waktu habis + ulang (0,78 dtk), bintang, lanjut
 tools\periksa.bat --stage=FOLDER  :: periksa folder stage lain (--data=FOLDER untuk katalog/pengaturan lain)
 ```
 

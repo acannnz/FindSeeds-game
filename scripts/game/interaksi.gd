@@ -1,6 +1,7 @@
 extends Node
 ## Tombol aksi kontekstual dan aksi berdurasi. Setiap frame mencari benda atau
-## petak tanah terdekat dalam jarak interaksi, menentukan aksinya lewat
+## petak tanah terdekat dalam jarak interaksi (jika jaraknya seri, yang searah
+## hadap pemain menang), menentukan aksinya lewat
 ## AturanAksi, lalu menjalankan aksi saat tombol ditekan: identifikasi,
 ## ambil/tukar alat, potong wadah, tanam, dan panen. Selama aksi berjalan
 ## pemain tidak bisa bergerak.
@@ -89,26 +90,23 @@ func tekan_aksi() -> void:
 
 func _perbarui_target() -> void:
 	var jangkauan: float = DataGame.pengaturan.jarak_interaksi_petak * _ukuran + KELONGGARAN_JARAK
-	var terdekat: Node2D = null
-	var aksi_terdekat := {}
-	var jarak_terdekat := INF
+	var calon: Array[Dictionary] = []
 	for benda in _peta.daftar_benda:
 		var jarak := _pemain.position.distance_to(benda.position)
 		var dalam_jangkauan := jarak <= jangkauan
 		var aksi := AturanAksi.untuk_benda(benda.entri, benda.status, kantong.penuh(), alat_di_tangan)
 		# Wadah tertutup memunculkan ikon alat saat didekati, tanpa memotong waktu.
 		benda.ikon_alat = DataGame.nama_benda(aksi.butuh_alat) if dalam_jangkauan and aksi.butuh_alat != "" else ""
-		if dalam_jangkauan and aksi.aksi != AturanAksi.AKSI_TIDAK_ADA and jarak < jarak_terdekat:
-			terdekat = benda
-			aksi_terdekat = aksi
-			jarak_terdekat = jarak
+		if dalam_jangkauan and aksi.aksi != AturanAksi.AKSI_TIDAK_ADA:
+			calon.append({"target": benda, "aksi": aksi, "jarak": jarak})
 	for tanah in _peta.daftar_tanah:
 		var jarak := _pemain.position.distance_to(tanah.position)
 		var aksi := AturanAksi.untuk_tanah(tanah.status, not kantong.kosong())
-		if jarak <= jangkauan and aksi.aksi != AturanAksi.AKSI_TIDAK_ADA and jarak < jarak_terdekat:
-			terdekat = tanah
-			aksi_terdekat = aksi
-			jarak_terdekat = jarak
+		if jarak <= jangkauan and aksi.aksi != AturanAksi.AKSI_TIDAK_ADA:
+			calon.append({"target": tanah, "aksi": aksi, "jarak": jarak})
+	var pilihan := _pilih_calon(calon)
+	var terdekat: Node2D = pilihan.get("target")
+	var aksi_terdekat: Dictionary = pilihan.get("aksi", {})
 	_sorot(terdekat)
 
 	aksi_kini = {}
@@ -121,6 +119,18 @@ func _perbarui_target() -> void:
 	if aksi_kini.butuh_alat != "":
 		alasan = "Butuh %s" % DataGame.nama_benda(aksi_kini.butuh_alat)
 	_tombol.tampilkan(aksi_kini.label, aksi_kini.aktif, alasan, _nama_target(terdekat))
+
+
+## Calon terdekat. Jika selisih jaraknya dalam toleransi seri, pilih yang
+## arahnya paling searah dengan hadap pemain.
+func _pilih_calon(calon: Array[Dictionary]) -> Dictionary:
+	var seri: float = DataGame.pengaturan.toleransi_seri_petak * _ukuran
+	var terbaik := {}
+	for c in calon:
+		c.searah = _pemain.hadap.dot((c.target.position - _pemain.position).normalized())
+		if terbaik.is_empty() or c.jarak < terbaik.jarak - seri 				or (absf(c.jarak - terbaik.jarak) <= seri and c.searah > terbaik.searah):
+			terbaik = c
+	return terbaik
 
 
 func _nama_target(target: Node2D) -> String:

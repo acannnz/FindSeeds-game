@@ -1,5 +1,5 @@
 extends "res://tools/dasar_uji.gd"
-## Uji logika murni: kantong benih, pesanan, dan aturan tombol aksi.
+## Uji logika murni: kantong benih, pesanan, bintang, dan aturan tombol aksi.
 ##
 ## Jalankan dari root proyek:
 ##   tools\periksa.bat --uji-logika
@@ -8,11 +8,13 @@ const DataGame := preload("res://scripts/inti/data_game.gd")
 const Kantong := preload("res://scripts/inti/kantong.gd")
 const AturanAksi := preload("res://scripts/inti/aturan_aksi.gd")
 const Pesanan := preload("res://scripts/inti/pesanan.gd")
+const Bintang := preload("res://scripts/inti/bintang.gd")
 
 
 func _initialize() -> void:
 	_uji_kantong()
 	_uji_pesanan()
+	_uji_bintang()
 	_uji_aturan_aksi()
 	_uji_aturan_tanah()
 	_selesai("uji logika")
@@ -45,6 +47,17 @@ func _uji_pesanan() -> void:
 	_cek("Jagung kedua (melebihi pesanan) ditolak", not p.terima("jagung"))
 	_cek("Belum lengkap selama tomat baru 1 dari 2", not p.lengkap() and p.terisi.tomat == 1)
 	_cek("Tomat kedua melengkapi pesanan", p.terima("tomat") and p.lengkap())
+
+
+func _uji_bintang() -> void:
+	for s in DataGame.daftar_stage:
+		var ambang: Dictionary = s.data.bintang_sisa_detik
+		var id: String = s.data.id
+		_cek("Stage %s: sisa %d (= ambang tiga) memberi 3 bintang" % [id, ambang.tiga], Bintang.hitung(ambang.tiga, ambang) == 3)
+		_cek("Stage %s: sisa %.1f memberi 2 bintang" % [id, ambang.tiga - 0.1], Bintang.hitung(ambang.tiga - 0.1, ambang) == 2)
+		_cek("Stage %s: sisa %d (= ambang dua) memberi 2 bintang" % [id, ambang.dua], Bintang.hitung(ambang.dua, ambang) == 2)
+		_cek("Stage %s: sisa %.1f memberi 1 bintang" % [id, ambang.dua - 0.1], Bintang.hitung(ambang.dua - 0.1, ambang) == 1)
+	_cek("Selesai di detik terakhir tetap 1 bintang", Bintang.hitung(0.01, {"tiga": 60, "dua": 40}) == 1)
 
 
 func _uji_aturan_tanah() -> void:

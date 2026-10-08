@@ -1,6 +1,13 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://scripts/game/main.gd" id="1_main"]
+[ext_resource type="PackedScene" path="res://scenes/layar_hasil.tscn" id="2_layar"]
 
 [node name="Main" type="Node"]
+process_mode = 3
 script = ExtResource("1_main")
+
+[node name="Lapisan" type="CanvasLayer" parent="."]
+layer = 10
+
+[node name="LayarHasil" parent="Lapisan" instance=ExtResource("2_layar")]

@@ -1,11 +1,14 @@
 extends Node2D
 ## Satu stage yang sedang dimainkan: membangun peta dari data, menaruh pemain
-## di '@', menyambungkan interaksi dengan tombol aksi, HUD, dan pembeli, dan
-## mengatur tata letak layar (peta di atas, kontrol di bawah). Stage selesai
-## otomatis begitu item terakhir pesanan terisi.
+## di '@', menyambungkan interaksi dengan tombol aksi, HUD, dan pembeli,
+## menghitung mundur timer, dan mengatur tata letak layar (peta di atas,
+## kontrol di bawah). Stage selesai otomatis begitu item terakhir pesanan
+## terisi. Alur antarstage (bintang, ulang, lanjut) diatur main.gd.
 
-## Pesanan lengkap. Timer, bintang, dan stage berikutnya ditangani di fase 7.
-signal selesai
+## Pesanan lengkap sebelum waktu habis.
+signal selesai(sisa_detik: float)
+## Waktu habis sebelum pesanan lengkap.
+signal waktu_habis
 
 const DataGame := preload("res://scripts/inti/data_game.gd")
 const Pesanan := preload("res://scripts/inti/pesanan.gd")
@@ -17,7 +20,9 @@ const UKURAN_PETAK := 64.0
 ## Data stage (isi file stage_<id>.json). Diisi sebelum node masuk pohon.
 var data: Dictionary
 var pesanan: Pesanan
+var sisa_detik := 0.0
 var sudah_selesai := false
+var sudah_habis := false
 
 @onready var kamera: Camera2D = $Kamera
 @onready var peta: Node2D = $Peta
@@ -27,39 +32,49 @@ var sudah_selesai := false
 @onready var tombol_aksi: Control = $UI/AreaKontrol/TombolAksi
 @onready var hud: Control = $UI/AreaKontrol/Hud
 @onready var interaksi: Node = $Interaksi
-@onready var pengumuman: Label = $UI/Pengumuman
 
 
 func _ready() -> void:
 	pesanan = Pesanan.new(data.pesanan.isi)
+	sisa_detik = float(data.waktu_detik)
 	peta.bangun(data, UKURAN_PETAK, pesanan)
 	pemain.position = peta.posisi_awal
 	pemain.siapkan(UKURAN_PETAK, joystick)
 	interaksi.siapkan(pemain, peta, tombol_aksi, pesanan, UKURAN_PETAK)
 	interaksi.bawaan_berubah.connect(_perbarui_hud)
 	interaksi.dipanen.connect(_saat_dipanen)
-	pengumuman.hide()
 	hud.judul = "Stage %s: %s" % [data.id, data.nama]
+	hud.sisa_detik = sisa_detik
 	_perbarui_hud()
 	get_viewport().size_changed.connect(_atur_tata_letak)
 	_atur_tata_letak()
 
 
+func _process(delta: float) -> void:
+	if sudah_selesai or sudah_habis:
+		return
+	sisa_detik = maxf(0.0, sisa_detik - delta)
+	hud.sisa_detik = sisa_detik
+	if sisa_detik <= 0.0:
+		sudah_habis = true
+		_hentikan_permainan()
+		waktu_habis.emit()
+
+
 func _saat_dipanen(tanaman: String, diterima: bool) -> void:
 	for pembeli in peta.daftar_pembeli:
 		pembeli.reaksi(tanaman, diterima)
-	if pesanan.lengkap():
-		_selesai()
+	if pesanan.lengkap() and not sudah_habis:
+		sudah_selesai = true
+		_hentikan_permainan()
+		selesai.emit(sisa_detik)
 
 
-func _selesai() -> void:
-	sudah_selesai = true
+func _hentikan_permainan() -> void:
+	hud.sisa_detik = sisa_detik
 	interaksi.hentikan()
 	pemain.terkunci = true
 	joystick.lepas()
-	pengumuman.text = "Pesanan lengkap!"
-	pengumuman.show()
-	selesai.emit()
 
 
 func _perbarui_hud() -> void:
@@ -72,7 +87,6 @@ func _atur_tata_letak() -> void:
 	var porsi: float = DataGame.pengaturan.porsi_tinggi_peta
 	var area_peta := Vector2(layar.x, layar.y * porsi)
 	area_kontrol.anchor_top = porsi
-	pengumuman.anchor_bottom = porsi
 
 	var dunia: Vector2 = peta.ukuran_dunia()
 	var skala := minf(area_peta.x / dunia.x, area_peta.y / dunia.y)

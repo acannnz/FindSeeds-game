@@ -1,7 +1,7 @@
 extends Control
-## Baris info di atas area kontrol: nama stage, isi kantong benih (slot
-## sebanyak kapasitas, urut dari yang akan ditanam duluan), dan alat di tangan.
-## Timer dan pesanan ditambahkan di fase berikutnya.
+## Baris info di atas area kontrol: nama stage, timer (merah pada detik-detik
+## terakhir), isi kantong benih (slot sebanyak kapasitas, urut dari yang akan
+## ditanam duluan), dan alat di tangan. Pesanan tampil di gelembung pembeli.
 
 const DataGame := preload("res://scripts/inti/data_game.gd")
 const Gambar := preload("res://scripts/game/gambar.gd")
@@ -10,6 +10,8 @@ const WARNA_JUDUL := Color(1, 1, 1, 0.8)
 const WARNA_SLOT_KOSONG := Color(1, 1, 1, 0.1)
 const WARNA_TEPI_SLOT := Color(1, 1, 1, 0.35)
 const WARNA_TEKS := Color.WHITE
+const WARNA_TIMER := Color.WHITE
+const WARNA_TIMER_MERAH := Color("#ff5252")
 const TEPI := 16.0
 const TINGGI_JUDUL := 34.0
 const TINGGI_SLOT := 52.0
@@ -21,6 +23,14 @@ var judul := "":
 	set(v):
 		judul = v
 		queue_redraw()
+
+## Sisa waktu stage. Digambar ulang hanya saat detik yang tampil berubah.
+var sisa_detik := 0.0:
+	set(v):
+		var berubah := ceili(v) != ceili(sisa_detik)
+		sisa_detik = v
+		if berubah:
+			queue_redraw()
 
 var _isi_kantong: Array[String] = []
 var _kapasitas := 0
@@ -34,8 +44,21 @@ func perbarui(kantong: RefCounted, alat_di_tangan: String) -> void:
 	queue_redraw()
 
 
+## True pada detik-detik terakhir (timer_merah_sisa_detik di pengaturan).
+func merah() -> bool:
+	return sisa_detik <= float(DataGame.pengaturan.timer_merah_sisa_detik)
+
+
+func teks_timer() -> String:
+	var detik := ceili(sisa_detik)
+	return "%d:%02d" % [detik / 60, detik % 60]
+
+
 func _draw() -> void:
-	Gambar.huruf_tengah(self, judul, Rect2(Vector2.ZERO, Vector2(size.x, TINGGI_JUDUL)), WARNA_JUDUL, 0.6)
+	var x_kanan := size.x - TEPI - LEBAR_TANGAN
+	Gambar.huruf_tengah(self, judul, Rect2(Vector2(TEPI, 0), Vector2(x_kanan - 2.0 * TEPI, TINGGI_JUDUL)), WARNA_JUDUL, 0.6)
+	var kotak_timer := Rect2(Vector2(x_kanan, 0), Vector2(LEBAR_TANGAN, TINGGI_JUDUL + 4.0))
+	Gambar.huruf_tengah(self, teks_timer(), kotak_timer, WARNA_TIMER_MERAH if merah() else WARNA_TIMER, 0.95)
 
 	var y := TINGGI_JUDUL + 6.0
 	var label_kantong := Rect2(Vector2(TEPI, y), Vector2(LEBAR_SLOT, TINGGI_SLOT * 0.4))

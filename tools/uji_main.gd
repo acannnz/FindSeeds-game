@@ -10,6 +10,7 @@ extends "res://tools/dasar_uji.gd"
 const ADEGAN_STAGE := preload("res://scenes/stage.tscn")
 const DataGame := preload("res://scripts/inti/data_game.gd")
 const AturanAksi := preload("res://scripts/inti/aturan_aksi.gd")
+const Bintang := preload("res://scripts/inti/bintang.gd")
 const FPS := 60
 const ARAH := [Vector2i.RIGHT, Vector2i.LEFT, Vector2i.DOWN, Vector2i.UP]
 ## Jarak ke titik rute yang dianggap sudah lewat / sampai (porsi petak).
@@ -78,6 +79,8 @@ func _mainkan(id: String) -> void:
 	_cek("Stage %s: solusi tercepat %.1f dtk (dokumen ~%.0f dtk) cukup untuk 3 bintang (≤ %.0f dtk)" % [id, detik, PERKIRAAN_DOKUMEN[id], batas_tiga],
 		detik <= batas_tiga)
 	_cek("Stage %s: pesanan terisi lengkap" % id, _stage.pesanan.lengkap())
+	var bintang := Bintang.hitung(_stage.sisa_detik, data.bintang_sisa_detik)
+	_cek("Stage %s: timer stage mencatat sisa %.1f dtk = 3 bintang" % [id, _stage.sisa_detik], bintang == 3)
 
 
 func _jalankan_langkah(langkah: Array) -> bool:

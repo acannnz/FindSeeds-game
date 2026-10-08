@@ -13,6 +13,7 @@
   "kapasitas_kantong": 3,
   "kecepatan_jalan_petak_per_detik": 4.0,
   "jarak_interaksi_petak": 1.0,
+  "toleransi_seri_petak": 0.05,
 
   "durasi_detik": {
     "identifikasi": 2.0,

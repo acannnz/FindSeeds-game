@@ -16,10 +16,15 @@ var joystick: Node
 var arah_paksa: Variant = null
 ## True selama aksi berdurasi berlangsung (fase 5): pemain tidak bisa bergerak.
 var terkunci := false
+## Arah hadap terakhir (vektor satuan). Dipakai sebagai pemecah seri target.
+var hadap := Vector2.DOWN:
+	set(v):
+		if not v.is_equal_approx(hadap):
+			hadap = v
+			queue_redraw()
 
 var _kecepatan := 0.0
 var _radius := 0.0
-var _hadap := Vector2.DOWN
 
 
 func siapkan(ukuran_petak: float, sumber_joystick: Node) -> void:
@@ -37,9 +42,8 @@ func _physics_process(_delta: float) -> void:
 	var arah := Vector2.ZERO if terkunci else _arah_masukan()
 	velocity = arah * _kecepatan
 	move_and_slide()
-	if arah != Vector2.ZERO and not arah.normalized().is_equal_approx(_hadap):
-		_hadap = arah.normalized()
-		queue_redraw()
+	if arah != Vector2.ZERO:
+		hadap = arah.normalized()
 
 
 ## Panjang 0..1. Keyboard didahulukan bila ditekan.
@@ -54,4 +58,4 @@ func _arah_masukan() -> Vector2:
 
 func _draw() -> void:
 	draw_circle(Vector2.ZERO, _radius, WARNA_BADAN)
-	draw_circle(_hadap * _radius * PORSI_JARAK_MATA, _radius * PORSI_RADIUS_MATA, WARNA_MATA)
+	draw_circle(hadap * _radius * PORSI_JARAK_MATA, _radius * PORSI_RADIUS_MATA, WARNA_MATA)

@@ -1,0 +1,68 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/layar_hasil.gd" id="1_layar"]
+[ext_resource type="Script" path="res://scripts/ui/tampilan_bintang.gd" id="2_bintang"]
+
+[node name="LayarHasil" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_layar")
+
+[node name="Latar" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.65)
+
+[node name="Kotak" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -220.0
+offset_right = 300.0
+offset_bottom = 220.0
+alignment = 1
+theme_override_constants/separation = 24
+
+[node name="Judul" type="Label" parent="Kotak"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 12
+theme_override_font_sizes/font_size = 60
+text = "Pesanan lengkap!"
+horizontal_alignment = 1
+
+[node name="Bintang" type="Control" parent="Kotak"]
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+script = ExtResource("2_bintang")
+
+[node name="Info" type="Label" parent="Kotak"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+horizontal_alignment = 1
+
+[node name="Tombol" type="HBoxContainer" parent="Kotak"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 32
+
+[node name="Ulangi" type="Button" parent="Kotak/Tombol"]
+custom_minimum_size = Vector2(230, 96)
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "Ulangi"
+
+[node name="Lanjut" type="Button" parent="Kotak/Tombol"]
+custom_minimum_size = Vector2(230, 96)
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "Lanjut"
