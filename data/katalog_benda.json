@@ -31,6 +31,25 @@
   "tong_sampah":         { "nama": "Tong sampah",            "warna": "#3f8a6a", "jenis": "hiasan", "teks_reaksi": "Ih, bau sampah!" },
   "mobil_mainan":        { "nama": "Mobil mainan",           "warna": "#3a7bd5", "jenis": "hiasan", "teks_reaksi": "Brmm... mobilnya melaju." },
 
+  "payung_merah":        { "nama": "Payung merah",           "warna": "#d0413a", "jenis": "hiasan", "teks_reaksi": "Payungnya terbuka sendiri!" },
+  "radio_merah":         { "nama": "Radio merah",            "warna": "#c8423b", "jenis": "hiasan", "teks_reaksi": "Kresek... lagu dangdut!" },
+  "kursi_rotan":         { "nama": "Kursi rotan",            "warna": "#c99a5b", "jenis": "hiasan", "teks_reaksi": "Kreek, kursinya berderit." },
+  "bola_basket":         { "nama": "Bola basket",            "warna": "#e07b2e", "jenis": "hiasan", "teks_reaksi": "Dug dug dug!" },
+  "topi_pesta_biru":     { "nama": "Topi pesta biru",        "warna": "#3f7fd8", "jenis": "hiasan", "teks_reaksi": "Teroret! Selamat ulang tahun!" },
+  "pot_lidah_mertua":    { "nama": "Pot lidah mertua",       "warna": "#4c9a52", "jenis": "hiasan", "teks_reaksi": "Daunnya kaku sekali." },
+  "sapu_ijuk":           { "nama": "Sapu ijuk",              "warna": "#7a5a3a", "jenis": "hiasan", "teks_reaksi": "Debu beterbangan, hatchi!" },
+  "rak_sepatu":          { "nama": "Rak sepatu",             "warna": "#8a6a4a", "jenis": "hiasan", "teks_reaksi": "Sepatunya berjatuhan." },
+  "keranjang_cucian":    { "nama": "Keranjang cucian",       "warna": "#7fb0d8", "jenis": "hiasan", "teks_reaksi": "Kaus kaki bau melompat keluar!" },
+
+  "kotak_perkakas":      { "nama": "Kotak perkakas merah",   "warna": "#c9443a", "jenis": "hiasan", "teks_reaksi": "Klonteng! Obengnya jatuh." },
+  "tali_gulung":         { "nama": "Gulungan tali",          "warna": "#b89160", "jenis": "hiasan", "teks_reaksi": "Talinya kusut." },
+  "kaleng_oli":          { "nama": "Kaleng oli merah",       "warna": "#c23b30", "jenis": "hiasan", "teks_reaksi": "Licin! Olinya bocor." },
+  "jeriken_kuning":      { "nama": "Jeriken kuning",         "warna": "#f2c230", "jenis": "hiasan", "teks_reaksi": "Kosong, bunyinya dung-dung." },
+  "karung_beras":        { "nama": "Karung beras",           "warna": "#e3d2a8", "jenis": "hiasan", "teks_reaksi": "Berat sekali!" },
+  "tangga_lipat":        { "nama": "Tangga lipat",           "warna": "#9aa3ad", "jenis": "hiasan", "teks_reaksi": "Tangganya goyang-goyang." },
+  "kipas_angin":         { "nama": "Kipas angin",            "warna": "#7fc3d8", "jenis": "hiasan", "teks_reaksi": "Wuss! Rambut berantakan." },
+  "lampu_minyak":        { "nama": "Lampu minyak",           "warna": "#e0a93a", "jenis": "hiasan", "teks_reaksi": "Apinya berkedip-kedip." },
+
   "kardus_mainan":       { "nama": "Kardus MAINAN", "warna": "#a1887f", "label": "MAINAN", "gambar": "kardus", "butuh_alat": "gunting", "isi": "hidung_badut" },
   "kardus_sepatu":       { "nama": "Kardus SEPATU", "warna": "#a1887f", "label": "SEPATU", "gambar": "kardus", "butuh_alat": "gunting", "isi": "sepatu" },
 

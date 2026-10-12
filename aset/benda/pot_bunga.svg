@@ -1,9 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 128 128">
-<ellipse cx="64" cy="112" rx="34" ry="7" fill="#000" fill-opacity="0.16"/>
-<path d="M38 70 L90 70 L82 112 L46 112 Z" fill="#d1784f" stroke="#3b2a20" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
-<rect x="32" y="62" width="64" height="14" rx="4" fill="#bf6a44" stroke="#3b2a20" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
-<path d="M64 62 L64 36 M50 64 L42 42 M78 64 L88 42" fill="none" stroke="#33691e" stroke-width="4" stroke-linecap="round"/>
-<g stroke="#3b2a20" stroke-linejoin="round" stroke-linecap="round" stroke-width="3">
-<circle cx="64" cy="28" r="14" fill="#ab47bc"/><circle cx="40" cy="38" r="12" fill="#ce93d8"/><circle cx="90" cy="38" r="12" fill="#ce93d8"/></g>
-<g fill="#fdd835"><circle cx="64" cy="28" r="5"/><circle cx="40" cy="38" r="4"/><circle cx="90" cy="38" r="4"/></g>
+<ellipse cx="64" cy="116" rx="31.4" ry="10.5" fill="#3a2716" fill-opacity="0.12"/><ellipse cx="64" cy="116" rx="28.0" ry="8.4" fill="#3a2716" fill-opacity="0.18"/>
+<path d="M42 80 L86 80 L80 114 L48 114 Z" fill="#cf7449" stroke="#764636" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M68 80 L86 80 L80 114 L70 114 Z" fill="#b46643"/>
+<rect x="38" y="74" width="52" height="12" rx="4" fill="#e08458" stroke="#7e4e3e" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M64 76 L64 46 M52 76 L44 52 M76 76 L86 52" fill="none" stroke="#3f7f34" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="64" cy="38" r="13" fill="#9b59b6" stroke="#5c386d" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="64" cy="38" r="4.9" fill="#f6d365"/><circle cx="42" cy="48" r="11" fill="#c39bd3" stroke="#705a7c" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="42" cy="48" r="4.2" fill="#f6d365"/><circle cx="88" cy="48" r="11" fill="#c39bd3" stroke="#705a7c" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="88" cy="48" r="4.2" fill="#f6d365"/>
 </svg>

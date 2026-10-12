@@ -121,6 +121,8 @@ func _uji_tombol_dan_label() -> void:
 	_cek("Tombol aksi di kanan bawah layar", p.x > layar.x * 0.6 and p.y > layar.y * 0.75)
 
 	_stage.pemain.position = _stage.peta.pusat_petak(Vector2i(2, 9))
+	# Hiasan di atas pemain sama dekatnya; hadapkan ke kotak pos (pemecah seri).
+	_stage.pemain.hadap = Vector2.DOWN
 	await _tunggu(2.0 / FPS)
 	_cek("Dekat kotak pos: label muncul di atas target", label.visible and label.position == _stage.peta.pusat_petak(Vector2i(2, 10)))
 
@@ -132,7 +134,10 @@ func _uji_tombol_dan_label() -> void:
 	_cek("Sentuh di luar tombol: tidak memicu", jumlah[0] == 1)
 
 	await _tunggu(DataGame.durasi("identifikasi") + 0.1)
-	_cek("Tidak ada target lagi: label disembunyikan", not label.visible)
+	_cek("Kotak pos abu-abu tidak lagi diberi label", not label.visible or label.position != _stage.peta.pusat_petak(Vector2i(2, 10)))
+	_stage.pemain.position = _stage.peta.pusat_petak(Vector2i(4, 8))
+	await _tunggu(2.0 / FPS)
+	_cek("Tidak ada target dalam jangkauan: label disembunyikan", not label.visible)
 
 
 func _sentuh(indeks: int, posisi: Vector2, tekan: bool) -> void:

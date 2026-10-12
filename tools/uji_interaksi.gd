@@ -55,7 +55,8 @@ func _uji_stage_1_3() -> void:
 	var kotak_pos := _benda_di(Vector2i(2, 10))
 	_cek("Setelah diperiksa, nama benda terungkap di teks reaksi", _ada_teks("Kotak pos merah"))
 	_cek("Kotak pos jadi abu-abu dan kantong tetap kosong", kotak_pos.status == AturanAksi.STATUS_ABU and _interaksi.kantong.kosong())
-	_cek("Benda abu-abu tidak menawarkan aksi lagi", _interaksi.aksi_kini.is_empty())
+	# Hiasan di sebelahnya boleh ditawarkan; yang penting bukan kotak pos abu-abu.
+	_cek("Benda abu-abu tidak ditawarkan lagi", _interaksi.aksi_kini.get("target") != kotak_pos)
 
 	# Wadah tanpa alat: tombol terkunci dan ikon alat muncul.
 	await _berdiri_di(Vector2i(4, 9))

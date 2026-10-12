@@ -7,21 +7,24 @@
   "pesanan": { "pembeli": "mang_ujang", "isi": { "tomat": 1, "wortel": 1 } },
   "peta": [
     "########",
-    "#B....X#",
+    "#B..u.X#",
     "#.PZ...#",
-    "#...O..#",
-    "#...MM.#",
-    "#...MM.#",
+    "#r..O..#",
+    "#..kMM.#",
+    "#.j.MM.#",
     "#T..MM.#",
     "#T.....#",
-    "#.....K#",
-    "#.N....#",
-    "#...@..#",
+    "#..q..K#",
+    "#lN..h.#",
+    "#e..@.p#",
     "########"
   ],
   "legenda": {
     "O": "jam_weker_merah", "X": "kerucut_lalu_lintas", "P": "pot_bunga",
     "K": "kaleng_cat_merah", "N": "bola_tenis", "Z": "kucing_tidur",
-    "M": "meja"
+    "M": "meja",
+    "u": "payung_merah", "r": "radio_merah", "k": "kursi_rotan", "j": "bola_basket",
+    "h": "topi_pesta_biru", "l": "pot_lidah_mertua", "p": "sapu_ijuk", "e": "rak_sepatu",
+    "q": "keranjang_cucian"
   }
 }

@@ -1,6 +1,8 @@
 {
   "halaman": { "nama": "Halaman", "warna_latar": "#6a9e3f",
                "tempelan": ["halaman_bunga", "halaman_batu_pijakan", "halaman_daun", "halaman_rumput"] },
-  "teras":   { "nama": "Teras",   "warna_latar": "#7a8f4a" },
-  "gudang":  { "nama": "Gudang",  "warna_latar": "#5f5a52" }
+  "teras":   { "nama": "Teras",   "warna_latar": "#7a8f4a",
+               "tempelan": ["teras_keset", "teras_daun", "teras_noda", "teras_kerikil"] },
+  "gudang":  { "nama": "Gudang",  "warna_latar": "#5f5a52",
+               "tempelan": ["gudang_jerami", "gudang_serbuk", "gudang_noda_oli", "gudang_paku"] }
 }

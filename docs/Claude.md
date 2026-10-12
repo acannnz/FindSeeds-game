@@ -17,15 +17,15 @@ Baca dokumen lengkapnya hanya jika butuh detail yang tidak ada di sini.
 | + | Simpan rekor bintang (user://rekor.json) | Selesai |
 | + | Pemeriksa jalan saat build (plugin editor + tools/build_android.bat) | Selesai |
 | + | Kontrol modern: satu kanvas, joystick dinamis, tombol melayang, label target, HUD atas | Selesai, diuji pengguna di HP Android (2026-10-08): OK |
-| + | Aset vektor SVG (66 file, gaya kartun datar bergaris tebal) + pemuat dengan cadangan kotak warna | Selesai (digantikan bertahap) |
-| + | Adegan menyatu gaya modern 3/4: hiasan bisa diperiksa, nama dirahasiakan, y-sort, tempelan lantai | 1-1 selesai, menunggu persetujuan pengguna sebelum 1-2 & 1-3 |
+| + | Aset vektor SVG + pemuat dengan cadangan kotak warna | Selesai; gaya lama sudah seluruhnya diganti gaya adegan |
+| + | Adegan menyatu gaya modern 3/4: hiasan bisa diperiksa, nama dirahasiakan, y-sort, tempelan lantai | Selesai untuk 1-1, 1-2, 1-3 (107 aset, satu gaya) |
 
 Kerjakan per fase. Setelah tiap fase: jelaskan singkat, commit, push ke `origin main`, lalu tunggu konfirmasi.
 
 ## Teknologi
 
 - Godot 4.7.2-stable, GDScript. Executable CLI: `D:\Download\Godot_v4.7.2-stable_win64\Godot_v4.7.2-stable_win64_console.exe` (editor: `Godot_v4.7.2-stable_win64.exe` di folder yang sama)
-- Target Android, layar portrait. Placeholder kotak warna + huruf, belum ada aset.
+- Target Android, layar portrait. Aset SVG gaya adegan modern (dibuat proyek); kotak warna hanya cadangan bila aset hilang.
 - Peta 8 × 12 selebar layar di bawah HUD atas; tanpa panel kontrol. Joystick dinamis (separuh kiri layar) dan tombol aksi (kanan bawah) melayang di atas tampilan game.
 - Lingkup prototipe: Stage 1-1, 1-2, 1-3. Tanpa menu, musim lain, suara, art, tutorial.
 
@@ -117,7 +117,7 @@ scripts/
     layar_hasil.gd           layar menang / "Waktu habis!" / "Dijeda" (scenes/layar_hasil.tscn)
     tampilan_bintang.gd      bintang digambar poligon
 scenes/                      main.tscn, stage.tscn, pemain.tscn, layar_hasil.tscn
-aset/                        66 SVG (256 px, viewBox 128) + .import; lihat scripts/inti/aset.gd untuk konvensi nama
+aset/                        107 SVG (viewBox 128 per petak, ekspor 2x) + .import; lihat scripts/inti/aset.gd untuk konvensi nama
   benda/ tanaman/ karakter/ pembeli/ petak/ ui/
 tools/
   pemeriksa_stage.gd         CLI (extends SceneTree), cetak laporan, exit code 1 jika gagal
@@ -131,8 +131,7 @@ tools/
   uji_plugin.gd              logika plugin pemeriksa: Run dibatalkan / export melapor jika stage salah
   uji_kontrol.gd             joystick (event sentuh via root.push_input), tombol, label target, tata letak 9:16–9:20
   uji_aset.gd                semua aset ada & termuat, kolom gambar, cadangan placeholder, blok penghalang, pemain 4 arah
-  buat_aset.py               generator SVG gaya lama (MENIMPA aset/; jangan dijalankan lagi)
-  buat_aset_adegan.py        generator SVG gaya adegan modern (1-1 + bersama); MENIMPA file yang ia tulis
+  buat_aset_adegan.py        generator SEMUA aset SVG (gaya adegan modern); MENIMPA aset/ jika dijalankan — edit SVG langsung bila sudah diubah tangan
   periksa.bat                pembungkus command line
   build_android.bat          periksa --semua dulu; export Android HANYA jika semua lolos
 addons/pemeriksa_stage/      plugin editor (aktif di project.godot)
@@ -152,7 +151,7 @@ Penghalang punya id sendiri: `rumah`, `meja`, `rak`, `wastafel` (+ `penghalang` 
 
 **`data/pengaturan.json`** — `peta_lebar_petak`, `peta_tinggi_petak`, `tinggi_hud_atas_px`, `porsi_bawah_minimal`, `radius_pemain_petak`, `joystick_radius_px`, `joystick_zona_mati`, `tombol_aksi_radius_px`, `tombol_aksi_jarak_tepi_px`, `skala_gambar_benda`, `peluang_tempelan_lantai`, `lama_teks_melayang_detik`, `lama_reaksi_pembeli_detik`, `kapasitas_kantong`, `kecepatan_jalan_petak_per_detik`, `jarak_interaksi_petak`, `toleransi_seri_petak`, `durasi_detik.{identifikasi, ambil_alat, pakai_alat, tanam, tumbuh, panen}`, `timer_merah_sisa_detik`, `jeda_ulang_detik`, `jeda_kemunculan_benda_stage`, `logika_per_musim` (angka musim → id logika).
 
-**`data/tema.json`** — id tema → `nama`, `warna_latar` (warna dunia di luar peta). Lantai/dinding dari `aset/petak/<tema>_lantai.svg` dan `_dinding.svg`.
+**`data/tema.json`** — id tema → `nama`, `warna_latar` (warna dunia di luar peta), `tempelan` (daftar hiasan lantai datar `aset/petak/<nama>.svg`). Lantai/dinding dari `aset/petak/<tema>_lantai.svg` dan `_dinding.svg`.
 
 **`data/stage/stage_<id>.json`** — `id`, `nama`, `tema` (harus ada di tema.json, cek 0), `waktu_detik`, `bintang_sisa_detik.{tiga, dua}`, `pesanan.{pembeli, isi}`, `peta` (12 string × 8 karakter), `legenda` (huruf → id katalog). Urutan stage = urutan id (musim, nomor).
 

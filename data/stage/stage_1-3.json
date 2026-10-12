@@ -7,21 +7,23 @@
   "pesanan": { "pembeli": "pak_rt", "isi": { "tomat": 2, "jagung": 1 } },
   "peta": [
     "#B######",
-    "#..S..G#",
+    "#..St.G#",
     "#.R..R.#",
     "#JR.LR.#",
     "#.R..R.#",
     "#......#",
     "####.###",
-    "#T.....#",
-    "#T.....#",
+    "#Tmn..k#",
+    "#Tf...j#",
     "#.....Y#",
-    "#@Q.A.W#",
+    "#@QcAoW#",
     "########"
   ],
   "legenda": {
     "Y": "spons_kuning", "L": "lampion_merah", "A": "kardus_mainan",
     "S": "kardus_sepatu", "G": "gunting", "J": "bantalan_jarum",
-    "Q": "kotak_pos", "W": "wastafel", "R": "rak"
+    "Q": "kotak_pos", "W": "wastafel", "R": "rak",
+    "t": "kotak_perkakas", "o": "tali_gulung", "c": "kaleng_oli", "j": "jeriken_kuning",
+    "k": "karung_beras", "n": "tangga_lipat", "f": "kipas_angin", "m": "lampu_minyak"
   }
 }

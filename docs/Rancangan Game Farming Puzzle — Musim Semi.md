@@ -192,16 +192,16 @@ Stage kedua mengenalkan benda kosong dan pengecoh: tiga benda di dekat jalur pem
 
 ```
 # # # # # # # #
-# B . . . . X #
+# B . . u . X #
 # . P Z . . . #
-# . . . O . . #
-# . . . M M . #
-# . . . M M . #
+# r . . O . . #
+# . . k M M . #
+# . j . M M . #
 # T . . M M . #
 # T . . . . . #
-# . . . . . K #
-# . N . . . . #
-# . . . @ . . #
+# . . q . . K #
+# l N . . h . #
+# e . . @ . p #
 # # # # # # # #
 ```
 
@@ -214,6 +214,10 @@ Stage kedua mengenalkan benda kosong dan pengecoh: tiga benda di dekat jalur pem
 | N | Bola tenis | Kosong |
 | Z | Kucing tidur | Kosong |
 | M | Meja | Penghalang |
+| u, r | Payung merah, radio merah | Hiasan (merah, tapi tidak bulat) |
+| j | Bola basket | Hiasan (oranye, tapi tidak lancip) |
+| h | Topi pesta biru | Hiasan (lancip, tapi tidak oranye) |
+| k, l, p, e, q | Kursi rotan, pot lidah mertua, sapu ijuk, rak sepatu, keranjang cucian | Hiasan |
 
 **Jebakan yang disengaja:** bola tenis dan kaleng cat ada di dekat posisi awal, jadi pemain yang menebak dari "bulat" atau "merah" saja rugi 2 detik. Pot bunga ada di dekat jam weker merah, dan benihnya memakan satu slot kantong sampai ditanam.
 
@@ -237,16 +241,16 @@ Stage ketiga mengenalkan alat: satu tomat tersembunyi di kardus yang hanya bisa 
 
 ```
 # B # # # # # #
-# . . S . . G #
+# . . S t . G #
 # . R . . R . #
 # J R . L R . #
 # . R . . R . #
 # . . . . . . #
 # # # # . # # #
-# T . . . . . #
-# T . . . . . #
+# T m n . . k #
+# T f . . . j #
 # . . . . . Y #
-# @ Q . A . W #
+# @ Q c A o W #
 # # # # # # # #
 ```
 
@@ -263,6 +267,12 @@ Pak RT berdiri di pintu kiri atas dan tidak perlu didatangi. Kedua ruangan tersa
 | Q | Kotak pos merah | Kosong |
 | W | Wastafel | Penghalang |
 | R | Rak | Penghalang |
+| j | Jeriken kuning | Hiasan (kuning, tapi tidak berlubang; di sebelah spons) |
+| c, t | Kaleng oli merah, kotak perkakas merah | Hiasan (merah, tapi tidak bulat) |
+| o | Gulungan tali | Hiasan (bulat, tapi tidak merah) |
+| m, n, f, k | Lampu minyak, tangga lipat, kipas angin, karung beras | Hiasan |
+
+Ruang atas sengaja hanya diberi satu hiasan: sela di antara rak adalah satu-satunya jalan, dan pemeriksa stage menolak hiasan yang menutup jalan ke gunting.
 
 **Jebakan yang disengaja:** kardus "SEPATU" ada di dekat gunting. Pemain yang tidak membaca tulisannya akan memotong kardus yang salah dan rugi 3,5 detik. Bantalan jarum juga merah dan bulat seperti tomat, tapi bintik-bintiknya menandakan stroberi.
 
