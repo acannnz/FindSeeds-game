@@ -1,26 +1,26 @@
 extends Control
-## HUD melayang di tepi atas layar, langsung di atas tampilan game (tanpa
-## panel): timer (merah pada detik-detik terakhir) dan nama stage di kiri,
-## slot kantong benih (urut dari yang akan ditanam duluan) di tengah, dan alat
-## di tangan di kanan. Pesanan tampil di gelembung pembeli di peta.
+## HUD di tepi atas layar: satu papan kertas berbingkai kayu (gaya.gd) berisi
+## jam + timer (merah pada detik-detik terakhir) dan nama stage di kiri, slot
+## kantong benih bulat (urut dari yang akan ditanam duluan) di tengah, dan
+## slot alat di tangan di kanan. Pesanan tampil di gelembung pembeli di peta.
 
 const DataGame := preload("res://scripts/inti/data_game.gd")
 const Gambar := preload("res://scripts/game/gambar.gd")
 const Aset := preload("res://scripts/inti/aset.gd")
+const Gaya := preload("res://scripts/inti/gaya.gd")
 
-const WARNA_LATAR := Color(0.06, 0.08, 0.07, 0.6)
-const WARNA_SLOT_KOSONG := Color(1, 1, 1, 0.12)
-const WARNA_TEPI_SLOT := Color(1, 1, 1, 0.4)
-const WARNA_TEKS := Color.WHITE
-const WARNA_TEKS_SAMAR := Color(1, 1, 1, 0.7)
-const WARNA_TIMER := Color.WHITE
-const WARNA_TIMER_MERAH := Color("#ff5252")
-const TEPI := 14.0
-const LEBAR_KIRI := 240.0
-const SISI_SLOT := 64.0
-const JARAK_SLOT := 8.0
-const LEBAR_TANGAN := 128.0
-const TINGGI_LABEL := 20.0
+const TEPI := 12.0
+const PADAT := 14.0
+const LEBAR_KIRI := 236.0
+const R_JAM := 24.0
+const R_SLOT := 30.0
+const JARAK_SLOT := 12.0
+const R_TANGAN := 34.0
+## Ukuran huruf timer sebagai porsi tinggi kotaknya.
+const PORSI_UKURAN_TIMER := 0.85
+const UKURAN_JUDUL := 19
+## Getar jam saat timer merah (radian per detik).
+const KECEPATAN_DENYUT := 12.0
 
 var judul := "":
 	set(v):
@@ -61,48 +61,78 @@ func teks_timer() -> String:
 	return "%d:%02d" % [detik / 60, detik % 60]
 
 
+func _process(_delta: float) -> void:
+	if merah():
+		queue_redraw()
+
+
 func _draw() -> void:
 	var tinggi: float = DataGame.pengaturan.tinggi_hud_atas_px
-	var y := inset_atas + TEPI
-	var tinggi_isi := tinggi - 2.0 * TEPI
+	var papan := Rect2(Vector2(TEPI, inset_atas + TEPI * 0.5), Vector2(size.x - 2.0 * TEPI, tinggi - TEPI * 1.5))
+	Gaya.panel(self, papan, 26.0)
+	var tengah_y := papan.get_center().y
 
-	# Kiri: timer besar, nama stage kecil di bawahnya.
-	var kotak_kiri := Rect2(Vector2(TEPI, y), Vector2(LEBAR_KIRI, tinggi_isi))
-	draw_rect(kotak_kiri, WARNA_LATAR)
-	var kotak_timer := Rect2(kotak_kiri.position, Vector2(LEBAR_KIRI, tinggi_isi - TINGGI_LABEL))
-	Gambar.huruf_tengah(self, teks_timer(), kotak_timer, WARNA_TIMER_MERAH if merah() else WARNA_TIMER, 0.85)
-	var kotak_judul := Rect2(Vector2(kotak_kiri.position.x, kotak_kiri.end.y - TINGGI_LABEL - 4.0), Vector2(LEBAR_KIRI, TINGGI_LABEL))
-	Gambar.huruf_tengah(self, judul, kotak_judul, WARNA_TEKS_SAMAR, 0.8)
+	# Kiri: jam, timer besar, nama stage kecil di bawahnya.
+	var warna_timer := Gaya.MERAH if merah() else Gaya.TEKS
+	var pusat_jam := Vector2(papan.position.x + PADAT + R_JAM, tengah_y)
+	if merah():
+		pusat_jam.x += sin(Time.get_ticks_msec() / 1000.0 * KECEPATAN_DENYUT) * 1.5
+	_gambar_jam(pusat_jam, warna_timer)
+	var x_teks := pusat_jam.x + R_JAM + 10.0
+	var lebar_teks := papan.position.x + LEBAR_KIRI - x_teks
+	var kotak_timer := Rect2(Vector2(x_teks, papan.position.y + 4.0), Vector2(lebar_teks, papan.size.y * 0.62))
+	_teks_kiri(teks_timer(), kotak_timer, warna_timer, int(kotak_timer.size.y * PORSI_UKURAN_TIMER), Gaya.FONT_TEBAL)
+	var kotak_judul := Rect2(Vector2(x_teks, kotak_timer.end.y - 6.0), Vector2(lebar_teks, papan.end.y - kotak_timer.end.y))
+	_teks_kiri(judul, kotak_judul, Gaya.TEKS_SAMAR, UKURAN_JUDUL, Gaya.FONT)
 
-	# Kanan: alat di tangan.
-	var kotak_tangan := Rect2(Vector2(size.x - TEPI - LEBAR_TANGAN, y), Vector2(LEBAR_TANGAN, tinggi_isi))
-	draw_rect(kotak_tangan, WARNA_LATAR)
-	Gambar.huruf_tengah(self, "Tangan", Rect2(kotak_tangan.position, Vector2(LEBAR_TANGAN, TINGGI_LABEL + 4.0)), WARNA_TEKS_SAMAR, 0.75)
-	var isi_tangan := Rect2(kotak_tangan.position + Vector2(0, TINGGI_LABEL), Vector2(LEBAR_TANGAN, tinggi_isi - TINGGI_LABEL))
+	# Kanan: slot alat di tangan.
+	var pusat_tangan := Vector2(papan.end.x - PADAT - R_TANGAN, tengah_y)
+	Gaya.bulatan(self, pusat_tangan, R_TANGAN, Gaya.KERTAS_REDUP, Gaya.KAYU, 4.0, 0.0)
 	var ikon_alat := Aset.tekstur(Aset.benda(_alat, DataGame.entri_benda(_alat))) if _alat != "" else null
 	if ikon_alat != null:
-		var sisi := isi_tangan.size.y
-		draw_texture_rect(ikon_alat, Rect2(isi_tangan.get_center() - Vector2.ONE * sisi / 2.0, Vector2.ONE * sisi), false)
+		var sisi := R_TANGAN * 1.7
+		draw_texture_rect(ikon_alat, Rect2(pusat_tangan - Vector2.ONE * sisi / 2.0, Vector2.ONE * sisi), false)
+	elif _alat != "":
+		Gambar.huruf_tengah(self, DataGame.nama_benda(_alat), Rect2(pusat_tangan - Vector2(R_TANGAN, R_TANGAN / 2.0), Vector2(R_TANGAN * 2.0, R_TANGAN)), Gaya.TEKS, 0.45)
 	else:
-		Gambar.huruf_tengah(self, DataGame.nama_benda(_alat) if _alat != "" else "-", isi_tangan, WARNA_TEKS, 0.45)
+		# Tangan kosong: ikon tangan samar.
+		var ikon_tangan := Aset.tekstur(Aset.aksi("ambil"))
+		if ikon_tangan != null:
+			var sisi := R_TANGAN * 1.2
+			draw_texture_rect(ikon_tangan, Rect2(pusat_tangan - Vector2.ONE * sisi / 2.0, Vector2.ONE * sisi), false, Color(Gaya.TEKS_SAMAR, 0.55))
 
-	# Tengah: slot kantong benih.
-	var lebar_kantong := _kapasitas * SISI_SLOT + (_kapasitas + 1) * JARAK_SLOT
-	var x_kantong := (kotak_kiri.end.x + kotak_tangan.position.x - lebar_kantong) / 2.0
-	var kotak_kantong := Rect2(Vector2(x_kantong, y), Vector2(lebar_kantong, tinggi_isi))
-	draw_rect(kotak_kantong, WARNA_LATAR)
-	Gambar.huruf_tengah(self, "Kantong", Rect2(kotak_kantong.position, Vector2(lebar_kantong, TINGGI_LABEL + 4.0)), WARNA_TEKS_SAMAR, 0.75)
-	var sisi := minf(SISI_SLOT, tinggi_isi - TINGGI_LABEL - JARAK_SLOT)
+	# Tengah: slot kantong benih bulat.
+	var lebar_kantong := _kapasitas * R_SLOT * 2.0 + (_kapasitas - 1) * JARAK_SLOT
+	var x_awal := (papan.position.x + LEBAR_KIRI + pusat_tangan.x - R_TANGAN - lebar_kantong) / 2.0
 	for i in _kapasitas:
-		var kotak := Rect2(Vector2(x_kantong + JARAK_SLOT + i * (SISI_SLOT + JARAK_SLOT), y + TINGGI_LABEL + 2.0), Vector2(SISI_SLOT, sisi))
-		var ikon_buah := Aset.tekstur(Aset.tanaman(_isi_kantong[i], "buah")) if i < _isi_kantong.size() else null
+		var pusat := Vector2(x_awal + R_SLOT + i * (R_SLOT * 2.0 + JARAK_SLOT), tengah_y)
+		Gaya.bulatan(self, pusat, R_SLOT, Gaya.KERTAS_REDUP, Gaya.KAYU, 3.0, 0.0)
+		if i >= _isi_kantong.size():
+			# Slot kosong: bentuk biji samar.
+			draw_set_transform(pusat, -0.5, Vector2(0.6, 1.0))
+			draw_circle(Vector2.ZERO, R_SLOT * 0.32, Color(Gaya.TEKS_SAMAR, 0.35))
+			draw_set_transform(Vector2.ZERO)
+			continue
+		var ikon_buah := Aset.tekstur(Aset.tanaman(_isi_kantong[i], "buah"))
 		if ikon_buah != null:
-			draw_rect(kotak, WARNA_SLOT_KOSONG)
-			draw_texture_rect(ikon_buah, kotak.grow(-3.0), false)
-		elif i < _isi_kantong.size():
-			var warna := DataGame.warna_tanaman(_isi_kantong[i])
-			draw_rect(kotak, warna)
-			Gambar.huruf_tengah(self, DataGame.nama_tanaman(_isi_kantong[i]), kotak, Gambar.warna_kontras(warna), 0.32)
+			var sisi := R_SLOT * 1.6
+			draw_texture_rect(ikon_buah, Rect2(pusat - Vector2.ONE * sisi / 2.0, Vector2.ONE * sisi), false)
 		else:
-			draw_rect(kotak, WARNA_SLOT_KOSONG)
-		draw_rect(kotak, WARNA_TEPI_SLOT, false, 2.0)
+			var warna := DataGame.warna_tanaman(_isi_kantong[i])
+			draw_circle(pusat, R_SLOT * 0.7, warna)
+			Gambar.huruf_tengah(self, DataGame.nama_tanaman(_isi_kantong[i]).left(1), Rect2(pusat - Vector2.ONE * R_SLOT, Vector2.ONE * R_SLOT * 2.0), Gambar.warna_kontras(warna), 0.5)
+
+
+func _gambar_jam(pusat: Vector2, warna: Color) -> void:
+	Gaya.bulatan(self, pusat, R_JAM, Gaya.KERTAS_REDUP, warna, 4.0, 0.0)
+	draw_line(pusat, pusat + Vector2(0, -R_JAM * 0.55), warna, 3.5, true)
+	draw_line(pusat, pusat + Vector2(R_JAM * 0.4, 0), warna, 3.5, true)
+	draw_circle(pusat, 3.0, warna)
+
+
+func _teks_kiri(teks: String, kotak: Rect2, warna: Color, ukuran: int, font: Font) -> void:
+	var lebar := font.get_string_size(teks, HORIZONTAL_ALIGNMENT_LEFT, -1, ukuran).x
+	if lebar > kotak.size.x:
+		ukuran = maxi(8, int(ukuran * kotak.size.x / lebar))
+	var dasar := kotak.get_center().y + (font.get_ascent(ukuran) - font.get_descent(ukuran)) / 2.0
+	draw_string(font, Vector2(kotak.position.x, dasar), teks, HORIZONTAL_ALIGNMENT_LEFT, kotak.size.x, ukuran, warna)

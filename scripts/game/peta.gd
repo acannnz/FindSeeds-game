@@ -24,6 +24,13 @@ const ARAH_TETANGGA := [Vector2i.RIGHT, Vector2i.LEFT, Vector2i.DOWN, Vector2i.U
 const PORSI_TEPI_GELEMBUNG := 0.08
 ## Piksel tekstur per petak (SVG viewBox 128 per petak, diekspor 2x).
 const PIKSEL_PER_PETAK := 256.0
+## Petak dinding tema yang digambar di luar peta ke segala arah, supaya dunia
+## berlanjut sampai tepi layar (tanpa pita warna polos di atas/bawah peta).
+const MARGIN_LUAR := 8
+## Tepi tanah gelap di sekeliling petak tanah yang bersambung (satu bedengan).
+const WARNA_BEDENG := Color("#6a4027")
+const WARNA_BINGKAI_BEDENG := Color("#5a3a22")
+const PORSI_BINGKAI_BEDENG := 0.08
 
 var ukuran: float
 var lebar: int
@@ -39,6 +46,8 @@ var _tekstur_lantai: Texture2D
 var _tekstur_dinding: Texture2D
 var _tekstur_dinding_muka: Texture2D
 var _tekstur_tanah: Texture2D
+## Kotak dunia tiap kelompok petak tanah yang bersambung (satu bedengan).
+var _bedeng: Array[Rect2] = []
 ## Tempelan lantai: Array berisi {"tekstur", "kotak" (dunia)}.
 var _tempelan: Array[Dictionary] = []
 ## Blok penghalang: Array berisi {"simbol", "kotak" (dunia), "tekstur", "sel"}.
@@ -57,6 +66,7 @@ func bangun(data_stage: Dictionary, ukuran_petak: float, pesanan: RefCounted) ->
 	_tekstur_dinding_muka = Aset.tekstur(Aset.petak(tema, "dinding_muka"))
 	_tekstur_tanah = Aset.tekstur(Aset.tanah())
 	_sebar_tempelan(data_stage)
+	_kumpulkan_bedeng()
 	_kumpulkan_blok_penghalang()
 	for blok in _blok_penghalang:
 		var node := BlokPenghalang.new()
@@ -221,7 +231,37 @@ func _tambah_tabrakan(badan: StaticBody2D, sel: Vector2i) -> void:
 	badan.add_child(bentuk)
 
 
+## Petak tanah yang bersambung (4 arah) digambar sebagai satu bedengan.
+func _kumpulkan_bedeng() -> void:
+	_bedeng.clear()
+	var sudah := {}
+	for y in tinggi:
+		for x in lebar:
+			var awal := Vector2i(x, y)
+			if sudah.has(awal) or _peta[y][x] != PemuatData.SIMBOL_TANAH:
+				continue
+			var kotak := Rect2i(awal, Vector2i.ONE)
+			var antrean: Array[Vector2i] = [awal]
+			sudah[awal] = true
+			while not antrean.is_empty():
+				var sel: Vector2i = antrean.pop_back()
+				kotak = kotak.expand(sel).expand(sel + Vector2i.ONE)
+				for arah in [Vector2i.RIGHT, Vector2i.LEFT, Vector2i.DOWN, Vector2i.UP]:
+					var n: Vector2i = sel + arah
+					if n.x >= 0 and n.y >= 0 and n.x < lebar and n.y < tinggi and not sudah.has(n) \
+							and _peta[n.y][n.x] == PemuatData.SIMBOL_TANAH:
+						sudah[n] = true
+						antrean.append(n)
+			_bedeng.append(Rect2(Vector2(kotak.position) * ukuran, Vector2(kotak.size) * ukuran))
+
+
 func _draw() -> void:
+	# Dunia di luar peta: dinding tema sampai tepi layar.
+	if _tekstur_dinding != null:
+		for y in range(-MARGIN_LUAR, tinggi + MARGIN_LUAR):
+			for x in range(-MARGIN_LUAR, lebar + MARGIN_LUAR):
+				if x < 0 or y < 0 or x >= lebar or y >= tinggi:
+					draw_texture_rect(_tekstur_dinding, Rect2(Vector2(x, y) * ukuran, Vector2.ONE * ukuran), false)
 	# Lantai: tekstur mulus dipasang per potongan selebar teksturnya (mis. 2x2
 	# petak), sehingga tidak tampak garis petak.
 	if _tekstur_lantai != null:
@@ -249,6 +289,27 @@ func _draw() -> void:
 						draw_texture_rect(tekstur, kotak, false)
 					else:
 						draw_rect(kotak, WARNA_DINDING)
-				PemuatData.SIMBOL_TANAH:
-					if _tekstur_tanah != null:
-						draw_texture_rect(_tekstur_tanah, kotak, false)
+	# Bedengan: tepi tanah gelap membulat di sekeliling tanah beralur. Tepinya
+	# digambar terakhir (tanpa isi) supaya sudut persegi tekstur tertutup.
+	if _tekstur_tanah != null:
+		for bedeng in _bedeng:
+			var bingkai := bedeng.grow(ukuran * PORSI_BINGKAI_BEDENG)
+			draw_style_box(_gaya_bedeng(true), bingkai)
+			for y in range(int(bedeng.position.y / ukuran), int(bedeng.end.y / ukuran)):
+				for x in range(int(bedeng.position.x / ukuran), int(bedeng.end.x / ukuran)):
+					if _peta[y][x] == PemuatData.SIMBOL_TANAH:
+						draw_texture_rect(_tekstur_tanah, Rect2(Vector2(x, y) * ukuran, Vector2.ONE * ukuran), false)
+			draw_style_box(_gaya_bedeng(false), bingkai)
+
+
+## isi = true: dasar bedengan tanpa tepi; false: tepinya saja.
+## Sudut membulat ≤ 3,4 × tebal tepi agar sudut tekstur tetap di dalam tepi.
+func _gaya_bedeng(isi: bool) -> StyleBoxFlat:
+	var gaya := StyleBoxFlat.new()
+	gaya.bg_color = WARNA_BEDENG
+	gaya.draw_center = isi
+	gaya.border_color = WARNA_BINGKAI_BEDENG
+	gaya.set_border_width_all(0 if isi else int(ukuran * PORSI_BINGKAI_BEDENG))
+	gaya.set_corner_radius_all(int(ukuran * PORSI_BINGKAI_BEDENG * 3.0))
+	gaya.anti_aliasing = true
+	return gaya

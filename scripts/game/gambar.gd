@@ -1,5 +1,7 @@
 extends RefCounted
-## Pembantu menggambar placeholder: kotak warna dengan huruf di tengah.
+## Pembantu menggambar teks dan placeholder (kotak warna dengan huruf di tengah).
+
+const Gaya := preload("res://scripts/inti/gaya.gd")
 
 ## Porsi tinggi petak yang dipakai untuk ukuran huruf.
 const PORSI_HURUF := 0.5
@@ -10,8 +12,10 @@ const PORSI_SELA_SAMPING := 0.06
 
 ## Teks di tengah kotak. Ukuran huruf = porsi tinggi kotak, diperkecil bila
 ## teks lebih lebar dari kotak.
-static func huruf_tengah(kanvas: CanvasItem, teks: String, kotak: Rect2, warna: Color, porsi: float = PORSI_HURUF) -> void:
-	var font := ThemeDB.fallback_font
+## font: null = Gaya.FONT.
+static func huruf_tengah(kanvas: CanvasItem, teks: String, kotak: Rect2, warna: Color, porsi: float = PORSI_HURUF, font: Font = null) -> void:
+	if font == null:
+		font = Gaya.FONT
 	var ukuran_font := maxi(UKURAN_FONT_MIN, int(kotak.size.y * porsi))
 	var lebar_boleh := kotak.size.x * (1.0 - 2.0 * PORSI_SELA_SAMPING)
 	var lebar_teks := font.get_string_size(teks, HORIZONTAL_ALIGNMENT_LEFT, -1, ukuran_font).x

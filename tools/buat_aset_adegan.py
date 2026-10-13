@@ -94,9 +94,18 @@ A["petak/gudang_dinding_muka"] = svg('''<rect width="128" height="128" fill="#5a
 <g fill="#523a28"><rect x="2" y="78" width="28" height="50"/><rect x="34" y="78" width="28" height="50"/><rect x="66" y="78" width="28" height="50"/><rect x="98" y="78" width="28" height="50"/></g>
 <rect x="0" y="72" width="128" height="5" fill="#8a6548"/>''')
 
-alur = "".join(f'<path d="M14 {y} Q64 {y-5} 114 {y}" {garis("#6a3f27", 7)}/><path d="M14 {y-4} Q64 {y-9} 114 {y-4}" {garis("#a36d4b", 3)}/>' for y in (36, 66, 96))
-A["petak/tanah"] = svg(f'''<rect x="6" y="6" width="116" height="116" rx="18" fill="#875737"/>
-<rect x="6" y="6" width="116" height="116" rx="18" fill="none" stroke="#6a4129" stroke-width="3"/>{alur}''')
+# Tanah bedengan: penuh sampai tepi dan bersambung ke segala arah (gundukan
+# di x = 0 dan 128 terpotong setengah), berupa barisan gundukan tanah gembur.
+# Tepi bedengan yang membulat digambar game (peta.gd) di sekeliling kelompok
+# petak tanah.
+def gundukan(y, geser):
+    s = ""
+    for x in range(-16 + geser, 145, 32):
+        s += f'<ellipse cx="{x}" cy="{y + 5}" rx="19" ry="9" fill="#5e3920"/>'
+        s += f'<ellipse cx="{x}" cy="{y}" rx="18" ry="9" fill="#93603b"/>'
+        s += f'<ellipse cx="{x - 5}" cy="{y - 3}" rx="8" ry="3" fill="#b07a50"/>'
+    return s
+A["petak/tanah"] = svg(f'<rect width="128" height="128" fill="#74462a"/>' + gundukan(20, 0) + gundukan(62, 16) + gundukan(104, 0))
 
 # =============================================================== benda stage 1-1
 def bola(cx, cy, r, warna, kilau=True):

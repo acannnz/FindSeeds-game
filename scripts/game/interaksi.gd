@@ -19,9 +19,10 @@ const Kantong := preload("res://scripts/inti/kantong.gd")
 const PetakTanah := preload("res://scripts/game/petak_tanah.gd")
 const TeksMelayang := preload("res://scripts/game/teks_melayang.gd")
 
-const WARNA_TEKS_REAKSI := Color.WHITE
-const WARNA_TEKS_INFO := Color("#b3e5fc")
-const WARNA_TEKS_DITOLAK := Color("#ef9a9a")
+## Warna titik aksen teks melayang (teksnya sendiri selalu Gaya.TEKS).
+const WARNA_TEKS_REAKSI := Color("#a0805f")
+const WARNA_TEKS_INFO := Color("#4f9fd6")
+const WARNA_TEKS_DITOLAK := Color("#d9493a")
 ## Kelonggaran jarak interaksi (satuan dunia) agar pemain yang berdiri tepat
 ## di tengah petak sebelah tetap terhitung dalam jangkauan.
 const KELONGGARAN_JARAK := 0.5

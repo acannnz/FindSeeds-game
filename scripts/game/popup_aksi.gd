@@ -3,8 +3,8 @@ extends Node2D
 ## tombol aksi di pojok layar): gelembung bulat berisi ikon aksi (kaca
 ## pembesar untuk Periksa, tangan untuk Ambil, ...) yang ditekan langsung.
 ## Di bawah gelembung ada keterangan kecil: alasan jika aksi terkunci, atau
-## nama target jika boleh diketahui (benda rahasia tanpa nama). Aksi aktif:
-## hijau dan berdenyut; terkunci: abu-abu. Progres aksi berdurasi tampil
+## nama target jika boleh diketahui (benda rahasia tanpa nama). Gaya kertas &
+## kayu (gaya.gd). Aksi aktif: ikon hijau dan berdenyut; terkunci: pudar. Progres aksi berdurasi tampil
 ## sebagai cincin di tepi gelembung. Jika pemain berdiri di atas target,
 ## pop-up pindah ke bawah target agar tidak menutupi pemain.
 ## Di desktop, Spasi/Enter (ui_accept) juga memicu aksi.
@@ -14,15 +14,8 @@ signal ditekan
 const DataGame := preload("res://scripts/inti/data_game.gd")
 const Gambar := preload("res://scripts/game/gambar.gd")
 const Aset := preload("res://scripts/inti/aset.gd")
+const Gaya := preload("res://scripts/inti/gaya.gd")
 
-const WARNA_AKTIF := Color("#43a047")
-const WARNA_NONAKTIF := Color("#757575")
-const WARNA_TEPI := Color.WHITE
-const WARNA_BAYANGAN := Color(0, 0, 0, 0.28)
-const WARNA_PROGRES := Color("#fff59d")
-const WARNA_LATAR_TEKS := Color(0.08, 0.1, 0.09, 0.82)
-const WARNA_NAMA := Color(1, 1, 1, 0.9)
-const WARNA_ALASAN := Color("#ffcc80")
 ## Ukuran dalam satuan petak (selain radius gelembung dari pengaturan).
 ## Jarak dari pusat target ke dasar gelembung: gambar benda diperbesar
 ## skala_gambar_benda dan berpijak di dasar petak, jadi puncaknya ±0,85 petak.
@@ -30,7 +23,7 @@ const PORSI_JARAK_ATAS := 0.95
 const PORSI_JARAK_BAWAH := 0.55
 ## Tambahan jarak jika di atas target sudah ada gelembung ikon alat.
 const PORSI_JARAK_IKON := 0.5
-const PORSI_TINGGI_TEKS := 0.26
+const PORSI_TINGGI_TEKS := 0.36
 const PORSI_EKOR := 0.12
 ## Area sentuh sedikit lebih besar dari gelembung agar mudah dikenai jempol.
 const PORSI_AREA_SENTUH := 1.35
@@ -139,24 +132,26 @@ func _draw() -> void:
 	var r := _radius
 	if _aktif and progres < 0.0:
 		r *= 1.0 + sin(_waktu * KECEPATAN_DENYUT) * SKALA_DENYUT
-	var warna := WARNA_AKTIF if _aktif else WARNA_NONAKTIF
-	# Ekor kecil menunjuk ke target.
+	var tebal := Gaya.TEBAL_TEPI
+	var isi := Gaya.KERTAS if _aktif else Gaya.KERTAS_REDUP
+	var tepi := Gaya.KAYU if _aktif else Gaya.TEKS_SAMAR
+	# Ekor kecil menunjuk ke target, digambar dulu agar pangkalnya tertutup gelembung.
 	var arah := -1.0 if _di_bawah else 1.0
 	var e := _ukuran * PORSI_EKOR
-	var pangkal := p + Vector2(0, (r - 2.0) * arah)
-	var ekor := PackedVector2Array([pangkal + Vector2(-e, 0), pangkal + Vector2(e, 0), Vector2(p.x * 0.5, pangkal.y + e * 1.4 * arah)])
-	draw_circle(p + Vector2(0, 3), r + 2.0, WARNA_BAYANGAN)
-	draw_colored_polygon(ekor, WARNA_TEPI)
-	draw_circle(p, r + 2.5, WARNA_TEPI)
-	draw_circle(p, r, warna)
-	var warna_ikon := Color.WHITE if _aktif else Color(1, 1, 1, 0.7)
+	var pangkal := p + Vector2(0, (r - tebal) * arah)
+	var ujung := Vector2(p.x * 0.5, pangkal.y + e * 1.6 * arah)
+	draw_colored_polygon(PackedVector2Array([pangkal + Vector2(-e, 0), pangkal + Vector2(e, 0), ujung]), isi)
+	draw_polyline(PackedVector2Array([pangkal + Vector2(-e, 0), ujung, pangkal + Vector2(e, 0)]), tepi, tebal, true)
+	Gaya.bulatan(self, p, r, isi, tepi, tebal, 4.0)
+	draw_colored_polygon(PackedVector2Array([pangkal + Vector2(-e + tebal, -tebal * arah), pangkal + Vector2(e - tebal, -tebal * arah), ujung - Vector2(0, tebal * 1.6 * arah)]), isi)
+	var warna_ikon := Gaya.HIJAU_GELAP if _aktif else Color(Gaya.TEKS_SAMAR, 0.8)
 	if _ikon != null:
-		var sisi := r * 1.25
+		var sisi := r * 1.2
 		draw_texture_rect(_ikon, Rect2(p - Vector2.ONE * sisi / 2.0, Vector2.ONE * sisi), false, warna_ikon)
 	else:
 		Gambar.huruf_tengah(self, _label, Rect2(p - Vector2(r, r * 0.4), Vector2(r * 2.0, r * 0.8)), warna_ikon, 0.7)
 	if progres >= 0.0:
-		draw_arc(p, r - 3.0, -PI / 2.0, -PI / 2.0 + TAU * clampf(progres, 0.0, 1.0), 40, WARNA_PROGRES, 5.0, true)
+		draw_arc(p, r - tebal * 1.5, -PI / 2.0, -PI / 2.0 + TAU * clampf(progres, 0.0, 1.0), 40, Gaya.HIJAU, 5.0, true)
 	_gambar_keterangan(p, r)
 
 
@@ -166,14 +161,14 @@ func _gambar_keterangan(p: Vector2, r: float) -> void:
 	var teks := _alasan if _alasan != "" else _nama
 	if teks == "":
 		return
-	var font := ThemeDB.fallback_font
+	var font := Gaya.FONT
 	var tinggi := _ukuran * PORSI_TINGGI_TEKS
-	var ukuran_font := int(tinggi * 0.75)
+	var ukuran_font := int(tinggi * 0.72)
 	var lebar := font.get_string_size(teks, HORIZONTAL_ALIGNMENT_LEFT, -1, ukuran_font).x + tinggi
-	var y := p.y + r + 4.0 if _di_bawah else p.y - r - 4.0 - tinggi
+	var y := p.y + r + 6.0 if _di_bawah else p.y - r - 6.0 - tinggi
 	var kotak := Rect2(Vector2(p.x - lebar / 2.0, y), Vector2(lebar, tinggi))
 	var x_dunia := position.x + kotak.position.x
 	if _lebar_peta > 0.0:
 		kotak.position.x -= minf(0.0, x_dunia) + maxf(0.0, x_dunia + lebar - _lebar_peta)
-	draw_rect(kotak, WARNA_LATAR_TEKS)
-	Gambar.huruf_tengah(self, teks, kotak, WARNA_ALASAN if _alasan != "" else WARNA_NAMA, 0.75)
+	Gaya.panel(self, kotak, tinggi / 2.0, Gaya.KERTAS, Gaya.KAYU, 2.0, 2.0)
+	Gambar.huruf_tengah(self, teks, kotak, Gaya.MERAH if _alasan != "" else Gaya.TEKS, 0.72)

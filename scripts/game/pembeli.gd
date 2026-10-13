@@ -7,12 +7,12 @@ extends Node2D
 const DataGame := preload("res://scripts/inti/data_game.gd")
 const Gambar := preload("res://scripts/game/gambar.gd")
 const Aset := preload("res://scripts/inti/aset.gd")
+const Gaya := preload("res://scripts/inti/gaya.gd")
 
 const WARNA_BADAN := Color("#3949ab")
-const WARNA_GELEMBUNG := Color(1, 1, 1, 0.95)
-const WARNA_TEKS := Color("#263238")
-const WARNA_CENTANG := Color("#2e7d32")
-const WARNA_SOROT_CENTANG := Color("#c8e6c9")
+const WARNA_SOROT_CENTANG := Color("#d9efc4")
+## Ekor gelembung (porsi ukuran petak) yang menunjuk ke pembeli.
+const PORSI_EKOR := 0.16
 const PORSI_RADIUS_BADAN := 0.4
 ## Simpangan geleng sebagai porsi ukuran petak, dan jumlah ayunannya.
 const PORSI_GELENG := 0.12
@@ -83,17 +83,17 @@ func _draw() -> void:
 	if pesanan == null or _gelembung.size.x <= 0.0:
 		return
 
-	draw_rect(_gelembung, WARNA_GELEMBUNG)
+	_gambar_gelembung()
 	var tinggi := _gelembung.size.y
 	var x := _gelembung.position.x
 	var lebar_nama := tinggi * 2.2
-	Gambar.huruf_tengah(self, nama, Rect2(Vector2(x, _gelembung.position.y), Vector2(lebar_nama, tinggi)), WARNA_TEKS, 0.4)
+	Gambar.huruf_tengah(self, nama, Rect2(Vector2(x, _gelembung.position.y), Vector2(lebar_nama, tinggi)), Gaya.TEKS, 0.4)
 	x += lebar_nama
 	var lebar_item := minf(tinggi * 1.9, (_gelembung.end.x - x) / maxf(1.0, pesanan.diminta.size()))
 	for tanaman in pesanan.diminta:
 		var kotak := Rect2(Vector2(x, _gelembung.position.y), Vector2(lebar_item, tinggi)).grow(-tinggi * 0.08)
 		if _sisa_sorot > 0.0 and tanaman == _tanaman_disorot:
-			draw_rect(kotak, WARNA_SOROT_CENTANG)
+			draw_style_box(Gaya.kotak_gaya(WARNA_SOROT_CENTANG, WARNA_SOROT_CENTANG, 10.0, 0.0, 0.0), kotak)
 		_gambar_item(tanaman, kotak)
 		x += lebar_item
 
@@ -113,12 +113,35 @@ func _gambar_item(tanaman: String, kotak: Rect2) -> void:
 		_gambar_centang(kotak_angka.grow(-sisi * 0.18))
 	else:
 		var teks := "%d/%d" % [pesanan.terisi[tanaman], pesanan.diminta[tanaman]]
-		Gambar.huruf_tengah(self, teks, kotak_angka, WARNA_TEKS, 0.5)
+		Gambar.huruf_tengah(self, teks, kotak_angka, Gaya.TEKS, 0.5)
 
 
-## Centang digambar dengan garis (font bawaan belum tentu punya simbol ✓).
+## Centang digambar dengan garis (font belum tentu punya simbol ✓).
 func _gambar_centang(kotak: Rect2) -> void:
 	var s := minf(kotak.size.x, kotak.size.y)
 	var o := kotak.get_center() - Vector2.ONE * s / 2.0
 	var titik := PackedVector2Array([o + Vector2(0.1, 0.55) * s, o + Vector2(0.4, 0.85) * s, o + Vector2(0.9, 0.2) * s])
-	draw_polyline(titik, WARNA_CENTANG, maxf(2.0, s * 0.14))
+	draw_polyline(titik, Gaya.HIJAU_GELAP, maxf(2.0, s * 0.14), true)
+
+
+## Gelembung bicara kertas (gaya.gd) dengan ekor menunjuk kepala pembeli.
+func _gambar_gelembung() -> void:
+	var tebal := Gaya.TEBAL_TEPI * 0.75
+	Gaya.panel(self, _gelembung, 14.0, Gaya.KERTAS, Gaya.KAYU, tebal, 3.0)
+	var e := _ukuran * PORSI_EKOR
+	# Ekor di sisi gelembung yang menghadap pembeli (pembeli di pusat lokal).
+	if _gelembung.position.x > 0.0:
+		# Gelembung di samping kanan pembeli (pembeli di baris teratas).
+		var xk := _gelembung.position.x + tebal / 2.0
+		var yk := clampf(0.0, _gelembung.position.y + e, _gelembung.end.y - e)
+		var ujung_kiri := Vector2(xk - e * 1.3, yk)
+		draw_colored_polygon(PackedVector2Array([Vector2(xk, yk - e), Vector2(xk, yk + e), ujung_kiri]), Gaya.KERTAS)
+		draw_polyline(PackedVector2Array([Vector2(xk - tebal / 2.0, yk - e), ujung_kiri, Vector2(xk - tebal / 2.0, yk + e)]), Gaya.KAYU, tebal, true)
+		return
+	var di_bawah := _gelembung.end.y <= 0.0
+	var y := _gelembung.end.y - tebal / 2.0 if di_bawah else _gelembung.position.y + tebal / 2.0
+	var x := clampf(0.0, _gelembung.position.x + e * 2.0, _gelembung.end.x - e * 2.0)
+	var arah := 1.0 if di_bawah else -1.0
+	var ujung := Vector2(x - e * 0.4, y + e * 1.3 * arah)
+	draw_colored_polygon(PackedVector2Array([Vector2(x - e, y), Vector2(x + e, y), ujung]), Gaya.KERTAS)
+	draw_polyline(PackedVector2Array([Vector2(x - e, y + tebal / 2.0 * arah), ujung, Vector2(x + e, y + tebal / 2.0 * arah)]), Gaya.KAYU, tebal, true)

@@ -11,7 +11,8 @@ const Aset := preload("res://scripts/inti/aset.gd")
 const WARNA_TANAH := Color("#8d5a3b")
 const WARNA_ALUR := Color("#6d4029")
 const WARNA_BATANG := Color("#558b2f")
-const WARNA_SOROT := Color("#ffeb3b")
+## Sorotan sama dengan benda (cincin halus), bukan kotak.
+const WARNA_SOROT := Color(1, 1, 1, 0.55)
 const WARNA_PROGRES := Color(1, 1, 1, 0.8)
 const JUMLAH_ALUR := 3
 ## Ukuran buah, sebagai porsi ukuran petak, saat baru ditanam dan saat matang.
@@ -112,4 +113,4 @@ func _draw() -> void:
 			var kotak_huruf := Rect2(Vector2.ONE * -radius, Vector2.ONE * radius * 2.0)
 			Gambar.huruf_tengah(self, DataGame.nama_tanaman(tanaman).left(1), kotak_huruf, Gambar.warna_kontras(warna), 0.7)
 	if disorot:
-		draw_rect(kotak.grow(-4.0), Color(WARNA_SOROT, 0.6), false, 2.0)
+		draw_arc(Vector2(0, _ukuran * 0.36), _ukuran * 0.42, 0.0, TAU, 32, WARNA_SOROT, 3.0, true)

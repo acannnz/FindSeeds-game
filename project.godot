@@ -26,6 +26,10 @@ window/handheld/orientation=1
 
 enabled=PackedStringArray("res://addons/pemeriksa_stage/plugin.cfg")
 
+[gui]
+
+theme/custom_font="res://aset/font/fredoka.tres"
+
 [input_devices]
 
 pointing/emulate_touch_from_mouse=true

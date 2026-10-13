@@ -7,13 +7,9 @@ extends Control
 ## (diatur stage.gd). Bisa dibuka ulang kapan saja dari catatan.
 
 const DataGame := preload("res://scripts/inti/data_game.gd")
+const Gaya := preload("res://scripts/inti/gaya.gd")
 
-const WARNA_REDUP := Color(0, 0, 0, 0.45)
-const WARNA_KERTAS := Color("#fff8e1")
-const WARNA_TEPI := Color("#8d6e63")
-const WARNA_JUDUL := Color("#4e342e")
-const WARNA_TEKS := Color("#3e2723")
-const WARNA_SAMAR := Color("#8d6e63")
+const WARNA_REDUP := Color(0.16, 0.09, 0.03, 0.45)
 const LEBAR_KARTU := 600.0
 const SELA := 28.0
 const UKURAN_JUDUL := 34
@@ -41,22 +37,18 @@ func _ready() -> void:
 	var kartu := PanelContainer.new()
 	kartu.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	kartu.custom_minimum_size.x = LEBAR_KARTU
-	var gaya := StyleBoxFlat.new()
-	gaya.bg_color = WARNA_KERTAS
-	gaya.border_color = WARNA_TEPI
-	gaya.set_border_width_all(4)
-	gaya.set_corner_radius_all(18)
+	var gaya := Gaya.kotak_gaya(Gaya.KERTAS, Gaya.KAYU, 26.0)
 	gaya.set_content_margin_all(SELA)
 	kartu.add_theme_stylebox_override("panel", gaya)
 	tengah.add_child(kartu)
 	var isi := VBoxContainer.new()
 	isi.add_theme_constant_override("separation", 18)
 	kartu.add_child(isi)
-	isi.add_child(_label("Catatan petunjuk", UKURAN_JUDUL, WARNA_JUDUL, HORIZONTAL_ALIGNMENT_CENTER))
+	isi.add_child(_label("Catatan petunjuk", UKURAN_JUDUL, Gaya.KAYU_GELAP, HORIZONTAL_ALIGNMENT_CENTER, Gaya.FONT_TEBAL))
 	_daftar = VBoxContainer.new()
 	_daftar.add_theme_constant_override("separation", 14)
 	isi.add_child(_daftar)
-	isi.add_child(_label("Ketuk di mana saja untuk menutup", UKURAN_SAMAR, WARNA_SAMAR, HORIZONTAL_ALIGNMENT_CENTER))
+	isi.add_child(_label("Ketuk di mana saja untuk menutup", UKURAN_SAMAR, Gaya.TEKS_SAMAR, HORIZONTAL_ALIGNMENT_CENTER))
 	hide()
 
 
@@ -74,7 +66,7 @@ func tampilkan(petunjuk: Array) -> void:
 		titik.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 		baris.add_child(titik)
 		var teks := "%d. Benih %s: %s" % [i + 1, DataGame.nama_tanaman(tanaman).to_lower(), petunjuk[i].teks]
-		var label := _label(teks, UKURAN_TEKS, WARNA_TEKS, HORIZONTAL_ALIGNMENT_LEFT)
+		var label := _label(teks, UKURAN_TEKS, Gaya.TEKS, HORIZONTAL_ALIGNMENT_LEFT)
 		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		baris.add_child(label)
 		_daftar.add_child(baris)
@@ -97,8 +89,9 @@ func _input(event: InputEvent) -> void:
 		hide.call_deferred()
 
 
-func _label(teks: String, ukuran: int, warna: Color, rata: HorizontalAlignment) -> Label:
+func _label(teks: String, ukuran: int, warna: Color, rata: HorizontalAlignment, font: Font = Gaya.FONT) -> Label:
 	var label := Label.new()
+	label.add_theme_font_override("font", font)
 	label.text = teks
 	label.horizontal_alignment = rata
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

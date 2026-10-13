@@ -18,6 +18,7 @@ Baca dokumen lengkapnya hanya jika butuh detail yang tidak ada di sini.
 | + | Pemeriksa jalan saat build (plugin editor + tools/build_android.bat) | Selesai |
 | + | Kontrol modern: satu kanvas, joystick dinamis, tombol melayang, label target, HUD atas | Selesai, diuji pengguna di HP Android (2026-10-08): OK |
 | + | Pop-up aksi di atas benda (ikon kaca pembesar dsb.) menggantikan tombol kanan bawah; peta di tengah sisa tinggi layar | Selesai (2026-10-13) |
+| + | Sistem desain UI "kayu & kertas" (gaya.gd, font Fredoka): HUD satu papan, gelembung pesanan berekor, pop-up kertas, teks melayang kapsul, dunia sampai tepi layar, bedengan | Contoh di 1-1 untuk persetujuan (2026-10-13); kode berlaku ke semua stage, layar hasil belum |
 | + | Catatan petunjuk di samping lahan: teka-teki benda sumber pesanan, panel bisa dibaca ulang; cek 7 | Selesai (2026-10-13) |
 | + | Aset vektor SVG + pemuat dengan cadangan kotak warna | Selesai; gaya lama sudah seluruhnya diganti gaya adegan |
 | + | Adegan menyatu gaya modern 3/4: hiasan bisa diperiksa, nama dirahasiakan, y-sort, tempelan lantai | Selesai untuk 1-1, 1-2, 1-3 (115 aset, satu gaya) |
@@ -95,6 +96,7 @@ scripts/
     pemuat_data.gd           baca JSON, simbol umum, jenis benda (dipakai game + pemeriksa)
     pemeriksa.gd             logika 6 pengecekan + cek format, mengembalikan daftar temuan
     data_game.gd             data bersama via static var + _static_init (BUKAN autoload)
+    gaya.gd                  sistem desain UI "kayu & kertas": FONT/FONT_TEBAL (Fredoka), warna, kotak_gaya(), panel(), bulatan(); ubah tampilan UI di sini
     kantong.gd               kantong benih FIFO, kapasitas dari pengaturan
     aturan_aksi.gd           aksi kontekstual per benda (label, aktif, alasan, butuh_alat)
     pesanan.gd               diminta/terisi per tanaman; terima() menolak yang tidak dipesan atau berlebih
@@ -171,6 +173,7 @@ Penghalang punya id sendiri: `rumah`, `meja`, `rak`, `wastafel` (+ `penghalang` 
 - **Satuan dunia** `Stage.UKURAN_PETAK = 64` per petak. Camera2D (jangkar kiri atas) di-zoom lewat `Stage.hitung_tata_letak()` (statis, diuji): peta selebar layar di bawah HUD, di tengah sisa tinggi. Di HP (`OS.has_feature("mobile")`) area aman (poni/bilah gestur) menggeser HUD dan batas bawah peta.
 - **Benda, `B`, `#`, dan penghalang padat.** `.`, `@`, `T` bisa diinjak. Pemain berupa lingkaran dengan radius `radius_pemain_petak`.
 - **Pintasan debug** (build debug saja): tombol 1–9 memilih stage, R mengulang stage, panah untuk bergerak.
+- **UI:** semua komponen memakai `scripts/inti/gaya.gd` (font Fredoka OFL di `aset/font/`, juga font default Control lewat `gui/theme/custom_font`). Teks digambar lewat `Gambar.huruf_tengah` (default `Gaya.FONT`), jangan `ThemeDB.fallback_font`. Dunia di luar peta = tekstur dinding tema sejauh `MARGIN_LUAR` petak (peta.gd). Petak tanah bersambung digambar sebagai satu bedengan bertepi membulat; tekstur `tanah.svg` bersambung ke segala arah.
 - **Tampilan 3/4:** Stage dan Peta `y_sort_enabled`; benda, tanaman, pembeli, blok penghalang, dan pemain di-y-sort bersama (z_index 0). Latar (lantai mulus per potongan selebar tekstur, dinding + `dinding_muka`, tanah, tempelan lantai) digambar `peta._draw`. Gambar benda berpijak di dasar petak, diperbesar `skala_gambar_benda`; tempelan disebar acak-tetap (benih = id stage) dengan `peluang_tempelan_lantai` dari daftar `tempelan` di tema.json. Gelembung ikon alat = node anak z 5.
 - **Aset:** `scripts/inti/aset.gd` menentukan jalur dari id (benda/<id>.svg, tanaman/<id>_<muda|matang|buah>.svg + tunas.svg, karakter/pemain_<arah>.svg, pembeli/<id>.svg, petak/<tema>_<lantai|dinding>.svg + tanah.svg, ui/aksi_<aksi>.svg). Aset hilang → `tekstur()` null → kotak warna lama. `main.gd` memuat SEMUA tekstur di awal (`Aset.muat_semua`); tekstur yang pertama dimuat di dalam `_draw()` bisa tampil putih. Node mengambil tekstur di `siapkan()`, bukan di `_draw()`. Penghalang bersambung (huruf sama) digambar sebagai satu blok diregangkan (rumah 2×4, meja 2×3, rak 1×3). Pemeriksa CLI melaporkan aset hilang sebagai `[INFO]` (tidak gagal). Mipmap + filter linear diaktifkan (`[importer_defaults]` dan `default_texture_filter=2` di project.godot). Kredit/lisensi: `docs/kredit_aset.md`.
 - **Menjalankan game:** buka proyek di editor Godot 4.7.2 lalu F5. Bisa juga `Godot_v4.7.2-stable_win64.exe --path . --resolution 360x640`.
