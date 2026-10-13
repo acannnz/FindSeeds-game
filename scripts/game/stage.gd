@@ -1,9 +1,9 @@
 extends Node2D
 ## Satu stage yang sedang dimainkan: membangun peta dari data, menaruh pemain
-## di '@', menyambungkan interaksi dengan tombol aksi, HUD, dan pembeli,
+## di '@', menyambungkan interaksi dengan pop-up aksi, HUD, dan pembeli,
 ## menghitung mundur timer, dan mengatur tata letak layar: peta selebar layar
-## di bawah HUD atas; joystick, tombol aksi, dan HUD melayang langsung di atas
-## tampilan game tanpa panel terpisah. Stage selesai otomatis begitu item terakhir pesanan
+## di bawah HUD atas, di tengah sisa tinggi layar; joystick dan HUD melayang
+## langsung di atas tampilan game, aksi berupa pop-up di atas benda. Stage selesai otomatis begitu item terakhir pesanan
 ## terisi. Alur antarstage (bintang, ulang, lanjut) diatur main.gd.
 
 ## Pesanan lengkap sebelum waktu habis.
@@ -33,10 +33,9 @@ var rekor_bintang := 0
 @onready var peta: Node2D = $Peta
 @onready var pemain: CharacterBody2D = $Pemain
 @onready var joystick: Control = $UI/Joystick
-@onready var tombol_aksi: Control = $UI/TombolAksi
 @onready var hud: Control = $UI/Hud
 @onready var interaksi: Node = $Interaksi
-@onready var label_target: Node2D = $LabelTarget
+@onready var popup_aksi: Node2D = $PopupAksi
 
 
 func _ready() -> void:
@@ -49,8 +48,10 @@ func _ready() -> void:
 	peta.bangun(data, UKURAN_PETAK, pesanan)
 	pemain.position = peta.posisi_awal
 	pemain.siapkan(UKURAN_PETAK, joystick)
-	label_target.siapkan(UKURAN_PETAK, peta.ukuran_dunia().x)
-	interaksi.siapkan(pemain, peta, tombol_aksi, label_target, pesanan, UKURAN_PETAK)
+	popup_aksi.siapkan(UKURAN_PETAK, peta.ukuran_dunia().x)
+	# Sentuhan pada pop-up tidak memunculkan joystick.
+	joystick.penolak = popup_aksi.kena
+	interaksi.siapkan(pemain, peta, popup_aksi, pesanan, UKURAN_PETAK)
 	interaksi.bawaan_berubah.connect(_perbarui_hud)
 	interaksi.dipanen.connect(_saat_dipanen)
 	hud.judul = "%s %s" % [data.id, data.nama]
@@ -97,22 +98,22 @@ func _atur_tata_letak() -> void:
 	var layar := get_viewport_rect().size
 	var aman := _area_aman(layar)
 	hud.inset_atas = aman.position.y
-	tombol_aksi.inset_bawah = layar.y - aman.end.y
-	var p := DataGame.pengaturan
-	var tata := hitung_tata_letak(layar, peta.ukuran_dunia(), aman.position.y + float(p.tinggi_hud_atas_px), p.porsi_bawah_minimal)
+	var atas := aman.position.y + float(DataGame.pengaturan.tinggi_hud_atas_px)
+	var tata := hitung_tata_letak(layar, peta.ukuran_dunia(), atas, aman.end.y)
 	kamera.zoom = Vector2.ONE * tata.skala
 	# Kamera berjangkar kiri atas: titik dunia di posisi kamera tampil di (0, 0).
 	kamera.position = -tata.asal / tata.skala
 
 
-## Peta selebar layar, tepat di bawah HUD atas. Jika layar terlalu pendek
-## sehingga sisa bawah (tempat jempol) kurang dari porsi_bawah, peta diperkecil
-## dan diletakkan di tengah horizontal.
+## Peta selebar layar di antara HUD atas (`atas`) dan tepi bawah area aman
+## (`bawah`), di tengah sisa tingginya. Jika layar terlalu pendek, peta
+## diperkecil agar muat dan diletakkan di tengah horizontal.
 ## Mengembalikan {"skala": float, "asal": Vector2 (pojok kiri atas peta di layar)}.
-static func hitung_tata_letak(layar: Vector2, dunia: Vector2, atas: float, porsi_bawah: float) -> Dictionary:
-	var tinggi_boleh := layar.y - atas - layar.y * porsi_bawah
+static func hitung_tata_letak(layar: Vector2, dunia: Vector2, atas: float, bawah: float) -> Dictionary:
+	var tinggi_boleh := bawah - atas
 	var skala := minf(layar.x / dunia.x, tinggi_boleh / dunia.y)
-	return {"skala": skala, "asal": Vector2((layar.x - dunia.x * skala) / 2.0, atas)}
+	var ukuran := dunia * skala
+	return {"skala": skala, "asal": Vector2((layar.x - ukuran.x) / 2.0, atas + (tinggi_boleh - ukuran.y) / 2.0)}
 
 
 ## Area aman layar (di luar poni/bilah gestur) dalam koordinat viewport.

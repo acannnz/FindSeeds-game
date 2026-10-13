@@ -17,6 +17,7 @@ Baca dokumen lengkapnya hanya jika butuh detail yang tidak ada di sini.
 | + | Simpan rekor bintang (user://rekor.json) | Selesai |
 | + | Pemeriksa jalan saat build (plugin editor + tools/build_android.bat) | Selesai |
 | + | Kontrol modern: satu kanvas, joystick dinamis, tombol melayang, label target, HUD atas | Selesai, diuji pengguna di HP Android (2026-10-08): OK |
+| + | Pop-up aksi di atas benda (ikon kaca pembesar dsb.) menggantikan tombol kanan bawah; peta di tengah sisa tinggi layar | Selesai (2026-10-13) |
 | + | Aset vektor SVG + pemuat dengan cadangan kotak warna | Selesai; gaya lama sudah seluruhnya diganti gaya adegan |
 | + | Adegan menyatu gaya modern 3/4: hiasan bisa diperiksa, nama dirahasiakan, y-sort, tempelan lantai | Selesai untuk 1-1, 1-2, 1-3 (107 aset, satu gaya) |
 
@@ -26,14 +27,14 @@ Kerjakan per fase. Setelah tiap fase: jelaskan singkat, commit, push ke `origin 
 
 - Godot 4.7.2-stable, GDScript. Executable CLI: `D:\Download\Godot_v4.7.2-stable_win64\Godot_v4.7.2-stable_win64_console.exe` (editor: `Godot_v4.7.2-stable_win64.exe` di folder yang sama)
 - Target Android, layar portrait. Aset SVG gaya adegan modern (dibuat proyek); kotak warna hanya cadangan bila aset hilang.
-- Peta 8 × 12 selebar layar di bawah HUD atas; tanpa panel kontrol. Joystick dinamis (separuh kiri layar) dan tombol aksi (kanan bawah) melayang di atas tampilan game.
+- Peta 8 × 12 selebar layar di bawah HUD atas, di tengah sisa tinggi layar; tanpa panel kontrol. Joystick dinamis (separuh kiri layar) melayang di atas tampilan game; aksi berupa pop-up di atas benda.
 - Lingkup prototipe: Stage 1-1, 1-2, 1-3. Tanpa menu, musim lain, suara, art, tutorial.
 
 ## Aturan main (ringkas)
 
 - Stage 90 detik. Cari benda yang bisa jadi benih, tanam, panen. Panen yang dipesan langsung mengisi pesanan.
 - Menang: pesanan lengkap (otomatis). Kalah: waktu habis → "Waktu habis!" → ulang < 1 detik.
-- Tombol aksi kontekstual untuk benda terdekat dalam 1 petak: Identifikasi, Ambil, Potong, Tanam, Panen.
+- Pop-up aksi kontekstual (ditekan langsung) di atas benda terdekat dalam 1 petak: Identifikasi, Ambil, Potong, Tanam, Panen.
 - Identifikasi: sumber → benih masuk kantong; kosong → reaksi lalu abu-abu; pengecoh → benih yang hasilnya tidak dipesan.
 - Wadah tertutup: ikon alat muncul saat didekati, tanpa memotong waktu. Setelah dibuka, isinya tertinggal di tempat lalu diidentifikasi biasa.
 - Tangan pegang 1 alat; ambil alat lain = tukar, alat lama ditaruh di tempat. Alat tidak habis.
@@ -51,7 +52,7 @@ Durasi (semua dari `data/pengaturan.json`): jalan 4 petak/detik, identifikasi 2,
 - **Benda padat:** benda menempati petaknya dan tidak bisa dilewati; diinteraksi dari petak sebelah.
 - **Wadah tanpa alat:** ikon alat di atas wadah, tombol tampil abu-abu "Potong" dan tidak bisa ditekan.
 - **Kantong penuh:** Identifikasi dikunci untuk SEMUA benda yang belum dicoba (tombol abu-abu "Kantong penuh"), supaya tidak membocorkan mana yang sumber. Ambil dan Potong tetap bisa.
-- **Kontrol (mengubah dokumen awal "2/3 peta + 1/3 kontrol"):** satu kanvas; peta selebar layar di bawah HUD atas (diperkecil bila sisa bawah < `porsi_bawah_minimal`); joystick tak terlihat sampai disentuh, muncul di titik sentuh separuh kiri, alas ikut tertarik, memudar saat dilepas; tombol aksi melayang kanan bawah (samar tanpa aksi, berdenyut saat aktif); label nama+aksi menempel di target (pindah ke bawah target bila pemain di atasnya); HUD melayang di atas.
+- **Kontrol (mengubah dokumen awal "2/3 peta + 1/3 kontrol"):** satu kanvas; peta selebar layar di bawah HUD atas, di tengah sisa tinggi (diperkecil bila tidak muat); joystick tak terlihat sampai disentuh, muncul di titik sentuh separuh kiri, alas ikut tertarik, memudar saat dilepas; HUD melayang di atas. **Diubah 2026-10-13:** tombol aksi kanan bawah + label target diganti satu pop-up di atas target: gelembung berikon aksi (kaca pembesar = Periksa), hijau berdenyut bila aktif, abu-abu + keterangan alasan bila terkunci, keterangan nama bila boleh diketahui, cincin progres selama aksi; pindah ke bawah target bila pemain di atasnya; sentuhan di pop-up tidak memunculkan joystick.
 - **Adegan menyatu (meniru Brain Puzzle, tetap berjalan):** tiap stage satu adegan 3/4 tanpa garis petak; benda hiasan (`jenis: "hiasan"`, huruf kecil di peta) bisa diperiksa seperti benda kosong (reaksi + abu-abu) dan TIDAK kena jeda 4 stage; tombol/label bertuliskan "Periksa" tanpa nama benda sumber/kosong/hiasan (nama terungkap di teks reaksi setelah diperiksa); sorotan berupa cincin halus. Gaya gambar: garis tipis senada, bayangan & sorotan lembut, palet per tema.
 - **Pemecah seri target:** jika dua target berselisih jarak ≤ `toleransi_seri_petak`, pilih yang paling searah dengan `pemain.hadap`.
 - **Git:** commit tiap fase lalu push ke `origin main` (https://github.com/acannnz/FindSeeds-game.git).
@@ -102,8 +103,8 @@ scripts/
     peta.gd                  gambar lantai/dinding/B/penghalang, tabrakan petak padat
     benda.gd                 StaticBody2D per benda (padat): status normal/abu, buka(), ganti_menjadi(), sorot, ikon alat
     interaksi.gd             target terdekat (benda + tanah), aksi berdurasi (kunci gerak), kantong, alat, panen → pesanan; hentikan()
+    popup_aksi.gd            pop-up di atas target: gelembung ikon aksi yang ditekan, keterangan nama/alasan, cincin progres; kena(posisi_layar)
     teks_melayang.gd         teks reaksi / "+ Benih tomat" yang naik lalu memudar
-    label_target.gd          label aksi (+ nama bila bukan benda rahasia) yang menempel pada target di dunia game
     blok_penghalang.gd       penghalang bersambung sebagai satu gambar 3/4 (node y-sort)
     abu.gdshader             shader abu-abu untuk benda kosong yang sudah dicoba
     petak_tanah.gd           petak T (bisa diinjak): kosong → tumbuh (durasi tumbuh) → matang; tanam(), panen()
@@ -111,8 +112,7 @@ scripts/
     pemain.gd                CharacterBody2D (motion floating), joystick/panah, `arah_paksa` utk uji
     gambar.gd                pembantu gambar placeholder (huruf di tengah, warna kontras)
   ui/
-    joystick.gd              joystick dinamis: muncul di titik sentuh separuh kiri, alas ikut tertarik, memudar; satu indeks sentuhan
-    tombol_aksi.gd           tombol melayang kanan bawah: label, alasan, cincin progres, denyut; Spasi/Enter di desktop
+    joystick.gd              joystick dinamis: muncul di titik sentuh separuh kiri, alas ikut tertarik, memudar; satu indeks sentuhan; `penolak` (sentuhan pop-up)
     hud.gd                   HUD melayang atas: timer m:ss (merah ≤ timer_merah_sisa_detik) + nama stage, slot kantong, alat di tangan
     layar_hasil.gd           layar menang / "Waktu habis!" / "Dijeda" (scenes/layar_hasil.tscn)
     tampilan_bintang.gd      bintang digambar poligon
@@ -129,7 +129,7 @@ tools/
   uji_main.gd                bot (rute BFS + pilih sisi benda dengan melihat 1 langkah ke depan) memainkan solusi tercepat dokumen, ukur waktu vs ambang 3 bintang
   uji_alur.gd                timer, jeda latar belakang, timer merah, waktu habis + ulang < 1 dtk, bintang 3/2/1, lanjut, kembali ke awal
   uji_plugin.gd              logika plugin pemeriksa: Run dibatalkan / export melapor jika stage salah
-  uji_kontrol.gd             joystick (event sentuh via root.push_input), tombol, label target, tata letak 9:16–9:20
+  uji_kontrol.gd             joystick (event sentuh via root.push_input), pop-up aksi, tata letak 3:4–9:20
   uji_aset.gd                semua aset ada & termuat, kolom gambar, cadangan placeholder, blok penghalang, pemain 4 arah
   buat_aset_adegan.py        generator SEMUA aset SVG (gaya adegan modern); MENIMPA aset/ jika dijalankan — edit SVG langsung bila sudah diubah tangan
   periksa.bat                pembungkus command line
@@ -149,7 +149,7 @@ Penghalang punya id sendiri: `rumah`, `meja`, `rak`, `wastafel` (+ `penghalang` 
 
 **`data/tanaman.json`** — id tanaman → `nama`, `warna` (slot kantong, teks benih). Semua `hasil` katalog dan isi pesanan harus ada di sini (cek 0).
 
-**`data/pengaturan.json`** — `peta_lebar_petak`, `peta_tinggi_petak`, `tinggi_hud_atas_px`, `porsi_bawah_minimal`, `radius_pemain_petak`, `joystick_radius_px`, `joystick_zona_mati`, `tombol_aksi_radius_px`, `tombol_aksi_jarak_tepi_px`, `skala_gambar_benda`, `peluang_tempelan_lantai`, `lama_teks_melayang_detik`, `lama_reaksi_pembeli_detik`, `kapasitas_kantong`, `kecepatan_jalan_petak_per_detik`, `jarak_interaksi_petak`, `toleransi_seri_petak`, `durasi_detik.{identifikasi, ambil_alat, pakai_alat, tanam, tumbuh, panen}`, `timer_merah_sisa_detik`, `jeda_ulang_detik`, `jeda_kemunculan_benda_stage`, `logika_per_musim` (angka musim → id logika).
+**`data/pengaturan.json`** — `peta_lebar_petak`, `peta_tinggi_petak`, `tinggi_hud_atas_px`, `radius_pemain_petak`, `joystick_radius_px`, `joystick_zona_mati`, `popup_aksi_radius_petak`, `skala_gambar_benda`, `peluang_tempelan_lantai`, `lama_teks_melayang_detik`, `lama_reaksi_pembeli_detik`, `kapasitas_kantong`, `kecepatan_jalan_petak_per_detik`, `jarak_interaksi_petak`, `toleransi_seri_petak`, `durasi_detik.{identifikasi, ambil_alat, pakai_alat, tanam, tumbuh, panen}`, `timer_merah_sisa_detik`, `jeda_ulang_detik`, `jeda_kemunculan_benda_stage`, `logika_per_musim` (angka musim → id logika).
 
 **`data/tema.json`** — id tema → `nama`, `warna_latar` (warna dunia di luar peta), `tempelan` (daftar hiasan lantai datar `aset/petak/<nama>.svg`). Lantai/dinding dari `aset/petak/<tema>_lantai.svg` dan `_dinding.svg`.
 
@@ -164,7 +164,7 @@ Penghalang punya id sendiri: `rumah`, `meja`, `rak`, `wastafel` (+ `penghalang` 
 - **Galat yang disengaja di uji:** bungkus dengan `_dengan_galat_diharapkan(callable)` (mengembalikan hasil callable; jumlah galat di `_galat_diharapkan`). Lambda GDScript menyalin variabel lokal, jadi jangan menulis ke variabel luar dari dalam lambda.
 - **Garis miring terbalik di heredoc bash** bisa berubah jadi tunggal; tulis string GDScript berisi `\\` lewat Write/Edit, bukan heredoc.
 - **Build:** Godot tidak mengizinkan plugin membatalkan export. Plugin hanya membatalkan Run dan melapor saat export; build yang benar-benar berhenti = `tools\build_android.bat`. `export_presets.cfg` sengaja di-commit (kata sandi keystore ada di `.godot/export_credentials.cfg`). Export template Godot 4.7.2 dan Android SDK belum terpasang (per 2026-10-08).
-- **Satuan dunia** `Stage.UKURAN_PETAK = 64` per petak. Camera2D (jangkar kiri atas) di-zoom lewat `Stage.hitung_tata_letak()` (statis, diuji): peta selebar layar di bawah HUD. Di HP (`OS.has_feature("mobile")`) area aman (poni/bilah gestur) menggeser HUD dan tombol aksi.
+- **Satuan dunia** `Stage.UKURAN_PETAK = 64` per petak. Camera2D (jangkar kiri atas) di-zoom lewat `Stage.hitung_tata_letak()` (statis, diuji): peta selebar layar di bawah HUD, di tengah sisa tinggi. Di HP (`OS.has_feature("mobile")`) area aman (poni/bilah gestur) menggeser HUD dan batas bawah peta.
 - **Benda, `B`, `#`, dan penghalang padat.** `.`, `@`, `T` bisa diinjak. Pemain berupa lingkaran dengan radius `radius_pemain_petak`.
 - **Pintasan debug** (build debug saja): tombol 1–9 memilih stage, R mengulang stage, panah untuk bergerak.
 - **Tampilan 3/4:** Stage dan Peta `y_sort_enabled`; benda, tanaman, pembeli, blok penghalang, dan pemain di-y-sort bersama (z_index 0). Latar (lantai mulus per potongan selebar tekstur, dinding + `dinding_muka`, tanah, tempelan lantai) digambar `peta._draw`. Gambar benda berpijak di dasar petak, diperbesar `skala_gambar_benda`; tempelan disebar acak-tetap (benih = id stage) dengan `peluang_tempelan_lantai` dari daftar `tempelan` di tema.json. Gelembung ikon alat = node anak z 5.
@@ -183,7 +183,7 @@ tools\periksa.bat --uji-interaksi :: uji identifikasi, alat, wadah, kantong penu
 tools\periksa.bat --uji-main      :: bot memainkan solusi tercepat 1-1/1-2/1-3 (bot per petak: 9,0 / 14,8 / 24,7 dtk; gerak bebas 1-2 terukur 13,1 dtk = dokumen)
 tools\periksa.bat --uji-alur      :: timer, jeda, waktu habis + ulang (0,78 dtk), bintang, lanjut
 tools\periksa.bat --uji-plugin    :: plugin editor: Run dibatalkan & export melapor saat stage salah
-tools\periksa.bat --uji-kontrol   :: joystick dinamis, tombol melayang, label target, tata letak berbagai rasio layar
+tools\periksa.bat --uji-kontrol   :: joystick dinamis, pop-up aksi di atas benda, tata letak berbagai rasio layar
 tools\periksa.bat --uji-aset      :: aset gambar lengkap & termuat (--semua mengimpor aset lebih dulu)
 tools\periksa.bat --stage=FOLDER  :: periksa folder stage lain (--data=FOLDER untuk katalog/pengaturan lain)
 tools\build_android.bat [release] :: --semua dulu, lalu export preset "Android" ke build\ (exit 1 = gagal, 2 = preset belum ada)

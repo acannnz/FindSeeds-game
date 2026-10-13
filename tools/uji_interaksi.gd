@@ -43,7 +43,7 @@ func _uji_stage_1_3() -> void:
 	# Benda kosong: reaksi lalu abu-abu, pemain terkunci selama identifikasi.
 	await _berdiri_di(Vector2i(2, 9))
 	_cek_aksi("Dekat kotak pos: Periksa aktif", "kotak_pos", "identifikasi", true)
-	_cek("Nama benda dirahasiakan sebelum diperiksa (label tanpa nama)", _stage.label_target._nama == "")
+	_cek("Nama benda dirahasiakan sebelum diperiksa (pop-up tanpa nama)", _stage.popup_aksi._nama == "")
 	var posisi_awal := _pemain.position
 	_interaksi.tekan_aksi()
 	_pemain.arah_paksa = Vector2.RIGHT

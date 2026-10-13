@@ -1,8 +1,8 @@
 extends Node
-## Tombol aksi kontekstual dan aksi berdurasi. Setiap frame mencari benda atau
+## Aksi kontekstual (pop-up di atas target) dan aksi berdurasi. Setiap frame mencari benda atau
 ## petak tanah terdekat dalam jarak interaksi (jika jaraknya seri, yang searah
 ## hadap pemain menang), menentukan aksinya lewat
-## AturanAksi, lalu menjalankan aksi saat tombol ditekan: identifikasi,
+## AturanAksi, lalu menjalankan aksi saat pop-up ditekan: identifikasi,
 ## ambil/tukar alat, potong wadah, tanam, dan panen. Selama aksi berjalan
 ## pemain tidak bisa bergerak.
 
@@ -34,37 +34,33 @@ var aksi_kini: Dictionary = {}
 
 var _pemain: CharacterBody2D
 var _peta: Node2D
-var _tombol: Control
-var _label_target: Node2D
+var _popup: Node2D
 var _ukuran: float
 var _berjalan: Dictionary = {}
 var _sisa_detik := 0.0
 var _berhenti := false
 
 
-func siapkan(pemain: CharacterBody2D, peta: Node2D, tombol: Control, label_target: Node2D, pesanan_stage: RefCounted, ukuran_petak: float) -> void:
+func siapkan(pemain: CharacterBody2D, peta: Node2D, popup: Node2D, pesanan_stage: RefCounted, ukuran_petak: float) -> void:
 	_pemain = pemain
 	_peta = peta
-	_tombol = tombol
-	_label_target = label_target
+	_popup = popup
 	pesanan = pesanan_stage
 	_ukuran = ukuran_petak
 	kantong = Kantong.new(int(DataGame.pengaturan.kapasitas_kantong))
-	_tombol.ditekan.connect(tekan_aksi)
+	_popup.ditekan.connect(tekan_aksi)
 
 
 func sibuk() -> bool:
 	return not _berjalan.is_empty()
 
 
-## Menghentikan semua interaksi (stage selesai): tombol dikosongkan.
+## Menghentikan semua interaksi (stage selesai): pop-up disembunyikan.
 func hentikan() -> void:
 	_berhenti = true
 	_berjalan = {}
 	aksi_kini = {}
-	_tombol.progres = -1.0
-	_tombol.tampilkan("", false, "")
-	_label_target.sembunyikan()
+	_popup.sembunyikan()
 	_sorot(null)
 
 
@@ -73,14 +69,14 @@ func _process(delta: float) -> void:
 		return
 	if sibuk():
 		_sisa_detik -= delta
-		_tombol.progres = 1.0 - _sisa_detik / _berjalan.durasi
+		_popup.progres = 1.0 - _sisa_detik / _berjalan.durasi
 		if _sisa_detik <= 0.0:
 			_selesaikan()
 		return
 	_perbarui_target()
 
 
-## Dipanggil tombol aksi (atau skrip uji). Diabaikan jika tidak ada aksi aktif.
+## Dipanggil pop-up aksi (atau skrip uji). Diabaikan jika tidak ada aksi aktif.
 func tekan_aksi() -> void:
 	if _berhenti or sibuk() or aksi_kini.is_empty() or not aksi_kini.aktif:
 		return
@@ -88,7 +84,7 @@ func tekan_aksi() -> void:
 	_berjalan.durasi = DataGame.durasi(AturanAksi.KUNCI_DURASI[_berjalan.aksi])
 	_sisa_detik = _berjalan.durasi
 	_pemain.terkunci = true
-	_tombol.progres = 0.0
+	_popup.progres = 0.0
 
 
 func _perbarui_target() -> void:
@@ -114,19 +110,17 @@ func _perbarui_target() -> void:
 
 	aksi_kini = {}
 	if terdekat == null:
-		_tombol.tampilkan("", false, "")
-		_label_target.sembunyikan()
+		_popup.sembunyikan()
 		return
 	aksi_kini = aksi_terdekat
 	aksi_kini.target = terdekat
 	var alasan: String = aksi_kini.alasan
 	if aksi_kini.butuh_alat != "":
 		alasan = "Butuh %s" % DataGame.nama_benda(aksi_kini.butuh_alat)
-	_tombol.tampilkan(aksi_kini.label, aksi_kini.aktif, alasan, aksi_kini.aksi)
 	var ada_ikon: bool = "ikon_alat" in terdekat and terdekat.ikon_alat != ""
-	# Pemain di atas target: label di bawah agar tidak menutupi pemain.
+	# Pemain di atas target: pop-up di bawah agar tidak menutupi pemain.
 	var di_bawah := _pemain.position.y < terdekat.position.y - _ukuran * 0.25
-	_label_target.tampilkan(terdekat.position, _nama_target(terdekat), aksi_kini.label, aksi_kini.aktif, alasan, ada_ikon, di_bawah)
+	_popup.tampilkan(terdekat.position, _nama_target(terdekat), aksi_kini.label, aksi_kini.aksi, aksi_kini.aktif, alasan, ada_ikon, di_bawah)
 
 
 ## Calon terdekat. Jika selisih jaraknya dalam toleransi seri, pilih yang
@@ -164,7 +158,7 @@ func _selesaikan() -> void:
 	var aksi := _berjalan
 	_berjalan = {}
 	_pemain.terkunci = false
-	_tombol.progres = -1.0
+	_popup.progres = -1.0
 	var target: Node2D = aksi.target
 	if not is_instance_valid(target):
 		return

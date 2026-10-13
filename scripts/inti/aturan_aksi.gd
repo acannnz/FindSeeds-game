@@ -1,5 +1,5 @@
 extends RefCounted
-## Aturan tombol aksi kontekstual: dari keadaan target terdekat dan bawaan
+## Aturan aksi kontekstual: dari keadaan target terdekat dan bawaan
 ## pemain, tentukan aksi apa yang ditawarkan dan apakah bisa ditekan.
 ## Logika murni, diuji oleh tools/uji_logika.gd.
 

@@ -34,7 +34,7 @@ var huruf: String
 var entri: Dictionary
 var sel: Vector2i
 var status := AturanAksi.STATUS_NORMAL
-## True jika benda ini target tombol aksi saat ini.
+## True jika benda ini target pop-up aksi saat ini.
 var disorot := false:
 	set(v):
 		if v != disorot:

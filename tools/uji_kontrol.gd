@@ -1,7 +1,7 @@
 extends "res://tools/dasar_uji.gd"
 ## Uji kontrol melayang: joystick dinamis (event sentuh sungguhan lewat
-## viewport), tombol aksi, label target di dunia, dan tata letak peta selebar
-## layar untuk beberapa rasio layar HP.
+## viewport), pop-up aksi di atas benda, dan tata letak peta selebar layar
+## untuk beberapa rasio layar HP.
 ##
 ## Jalankan dari root proyek:
 ##   tools\periksa.bat --uji-kontrol
@@ -9,6 +9,7 @@ extends "res://tools/dasar_uji.gd"
 const ADEGAN_STAGE := preload("res://scenes/stage.tscn")
 const SkripStage := preload("res://scripts/game/stage.gd")
 const DataGame := preload("res://scripts/inti/data_game.gd")
+const Aset := preload("res://scripts/inti/aset.gd")
 const FPS := 60
 
 var _stage: Node
@@ -30,7 +31,7 @@ func _jalankan() -> void:
 	root.add_child(_stage)
 	await process_frame
 	await _uji_joystick()
-	await _uji_tombol_dan_label()
+	await _uji_popup()
 	_selesai("uji kontrol")
 
 
@@ -38,21 +39,20 @@ func _uji_tata_letak() -> void:
 	var p := DataGame.pengaturan
 	var dunia := Vector2(p.peta_lebar_petak, p.peta_tinggi_petak) * SkripStage.UKURAN_PETAK
 	var atas: float = p.tinggi_hud_atas_px
-	var porsi: float = p.porsi_bawah_minimal
 	# Ukuran viewport untuk lebar 720 pada beberapa rasio layar HP.
-	for rasio in [["9:16", 1280.0], ["9:18", 1440.0], ["9:19,5", 1560.0], ["9:20", 1600.0]]:
+	for rasio in [["9:16", 1280.0], ["9:18", 1440.0], ["9:19,5", 1560.0], ["9:20", 1600.0], ["3:4", 960.0]]:
 		var layar := Vector2(720.0, rasio[1])
-		var t := SkripStage.hitung_tata_letak(layar, dunia, atas, porsi)
+		var t := SkripStage.hitung_tata_letak(layar, dunia, atas, layar.y)
 		var ukuran_peta: Vector2 = dunia * t.skala
-		var bawah: float = layar.y - t.asal.y - ukuran_peta.y
-		_cek("Layar %s: peta di bawah HUD, di dalam layar, sisa bawah ≥ %d%% (%.0f px, %.0f%%)" % [rasio[0], porsi * 100, bawah, bawah / layar.y * 100],
-			is_equal_approx(t.asal.y, atas) and t.asal.x >= -0.01 and ukuran_peta.x <= layar.x + 0.01 and bawah >= layar.y * porsi - 0.01)
-		# HP modern (≥ 19,5:9): peta selebar layar. Layar lebih pendek: peta
-		# diperkecil secukupnya agar sisa bawah tetap ≥ porsi_bawah_minimal.
-		if rasio[1] >= 1560.0:
+		var sela_atas: float = t.asal.y - atas
+		var sela_bawah: float = layar.y - t.asal.y - ukuran_peta.y
+		_cek("Layar %s: peta di bawah HUD, di dalam layar, di tengah sisa tinggi (sela %.0f / %.0f px)" % [rasio[0], sela_atas, sela_bawah],
+			sela_atas >= -0.01 and sela_bawah >= -0.01 and is_equal_approx(sela_atas, sela_bawah)
+			and t.asal.x >= -0.01 and ukuran_peta.x <= layar.x + 0.01)
+		if rasio[1] >= 1280.0:
 			_cek("Layar %s: peta selebar layar (%.0f px)" % [rasio[0], ukuran_peta.x], is_equal_approx(ukuran_peta.x, layar.x))
 		else:
-			_cek("Layar %s: peta diperkecil secukupnya, tetap di tengah (%.0f px)" % [rasio[0], ukuran_peta.x],
+			_cek("Layar %s: peta diperkecil agar muat, di tengah horizontal (%.0f px)" % [rasio[0], ukuran_peta.x],
 				ukuran_peta.x < layar.x and is_equal_approx(t.asal.x * 2.0 + ukuran_peta.x, layar.x))
 
 
@@ -110,34 +110,42 @@ func _uji_joystick() -> void:
 	_sentuh(0, Vector2(layar.x * 0.8, layar.y * 0.5), false)
 
 
-func _uji_tombol_dan_label() -> void:
-	var tombol: Control = _stage.tombol_aksi
-	var label: Node2D = _stage.label_target
+func _uji_popup() -> void:
+	var popup: Node2D = _stage.popup_aksi
+	var joystick: Control = _stage.joystick
 	var jumlah := [0]
-	tombol.ditekan.connect(func(): jumlah[0] += 1)
-
-	var p: Vector2 = tombol.global_position + tombol.pusat()
+	popup.ditekan.connect(func(): jumlah[0] += 1)
 	var layar: Vector2 = _stage.get_viewport_rect().size
-	_cek("Tombol aksi di kanan bawah layar", p.x > layar.x * 0.6 and p.y > layar.y * 0.75)
+	var kanvas: Transform2D = popup.get_canvas_transform()
 
 	_stage.pemain.position = _stage.peta.pusat_petak(Vector2i(2, 9))
 	# Hiasan di atas pemain sama dekatnya; hadapkan ke kotak pos (pemecah seri).
 	_stage.pemain.hadap = Vector2.DOWN
 	await _tunggu(2.0 / FPS)
-	_cek("Dekat kotak pos: label muncul di atas target", label.visible and label.position == _stage.peta.pusat_petak(Vector2i(2, 10)))
+	var target: Vector2 = _stage.peta.pusat_petak(Vector2i(2, 10))
+	_cek("Dekat kotak pos: pop-up muncul menempel pada target", popup.visible and popup.position == target)
+	# Pemain berdiri di atas kotak pos: pop-up pindah ke bawah agar tidak menutupi pemain.
+	_cek("Pop-up di bawah target (pemain di atasnya), berikon kaca pembesar (Periksa)",
+		popup.pusat_gelembung().y > target.y and popup._ikon != null and popup._ikon == Aset.tekstur(Aset.aksi("identifikasi")))
 
+	_sentuh(2, kanvas * Vector2(target.x, target.y + SkripStage.UKURAN_PETAK * 3.0), true)
+	_sentuh(2, kanvas * Vector2(target.x, target.y + SkripStage.UKURAN_PETAK * 3.0), false)
+	_cek("Sentuh di luar pop-up: tidak memicu", jumlah[0] == 0)
+
+	# Gelembung bisa berada di separuh kiri layar: joystick tidak boleh ikut muncul.
+	var p: Vector2 = kanvas * popup.pusat_gelembung()
 	_sentuh(2, p, true)
+	_cek("Sentuh di pop-up: aksi berjalan, joystick tidak muncul", jumlah[0] == 1 and _stage.interaksi.sibuk() and not joystick.aktif())
 	_sentuh(2, p, false)
-	_cek("Sentuh di tombol: tombol terpicu dan aksi berjalan", jumlah[0] == 1 and _stage.interaksi.sibuk())
-	_sentuh(2, Vector2(layar.x * 0.75, layar.y * 0.4), true)
-	_sentuh(2, Vector2(layar.x * 0.75, layar.y * 0.4), false)
-	_cek("Sentuh di luar tombol: tidak memicu", jumlah[0] == 1)
+	await _tunggu(0.5)
+	_cek("Selama aksi: pop-up tetap tampil dengan cincin progres", popup.visible and popup.progres > 0.0 and popup.progres < 1.0)
 
-	await _tunggu(DataGame.durasi("identifikasi") + 0.1)
-	_cek("Kotak pos abu-abu tidak lagi diberi label", not label.visible or label.position != _stage.peta.pusat_petak(Vector2i(2, 10)))
+	await _tunggu(DataGame.durasi("identifikasi"))
+	_cek("Kotak pos abu-abu tidak lagi diberi pop-up", not popup.visible or popup.position != target)
 	_stage.pemain.position = _stage.peta.pusat_petak(Vector2i(4, 8))
 	await _tunggu(2.0 / FPS)
-	_cek("Tidak ada target dalam jangkauan: label disembunyikan", not label.visible)
+	_cek("Tidak ada target dalam jangkauan: pop-up disembunyikan", not popup.visible)
+	_cek("Tidak ada tombol aksi di pojok layar", not _stage.has_node("UI/TombolAksi") and layar.x > 0.0)
 
 
 func _sentuh(indeks: int, posisi: Vector2, tekan: bool) -> void:

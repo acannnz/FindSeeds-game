@@ -5,7 +5,8 @@ extends Control
 ## - kenop mengikuti jempol; jika jempol ditarik melewati radius, alasnya ikut
 ##   tertarik sehingga jempol tidak pernah "mentok";
 ## - memudar saat dilepas.
-## Melacak satu indeks sentuhan, jadi tombol aksi tetap bisa ditekan jempol lain.
+## Melacak satu indeks sentuhan, jadi pop-up aksi tetap bisa ditekan jempol lain.
+## Sentuhan yang ditolak `penolak` (mis. mengenai pop-up aksi) diabaikan.
 
 const DataGame := preload("res://scripts/inti/data_game.gd")
 
@@ -19,6 +20,8 @@ const DETIK_PUDAR := 0.18
 
 ## Arah gerak, panjang 0..1 (sudah dikurangi zona mati).
 var vektor := Vector2.ZERO
+## func(posisi_layar: Vector2) -> bool; true = sentuhan ini bukan untuk joystick.
+var penolak: Callable
 
 var _radius := 0.0
 var _zona_mati := 0.0
@@ -59,7 +62,8 @@ func _process(delta: float) -> void:
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
-		if event.pressed and not aktif() and get_global_rect().has_point(event.position):
+		if event.pressed and not aktif() and get_global_rect().has_point(event.position) \
+				and not (penolak.is_valid() and penolak.call(event.position)):
 			_indeks_sentuh = event.index
 			_pusat_alas = event.position - global_position
 			_kenop = _pusat_alas
