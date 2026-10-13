@@ -31,6 +31,9 @@ const JENIS_HIASAN := "hiasan"
 const JENIS_WADAH := "wadah"
 const JENIS_ALAT := "alat"
 const JENIS_PENGHALANG := "penghalang"
+## Catatan petunjuk di samping lahan: dibaca untuk melihat teka-teki benda
+## sumber pesanan (kolom `petunjuk` di file stage).
+const JENIS_CATATAN := "catatan"
 const JENIS_TIDAK_DIKENAL := "tidak_dikenal"
 
 
@@ -121,6 +124,8 @@ static func jenis_benda(entri: Variant) -> String:
 			return JENIS_PENGHALANG
 		JENIS_HIASAN:
 			return JENIS_HIASAN
+		JENIS_CATATAN:
+			return JENIS_CATATAN
 	if entri.has("butuh_alat"):
 		return JENIS_WADAH
 	if entri.has("hasil"):

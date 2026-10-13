@@ -25,7 +25,8 @@ func _initialize() -> void:
 	_uji("Cek 0: peta tanpa @", [Pemeriksa.CEK_FORMAT], func(d):
 		_ganti_sel(_stage(d, "1-1"), Vector2i(1, 10), "."))
 
-	_uji("Cek 1: pesanan 2 tomat di stage yang hanya punya 1 sumber", [Pemeriksa.CEK_SUMBER_CUKUP], func(d):
+	# Petunjuk juga kurang (hanya 1 untuk tomat), jadi cek 7 ikut muncul.
+	_uji("Cek 1: pesanan 2 tomat di stage yang hanya punya 1 sumber", [Pemeriksa.CEK_SUMBER_CUKUP, Pemeriksa.CEK_CATATAN], func(d):
 		_stage(d, "1-1").pesanan.isi.tomat = 2)
 
 	_uji("Cek 2: gunting dihapus dari stage 1-3", [Pemeriksa.CEK_ALAT_ADA], func(d):
@@ -47,6 +48,25 @@ func _initialize() -> void:
 
 	_uji("Cek 6: logika musim Panas dipakai di Musim Semi", [Pemeriksa.CEK_LOGIKA_MUSIM], func(d):
 		d.katalog.bola_karet_merah.logika = "asosiasi")
+
+	_uji("Cek 7: catatan petunjuk dihapus dari stage 1-1", [Pemeriksa.CEK_CATATAN], func(d):
+		_ganti_sel(_stage(d, "1-1"), Vector2i(4, 10), "."))
+
+	_uji("Cek 7: catatan tidak bersebelahan dengan lahan", [Pemeriksa.CEK_CATATAN], func(d):
+		var s := _stage(d, "1-1")
+		_ganti_sel(s, Vector2i(4, 10), ".")
+		_ganti_sel(s, Vector2i(4, 4), "C"))
+
+	_uji("Cek 7: stage tanpa petunjuk", [Pemeriksa.CEK_CATATAN], func(d):
+		_stage(d, "1-1").erase("petunjuk"))
+
+	_uji("Cek 7: petunjuk untuk pengecoh (pot bunga, bunga tidak dipesan)", [Pemeriksa.CEK_CATATAN], func(d):
+		_stage(d, "1-2").petunjuk.append({"benda": "pot_bunga", "teks": "Aku berbunga."}))
+
+	_uji("Cek 7: petunjuk menunjuk benda yang tidak ada di stage", [Pemeriksa.CEK_CATATAN], func(d):
+		_stage(d, "1-1").petunjuk[0].benda = "jam_weker_merah")
+
+	_uji("Cek 7: petunjuk untuk isi wadah (hidung badut di kardus) sah", [], func(_d): pass)
 
 	_selesai("uji pemeriksa")
 

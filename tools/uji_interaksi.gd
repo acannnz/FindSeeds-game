@@ -122,7 +122,8 @@ func _uji_panen_pengecoh() -> void:
 	_interaksi.tekan_aksi()
 	await _tunggu(DataGame.durasi("tanam") + float(FRAME_LEBIH) / FPS)
 	_cek("Benih bunga tertanam, kantong kosong", tanah.status == AturanAksi.TANAH_TUMBUH and _interaksi.kantong.kosong())
-	_cek("Tanaman yang tumbuh tidak menawarkan aksi", _interaksi.aksi_kini.is_empty())
+	# Catatan petunjuk di sebelah lahan boleh menawarkan "Baca"; petak tanahnya tidak.
+	_cek("Tanaman yang tumbuh tidak menawarkan aksi", _interaksi.aksi_kini.get("target") != tanah)
 
 	var posisi := _pemain.position
 	_pemain.arah_paksa = Vector2.DOWN

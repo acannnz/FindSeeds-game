@@ -12,7 +12,7 @@
     "#r..O..#",
     "#..kMM.#",
     "#.j.MM.#",
-    "#T..MM.#",
+    "#TC.MM.#",
     "#T.....#",
     "#..q..K#",
     "#lN..h.#",
@@ -25,6 +25,11 @@
     "M": "meja",
     "u": "payung_merah", "r": "radio_merah", "k": "kursi_rotan", "j": "bola_basket",
     "h": "topi_pesta_biru", "l": "pot_lidah_mertua", "p": "sapu_ijuk", "e": "rak_sepatu",
-    "q": "keranjang_cucian"
-  }
+    "q": "keranjang_cucian",
+    "C": "catatan"
+  },
+  "petunjuk": [
+    { "benda": "jam_weker_merah", "teks": "Aku berdetak sepanjang hari dan berteriak paling keras saat pagi tiba." },
+    { "benda": "kerucut_lalu_lintas", "teks": "Ujungku lancip. Aku berdiri di jalan dan kendaraan harus menghindariku." }
+  ]
 }

@@ -1,7 +1,7 @@
 @tool
 extends RefCounted
 ## Enam pengecekan stage dari bagian "Saran implementasi" dokumen rancangan,
-## ditambah pengecekan format dasar (cek 0). Logika murni: menerima data yang
+## ditambah pengecekan format dasar (cek 0) dan catatan petunjuk (cek 7). Logika murni: menerima data yang
 ## sudah dimuat dan mengembalikan daftar temuan tanpa mencetak apa pun.
 ## @tool karena juga dijalankan plugin editor addons/pemeriksa_stage.
 
@@ -14,6 +14,7 @@ const CEK_HURUF_DIKENAL := 3
 const CEK_BISA_DICAPAI := 4
 const CEK_JEDA_BENDA := 5
 const CEK_LOGIKA_MUSIM := 6
+const CEK_CATATAN := 7
 
 const NAMA_CEK := {
 	CEK_FORMAT: "Format data",
@@ -23,9 +24,12 @@ const NAMA_CEK := {
 	CEK_BISA_DICAPAI: "Bisa dicapai dari @",
 	CEK_JEDA_BENDA: "Jeda kemunculan benda",
 	CEK_LOGIKA_MUSIM: "Logika sesuai musim",
+	CEK_CATATAN: "Catatan petunjuk",
 }
 
 const ARAH_TETANGGA := [Vector2i.RIGHT, Vector2i.LEFT, Vector2i.DOWN, Vector2i.UP]
+const ARAH_SEKITAR := [Vector2i(-1, -1), Vector2i(0, -1), Vector2i(1, -1), Vector2i(-1, 0),
+	Vector2i(1, 0), Vector2i(-1, 1), Vector2i(0, 1), Vector2i(1, 1)]
 # Batas wadah bersarang (wadah berisi wadah), mencegah putaran tak berujung.
 const BATAS_SARANG_WADAH := 8
 
@@ -67,6 +71,7 @@ func periksa(data: Dictionary) -> Array[Dictionary]:
 		_cek_huruf_dikenal(s.file, s.data)
 		_cek_bisa_dicapai(s.file, s.data)
 		_cek_logika_musim(s.file, s.data)
+		_cek_catatan(s.file, s.data)
 	_cek_jeda_benda(stage_sah)
 	return _temuan
 
@@ -335,6 +340,59 @@ func _cek_logika_musim(f: String, d: Dictionary) -> void:
 				_lapor(f, CEK_LOGIKA_MUSIM, "%s memakai logika '%s' yang tidak terdaftar di logika_per_musim." % [_nama(id), logika])
 			elif musim_logika[logika] > musim:
 				_lapor(f, CEK_LOGIKA_MUSIM, "%s memakai logika '%s' yang baru diperkenalkan di musim %d, padahal stage %s ada di musim %d (boleh: %s)." % [_nama(id), logika, musim_logika[logika], d.id, musim, ", ".join(boleh)])
+
+
+# --- Cek 7: catatan petunjuk di samping lahan, clue untuk tiap pesanan -------
+
+func _cek_catatan(f: String, d: Dictionary) -> void:
+	var catatan := _benda_di_peta(d).filter(func(b): return PemuatData.jenis_benda(_katalog[b.id]) == PemuatData.JENIS_CATATAN)
+	if catatan.size() != 1:
+		_lapor(f, CEK_CATATAN, "Stage harus punya tepat satu catatan petunjuk (ditemukan %d)." % catatan.size())
+	for b in catatan:
+		var dekat_tanah := false
+		for arah in ARAH_SEKITAR:
+			var n: Vector2i = b.sel + arah
+			if _di_dalam_peta(d.peta, n) and d.peta[n.y][n.x] == PemuatData.SIMBOL_TANAH:
+				dekat_tanah = true
+		if not dekat_tanah:
+			_lapor(f, CEK_CATATAN, "%s harus bersebelahan dengan petak tanah 'T'." % _uraikan_benda(b))
+
+	var petunjuk = d.get("petunjuk")
+	if typeof(petunjuk) != TYPE_ARRAY or petunjuk.is_empty():
+		_lapor(f, CEK_CATATAN, "'petunjuk' harus daftar {\"benda\", \"teks\"} yang tidak kosong.")
+		return
+	var di_stage := {}
+	for b in _benda_di_peta(d):
+		for id in _benda_teridentifikasi(b.id):
+			di_stage[id] = true
+	var clue_per_tanaman := {}
+	var sudah := {}
+	for i in petunjuk.size():
+		var p = petunjuk[i]
+		if typeof(p) != TYPE_DICTIONARY or typeof(p.get("benda")) != TYPE_STRING \
+				or typeof(p.get("teks")) != TYPE_STRING or p.teks.strip_edges().is_empty():
+			_lapor(f, CEK_CATATAN, "Petunjuk ke-%d harus berisi 'benda' (id) dan 'teks' yang tidak kosong." % (i + 1))
+			continue
+		var id: String = p.benda
+		if not _katalog.has(id) or PemuatData.jenis_benda(_katalog[id]) != PemuatData.JENIS_SUMBER:
+			_lapor(f, CEK_CATATAN, "Petunjuk ke-%d menunjuk '%s', tapi itu bukan benda sumber di katalog." % [i + 1, id])
+			continue
+		if not di_stage.has(id):
+			_lapor(f, CEK_CATATAN, "Petunjuk ke-%d menunjuk %s, tapi benda itu tidak ada di stage ini." % [i + 1, _nama(id)])
+			continue
+		if sudah.has(id):
+			_lapor(f, CEK_CATATAN, "%s diberi petunjuk lebih dari sekali." % _nama(id))
+			continue
+		sudah[id] = true
+		var tanaman: String = _katalog[id].hasil
+		if not d.pesanan.isi.has(tanaman):
+			_lapor(f, CEK_CATATAN, "Petunjuk ke-%d menunjuk %s (benih %s), padahal %s tidak dipesan; petunjuk hanya untuk pesanan." % [i + 1, _nama(id), tanaman, tanaman])
+			continue
+		clue_per_tanaman[tanaman] = clue_per_tanaman.get(tanaman, 0) + 1
+	for tanaman in d.pesanan.isi:
+		var butuh := int(d.pesanan.isi[tanaman])
+		if clue_per_tanaman.get(tanaman, 0) < butuh:
+			_lapor(f, CEK_CATATAN, "Pesanan butuh %d %s, tapi hanya ada %d petunjuk untuk benda sumber %s." % [butuh, tanaman, clue_per_tanaman.get(tanaman, 0), tanaman])
 
 
 # --- Pembantu ----------------------------------------------------------------

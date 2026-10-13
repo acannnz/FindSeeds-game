@@ -9,6 +9,8 @@ extends Node
 signal bawaan_berubah
 ## Hasil panen sudah diproses: diterima = true jika mengisi pesanan.
 signal dipanen(tanaman: String, diterima: bool)
+## Catatan petunjuk dibaca (seketika, tanpa durasi dan tanpa kunci gerak).
+signal baca_catatan
 
 const DataGame := preload("res://scripts/inti/data_game.gd")
 const PemuatData := preload("res://scripts/inti/pemuat_data.gd")
@@ -79,6 +81,9 @@ func _process(delta: float) -> void:
 ## Dipanggil pop-up aksi (atau skrip uji). Diabaikan jika tidak ada aksi aktif.
 func tekan_aksi() -> void:
 	if _berhenti or sibuk() or aksi_kini.is_empty() or not aksi_kini.aktif:
+		return
+	if aksi_kini.aksi == AturanAksi.AKSI_BACA:
+		baca_catatan.emit()
 		return
 	_berjalan = aksi_kini.duplicate()
 	_berjalan.durasi = DataGame.durasi(AturanAksi.KUNCI_DURASI[_berjalan.aksi])

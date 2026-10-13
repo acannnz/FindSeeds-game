@@ -32,6 +32,7 @@ func _jalankan() -> void:
 	await process_frame
 	await _uji_joystick()
 	await _uji_popup()
+	await _uji_catatan()
 	_selesai("uji kontrol")
 
 
@@ -146,6 +147,48 @@ func _uji_popup() -> void:
 	await _tunggu(2.0 / FPS)
 	_cek("Tidak ada target dalam jangkauan: pop-up disembunyikan", not popup.visible)
 	_cek("Tidak ada tombol aksi di pojok layar", not _stage.has_node("UI/TombolAksi") and layar.x > 0.0)
+
+
+func _uji_catatan() -> void:
+	var popup: Node2D = _stage.popup_aksi
+	var panel: Control = _stage.panel_petunjuk
+	var joystick: Control = _stage.joystick
+	var layar: Vector2 = _stage.get_viewport_rect().size
+	var kanvas: Transform2D = popup.get_canvas_transform()
+	# Catatan 1-3 di samping lahan, dicapai dari petak tanah di sebelahnya.
+	var sel_catatan := Vector2i(2, 7)
+	_stage.pemain.position = _stage.peta.pusat_petak(Vector2i(1, 7))
+	_stage.pemain.hadap = Vector2.RIGHT
+	await _tunggu(2.0 / FPS)
+	_cek("Dekat catatan: pop-up \"Baca\" berikon buku, nama terlihat",
+		popup.visible and popup.position == _stage.peta.pusat_petak(sel_catatan)
+		and popup._ikon == Aset.tekstur(Aset.aksi("baca")) and popup._nama == "Catatan petunjuk")
+	_cek("Panel petunjuk tertutup sebelum dibaca", not panel.visible)
+
+	var p: Vector2 = kanvas * popup.pusat_gelembung()
+	var sisa: float = _stage.sisa_detik
+	_sentuh(3, p, true)
+	_sentuh(3, p, false)
+	await _tunggu(1.0 / FPS)
+	_cek("Sentuh pop-up: panel terbuka seketika (tanpa aksi berdurasi), joystick tidak muncul",
+		panel.visible and not _stage.interaksi.sibuk() and not joystick.aktif())
+	var petunjuk: Array = _stage.data.petunjuk
+	_cek("Panel berisi satu baris per petunjuk stage (%d)" % petunjuk.size(), panel._daftar.get_child_count() == petunjuk.size())
+	await _tunggu(0.5)
+	_cek("Timer tetap berjalan selama panel terbuka", _stage.sisa_detik < sisa - 0.4)
+
+	var titik := Vector2(layar.x * 0.2, layar.y * 0.6)
+	_sentuh(3, titik, true)
+	await _tunggu(1.0 / FPS)
+	_cek("Ketuk di mana saja: panel tertutup, joystick tidak ikut muncul", not panel.visible and not joystick.aktif())
+	_sentuh(3, titik, false)
+
+	_stage.interaksi.tekan_aksi()
+	await _tunggu(1.0 / FPS)
+	_cek("Catatan bisa dibaca ulang", panel.visible)
+	_stage.pemain.position = _stage.peta.pusat_petak(Vector2i(4, 5))
+	await _tunggu(2.0 / FPS)
+	_cek("Menjauh dari catatan: panel tertutup sendiri", not panel.visible)
 
 
 func _sentuh(indeks: int, posisi: Vector2, tekan: bool) -> void:

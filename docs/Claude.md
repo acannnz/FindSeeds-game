@@ -18,6 +18,7 @@ Baca dokumen lengkapnya hanya jika butuh detail yang tidak ada di sini.
 | + | Pemeriksa jalan saat build (plugin editor + tools/build_android.bat) | Selesai |
 | + | Kontrol modern: satu kanvas, joystick dinamis, tombol melayang, label target, HUD atas | Selesai, diuji pengguna di HP Android (2026-10-08): OK |
 | + | Pop-up aksi di atas benda (ikon kaca pembesar dsb.) menggantikan tombol kanan bawah; peta di tengah sisa tinggi layar | Selesai (2026-10-13) |
+| + | Catatan petunjuk di samping lahan: teka-teki benda sumber pesanan, panel bisa dibaca ulang; cek 7 | Selesai (2026-10-13) |
 | + | Aset vektor SVG + pemuat dengan cadangan kotak warna | Selesai; gaya lama sudah seluruhnya diganti gaya adegan |
 | + | Adegan menyatu gaya modern 3/4: hiasan bisa diperiksa, nama dirahasiakan, y-sort, tempelan lantai | Selesai untuk 1-1, 1-2, 1-3 (107 aset, satu gaya) |
 
@@ -33,6 +34,7 @@ Kerjakan per fase. Setelah tiap fase: jelaskan singkat, commit, push ke `origin 
 ## Aturan main (ringkas)
 
 - Stage 90 detik. Cari benda yang bisa jadi benih, tanam, panen. Panen yang dipesan langsung mengisi pesanan.
+- Catatan petunjuk (satu per stage, di samping lahan): aksi "Baca" membuka panel teka-teki untuk benda sumber tiap pesanan (tanpa menyebut posisi, warna, jenis). Seketika, timer tetap jalan, bisa dibaca ulang; panel tertutup saat diketuk atau pemain menjauh.
 - Menang: pesanan lengkap (otomatis). Kalah: waktu habis → "Waktu habis!" → ulang < 1 detik.
 - Pop-up aksi kontekstual (ditekan langsung) di atas benda terdekat dalam 1 petak: Identifikasi, Ambil, Potong, Tanam, Panen.
 - Identifikasi: sumber → benih masuk kantong; kosong → reaksi lalu abu-abu; pengecoh → benih yang hasilnya tidak dipesan.
@@ -54,6 +56,7 @@ Durasi (semua dari `data/pengaturan.json`): jalan 4 petak/detik, identifikasi 2,
 - **Kantong penuh:** Identifikasi dikunci untuk SEMUA benda yang belum dicoba (tombol abu-abu "Kantong penuh"), supaya tidak membocorkan mana yang sumber. Ambil dan Potong tetap bisa.
 - **Kontrol (mengubah dokumen awal "2/3 peta + 1/3 kontrol"):** satu kanvas; peta selebar layar di bawah HUD atas, di tengah sisa tinggi (diperkecil bila tidak muat); joystick tak terlihat sampai disentuh, muncul di titik sentuh separuh kiri, alas ikut tertarik, memudar saat dilepas; HUD melayang di atas. **Diubah 2026-10-13:** tombol aksi kanan bawah + label target diganti satu pop-up di atas target: gelembung berikon aksi (kaca pembesar = Periksa), hijau berdenyut bila aktif, abu-abu + keterangan alasan bila terkunci, keterangan nama bila boleh diketahui, cincin progres selama aksi; pindah ke bawah target bila pemain di atasnya; sentuhan di pop-up tidak memunculkan joystick.
 - **Adegan menyatu (meniru Brain Puzzle, tetap berjalan):** tiap stage satu adegan 3/4 tanpa garis petak; benda hiasan (`jenis: "hiasan"`, huruf kecil di peta) bisa diperiksa seperti benda kosong (reaksi + abu-abu) dan TIDAK kena jeda 4 stage; tombol/label bertuliskan "Periksa" tanpa nama benda sumber/kosong/hiasan (nama terungkap di teks reaksi setelah diperiksa); sorotan berupa cincin halus. Gaya gambar: garis tipis senada, bayangan & sorotan lembut, palet per tema.
+- **Catatan petunjuk (2026-10-13):** clue hanya untuk benda sumber yang dipesan (bukan pengecoh), ditulis per stage di kolom `petunjuk`, dibaca lewat panel yang bisa dibuka ulang (timer tetap jalan). Ikon mata uang RPG craftpix direncanakan sebagai benda kosong/pengalih (belum diunduh, menunggu izin & cek lisensi).
 - **Pemecah seri target:** jika dua target berselisih jarak ≤ `toleransi_seri_petak`, pilih yang paling searah dengan `pemain.hadap`.
 - **Git:** commit tiap fase lalu push ke `origin main` (https://github.com/acannnz/FindSeeds-game.git).
 
@@ -114,6 +117,7 @@ scripts/
   ui/
     joystick.gd              joystick dinamis: muncul di titik sentuh separuh kiri, alas ikut tertarik, memudar; satu indeks sentuhan; `penolak` (sentuhan pop-up)
     hud.gd                   HUD melayang atas: timer m:ss (merah ≤ timer_merah_sisa_detik) + nama stage, slot kantong, alat di tangan
+    panel_petunjuk.gd        panel catatan petunjuk (Label autowrap), tutup saat diketuk / Esc; dibuka ulang dari catatan
     layar_hasil.gd           layar menang / "Waktu habis!" / "Dijeda" (scenes/layar_hasil.tscn)
     tampilan_bintang.gd      bintang digambar poligon
 scenes/                      main.tscn, stage.tscn, pemain.tscn, layar_hasil.tscn
@@ -145,7 +149,7 @@ Aturan kode: tidak ada angka penyetelan atau posisi benda di kode; semuanya dari
 
 **`data/katalog_benda.json`** — kunci = id benda. Kolom dari dokumen: `hasil`, `logika`, `reaksi`, `butuh_alat`, `isi`, `jenis`.
 Kolom tambahan prototipe: `nama` (teks tampilan), `warna` (warna kotak placeholder), `teks_reaksi` (benda kosong), `label` (tulisan di wadah, digambar oleh game di atas gambar kardus), `gambar` (opsional: nama file SVG lain, mis. kedua kardus memakai `kardus`).
-Penghalang punya id sendiri: `rumah`, `meja`, `rak`, `wastafel` (+ `penghalang` umum). Benda cadangan (krayon, kemoceng, bantal hati, bola kertas, rok tutu) dan `sekop` sudah ada di katalog walau belum dipakai.
+Penghalang punya id sendiri: `rumah`, `meja`, `rak`, `wastafel` (+ `penghalang` umum). `catatan` (`jenis: "catatan"`, huruf `C` di legenda) = catatan petunjuk, aksi Baca, tidak kena jeda 4 stage. Benda cadangan (krayon, kemoceng, bantal hati, bola kertas, rok tutu) dan `sekop` sudah ada di katalog walau belum dipakai.
 
 **`data/tanaman.json`** — id tanaman → `nama`, `warna` (slot kantong, teks benih). Semua `hasil` katalog dan isi pesanan harus ada di sini (cek 0).
 
@@ -153,7 +157,7 @@ Penghalang punya id sendiri: `rumah`, `meja`, `rak`, `wastafel` (+ `penghalang` 
 
 **`data/tema.json`** — id tema → `nama`, `warna_latar` (warna dunia di luar peta), `tempelan` (daftar hiasan lantai datar `aset/petak/<nama>.svg`). Lantai/dinding dari `aset/petak/<tema>_lantai.svg` dan `_dinding.svg`.
 
-**`data/stage/stage_<id>.json`** — `id`, `nama`, `tema` (harus ada di tema.json, cek 0), `waktu_detik`, `bintang_sisa_detik.{tiga, dua}`, `pesanan.{pembeli, isi}`, `peta` (12 string × 8 karakter), `legenda` (huruf → id katalog). Urutan stage = urutan id (musim, nomor).
+**`data/stage/stage_<id>.json`** — `id`, `nama`, `tema` (harus ada di tema.json, cek 0), `waktu_detik`, `bintang_sisa_detik.{tiga, dua}`, `pesanan.{pembeli, isi}`, `peta` (12 string × 8 karakter), `legenda` (huruf → id katalog), `petunjuk` (daftar `{"benda": id sumber, "teks": teka-teki}`, urutan = nomor di panel). Urutan stage = urutan id (musim, nomor).
 
 ## Catatan teknis Godot
 
@@ -175,7 +179,7 @@ Penghalang punya id sendiri: `rumah`, `meja`, `rak`, `wastafel` (+ `penghalang` 
 
 ```bat
 tools\periksa.bat                 :: periksa data\stage, exit 0 = lolos, 1 = ada masalah
-tools\periksa.bat --uji           :: uji mandiri pemeriksa (8 kasus)
+tools\periksa.bat --uji           :: uji mandiri pemeriksa (14 kasus)
 tools\periksa.bat --semua         :: pemeriksa stage + SEMUA uji (jalankan sebelum commit)
 tools\periksa.bat --uji-logika    :: uji kantong dan aturan aksi
 tools\periksa.bat --uji-gerak     :: uji gerak dan tabrakan
@@ -202,3 +206,4 @@ Pengecekan (nomor sama dengan dokumen):
 4. Flood fill 4 arah dari `@` lewat `. @ T`. Tiap `T` harus tercapai; tiap benda (bukan penghalang) harus punya tetangga yang tercapai.
 5. Benda sumber/kosong/pengecoh (termasuk isi wadah) tidak muncul lagi sebelum selang `jeda_kemunculan_benda_stage` stage. Selang = selisih posisi dalam daftar stage yang sudah diurutkan, jadi semua stage harus ada di folder.
 6. Logika benda sumber sudah diperkenalkan di musim stage itu atau sebelumnya (`logika_per_musim`).
+7. Catatan petunjuk: tepat satu `catatan` per stage, bersebelahan (8 arah) dengan `T`; `petunjuk` tidak kosong, tiap benda = sumber yang ada di stage (isi wadah dihitung), hasilnya dipesan, tanpa duplikat; tiap tanaman pesanan punya petunjuk ≥ jumlahnya.

@@ -22,7 +22,8 @@ func _initialize() -> void:
 	_siapkan_stage_rusak()
 	plugin.folder_stage = FOLDER_RUSAK
 	var pesan: Array[String] = plugin.periksa()
-	_cek("Stage rusak: masalah ditemukan", pesan.size() == 1 and "jagung" in pesan[0], str(pesan))
+	# Sumber jagung yang hilang memicu cek 1 dan cek 7 (petunjuknya ikut hilang).
+	_cek("Stage rusak: masalah ditemukan", not pesan.is_empty() and pesan.all(func(m): return "jagung" in m), str(pesan))
 	boleh_jalan = _dengan_galat_diharapkan(plugin.boleh_jalan)
 	_cek("Stage rusak: Run dibatalkan", not boleh_jalan)
 	_cek("Stage rusak: masalah dilaporkan sebagai galat di Output", _galat_diharapkan >= 2, "galat %d" % _galat_diharapkan)

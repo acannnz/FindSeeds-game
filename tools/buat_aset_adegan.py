@@ -698,6 +698,16 @@ A["tanaman/bunga_muda"] = svg(batang("M64 112 L64 46") + daun(48, 86, 15, 7, -30
 A["tanaman/bunga_matang"] = svg(batang("M64 112 L64 48") + batang("M64 82 Q46 72 38 58") + daun(80, 86, 15, 7, 30) + bunga(64, 38, 15) + bunga(36, 54, 10))
 A["tanaman/bunga_buah"] = buah_bayang(bunga(64, 70, 30))
 
+# =============================================================== catatan petunjuk (samping lahan)
+A["benda/catatan"] = svg(bayang(64, 118, 30) + f'''
+<rect x="58" y="78" width="12" height="40" rx="2" {isi("#8a5a3b")}/>
+<path d="M26 30 L102 30 L102 86 L26 86 Z" {isi("#a8754f")}/>
+<path d="M32 36 L96 36 L96 80 L32 80 Z" fill="{gelap("#a8754f", 0.15)}"/>
+<path d="M40 40 L86 38 L90 78 L44 80 Z" {isi("#fff6dc", tebal=2)}/>
+<path d="M50 52 L80 51 M51 60 L81 59 M52 68 L74 67" {garis("#b9a27e", 2.5)}/>
+<circle cx="64" cy="40" r="4.5" {isi("#e2483d", tebal=1.5)}/>
+<path d="M76 70 Q84 62 88 70 Q84 72 82 76" {garis("#6aa84f", 2.5)}/>''')
+
 # =============================================================== ikon aksi (putih, untuk tombol)
 P = 'fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"'
 A["ui/aksi_identifikasi"] = svg(f'<circle cx="54" cy="54" r="28" {P}/><line x1="76" y1="76" x2="104" y2="104" {P} stroke-width="13"/><path d="M45 46 Q45 37 54 37 Q63 37 63 45 Q63 51 54 55 L54 61" {P} stroke-width="7"/><circle cx="54" cy="71" r="4.5" fill="#ffffff"/>')
@@ -705,6 +715,7 @@ A["ui/aksi_ambil"] = svg(f'<path d="M36 70 L36 40 Q36 32 44 32 Q52 32 52 40 L52 
 A["ui/aksi_potong"] = svg(f'<line x1="44" y1="86" x2="100" y2="22" {P}/><line x1="84" y1="86" x2="28" y2="22" {P}/><circle cx="38" cy="100" r="13" {P} stroke-width="7"/><circle cx="90" cy="100" r="13" {P} stroke-width="7"/>')
 A["ui/aksi_tanam"] = svg(f'<path d="M64 112 L64 62" {P}/><path d="M64 70 Q40 70 32 46 Q56 44 64 64" {P} stroke-width="7"/><path d="M64 62 Q88 62 96 38 Q72 36 64 56" {P} stroke-width="7"/><line x1="30" y1="112" x2="98" y2="112" {P}/>')
 A["ui/aksi_panen"] = svg(f'<path d="M20 56 L108 56 L96 108 L32 108 Z" {P} stroke-width="8"/><path d="M38 56 Q64 10 90 56" {P} stroke-width="7"/><line x1="44" y1="72" x2="48" y2="96" {P} stroke-width="6"/><line x1="64" y1="72" x2="64" y2="96" {P} stroke-width="6"/><line x1="84" y1="72" x2="80" y2="96" {P} stroke-width="6"/>')
+A["ui/aksi_baca"] = svg(f'<path d="M64 38 Q44 26 18 30 L18 96 Q44 92 64 104 Q84 92 110 96 L110 30 Q84 26 64 38 Z" {P} stroke-width="8"/><line x1="64" y1="38" x2="64" y2="104" {P} stroke-width="7"/><path d="M30 50 Q42 48 52 54 M30 66 Q42 64 52 70 M76 54 Q86 48 98 50 M76 70 Q86 64 98 66" {P} stroke-width="5"/>')
 
 # ------------------------------------------------------------------ tulis
 ATRIBUT = re.compile(r'([\w:-]+)="([^"]*)"')

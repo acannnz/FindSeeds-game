@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://scripts/game/interaksi.gd" id="5_interaksi"]
 [ext_resource type="Script" path="res://scripts/ui/hud.gd" id="7_hud"]
 [ext_resource type="Script" path="res://scripts/game/popup_aksi.gd" id="8_popup"]
+[ext_resource type="Script" path="res://scripts/ui/panel_petunjuk.gd" id="9_petunjuk"]
 
 [node name="Stage" type="Node2D"]
 y_sort_enabled = true
@@ -43,3 +44,11 @@ anchor_right = 0.5
 anchor_bottom = 1.0
 mouse_filter = 2
 script = ExtResource("4_joystick")
+
+[node name="PanelPetunjuk" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("9_petunjuk")

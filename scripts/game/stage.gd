@@ -14,6 +14,7 @@ signal waktu_habis
 const DataGame := preload("res://scripts/inti/data_game.gd")
 const Pesanan := preload("res://scripts/inti/pesanan.gd")
 const Bintang := preload("res://scripts/inti/bintang.gd")
+const AturanAksi := preload("res://scripts/inti/aturan_aksi.gd")
 
 ## Satuan dunia per petak. Tampilan diskalakan oleh kamera agar pas di layar,
 ## jadi angka ini hanya satuan internal, bukan angka penyetelan.
@@ -36,6 +37,7 @@ var rekor_bintang := 0
 @onready var hud: Control = $UI/Hud
 @onready var interaksi: Node = $Interaksi
 @onready var popup_aksi: Node2D = $PopupAksi
+@onready var panel_petunjuk: Control = $UI/PanelPetunjuk
 
 
 func _ready() -> void:
@@ -49,11 +51,12 @@ func _ready() -> void:
 	pemain.position = peta.posisi_awal
 	pemain.siapkan(UKURAN_PETAK, joystick)
 	popup_aksi.siapkan(UKURAN_PETAK, peta.ukuran_dunia().x)
-	# Sentuhan pada pop-up tidak memunculkan joystick.
-	joystick.penolak = popup_aksi.kena
+	# Sentuhan pada pop-up atau saat panel petunjuk terbuka tidak memunculkan joystick.
+	joystick.penolak = func(posisi: Vector2) -> bool: return panel_petunjuk.visible or popup_aksi.kena(posisi)
 	interaksi.siapkan(pemain, peta, popup_aksi, pesanan, UKURAN_PETAK)
 	interaksi.bawaan_berubah.connect(_perbarui_hud)
 	interaksi.dipanen.connect(_saat_dipanen)
+	interaksi.baca_catatan.connect(func(): panel_petunjuk.tampilkan(data.get("petunjuk", [])))
 	hud.judul = "%s %s" % [data.id, data.nama]
 	if rekor_bintang > 0:
 		hud.judul += " · rekor %d/%d" % [rekor_bintang, Bintang.BINTANG_MAKS]
@@ -66,6 +69,9 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if sudah_selesai or sudah_habis:
 		return
+	# Panel petunjuk tertutup sendiri begitu pemain menjauh dari catatan.
+	if panel_petunjuk.visible and interaksi.aksi_kini.get("aksi", "") != AturanAksi.AKSI_BACA:
+		panel_petunjuk.tutup()
 	sisa_detik = maxf(0.0, sisa_detik - delta)
 	hud.sisa_detik = sisa_detik
 	if sisa_detik <= 0.0:
@@ -86,6 +92,7 @@ func _saat_dipanen(tanaman: String, diterima: bool) -> void:
 func _hentikan_permainan() -> void:
 	hud.sisa_detik = sisa_detik
 	interaksi.hentikan()
+	panel_petunjuk.tutup()
 	pemain.terkunci = true
 	joystick.lepas()
 

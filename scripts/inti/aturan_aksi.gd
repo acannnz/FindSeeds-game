@@ -11,6 +11,8 @@ const AKSI_AMBIL := "ambil"
 const AKSI_POTONG := "potong"
 const AKSI_TANAM := "tanam"
 const AKSI_PANEN := "panen"
+## Membuka panel catatan petunjuk; seketika, tidak mengunci gerak.
+const AKSI_BACA := "baca"
 
 const LABEL := {
 	AKSI_IDENTIFIKASI: "Periksa",
@@ -18,6 +20,7 @@ const LABEL := {
 	AKSI_POTONG: "Potong",
 	AKSI_TANAM: "Tanam",
 	AKSI_PANEN: "Panen",
+	AKSI_BACA: "Baca",
 }
 
 ## Kunci durasi di pengaturan.durasi_detik untuk tiap aksi.
@@ -68,6 +71,8 @@ static func untuk_benda(entri: Dictionary, status: String, kantong_penuh: bool, 
 	match PemuatData.jenis_benda(entri):
 		PemuatData.JENIS_ALAT:
 			return _hasil(AKSI_AMBIL)
+		PemuatData.JENIS_CATATAN:
+			return _hasil(AKSI_BACA)
 		PemuatData.JENIS_WADAH:
 			var butuh: String = entri.butuh_alat
 			if alat_di_tangan == butuh:

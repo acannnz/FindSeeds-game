@@ -13,7 +13,7 @@
     "#.R..R.#",
     "#......#",
     "####.###",
-    "#Tmn..k#",
+    "#TCn..k#",
     "#Tf...j#",
     "#.....Y#",
     "#@QcAoW#",
@@ -24,6 +24,12 @@
     "S": "kardus_sepatu", "G": "gunting", "J": "bantalan_jarum",
     "Q": "kotak_pos", "W": "wastafel", "R": "rak",
     "t": "kotak_perkakas", "o": "tali_gulung", "c": "kaleng_oli", "j": "jeriken_kuning",
-    "k": "karung_beras", "n": "tangga_lipat", "f": "kipas_angin", "m": "lampu_minyak"
-  }
+    "k": "karung_beras", "n": "tangga_lipat", "f": "kipas_angin",
+    "C": "catatan"
+  },
+  "petunjuk": [
+    { "benda": "lampion_merah", "teks": "Aku tergantung tinggi dan bersinar di malam perayaan." },
+    { "benda": "hidung_badut", "teks": "Aku menempel di wajah orang yang pekerjaannya membuat penonton tertawa." },
+    { "benda": "spons_kuning", "teks": "Tubuhku penuh lubang, aku suka minum air, dan rajin membantu mencuci piring." }
+  ]
 }

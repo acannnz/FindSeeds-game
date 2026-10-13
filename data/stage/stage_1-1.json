@@ -16,7 +16,7 @@
     "#w...RR#",
     "#..g.RR#",
     "#a.T.RR#",
-    "#@.s.RR#",
+    "#@.sCRR#",
     "########"
   ],
   "legenda": {
@@ -24,6 +24,10 @@
     "R": "rumah",
     "k": "kursi_taman", "m": "mawar_merah", "c": "pot_kaktus", "t": "tong_sampah",
     "b": "batu_bulat", "w": "kaleng_siram", "g": "sepeda_roda_tiga", "a": "mobil_mainan",
-    "s": "selang_air"
-  }
+    "s": "selang_air",
+    "C": "catatan"
+  },
+  "petunjuk": [
+    { "benda": "bola_karet_merah", "teks": "Aku bulat dan suka memantul. Anak-anak senang melempar dan menendangku." }
+  ]
 }
