@@ -20,7 +20,7 @@ Baca dokumen lengkapnya hanya jika butuh detail yang tidak ada di sini.
 | + | Pop-up aksi di atas benda (ikon kaca pembesar dsb.) menggantikan tombol kanan bawah; peta di tengah sisa tinggi layar | Selesai (2026-10-13) |
 | + | Catatan petunjuk di samping lahan: teka-teki benda sumber pesanan, panel bisa dibaca ulang; cek 7 | Selesai (2026-10-13) |
 | + | Aset vektor SVG + pemuat dengan cadangan kotak warna | Selesai; gaya lama sudah seluruhnya diganti gaya adegan |
-| + | Adegan menyatu gaya modern 3/4: hiasan bisa diperiksa, nama dirahasiakan, y-sort, tempelan lantai | Selesai untuk 1-1, 1-2, 1-3 (107 aset, satu gaya) |
+| + | Adegan menyatu gaya modern 3/4: hiasan bisa diperiksa, nama dirahasiakan, y-sort, tempelan lantai | Selesai untuk 1-1, 1-2, 1-3 (115 aset, satu gaya) |
 
 Kerjakan per fase. Setelah tiap fase: jelaskan singkat, commit, push ke `origin main`, lalu tunggu konfirmasi.
 
@@ -56,7 +56,7 @@ Durasi (semua dari `data/pengaturan.json`): jalan 4 petak/detik, identifikasi 2,
 - **Kantong penuh:** Identifikasi dikunci untuk SEMUA benda yang belum dicoba (tombol abu-abu "Kantong penuh"), supaya tidak membocorkan mana yang sumber. Ambil dan Potong tetap bisa.
 - **Kontrol (mengubah dokumen awal "2/3 peta + 1/3 kontrol"):** satu kanvas; peta selebar layar di bawah HUD atas, di tengah sisa tinggi (diperkecil bila tidak muat); joystick tak terlihat sampai disentuh, muncul di titik sentuh separuh kiri, alas ikut tertarik, memudar saat dilepas; HUD melayang di atas. **Diubah 2026-10-13:** tombol aksi kanan bawah + label target diganti satu pop-up di atas target: gelembung berikon aksi (kaca pembesar = Periksa), hijau berdenyut bila aktif, abu-abu + keterangan alasan bila terkunci, keterangan nama bila boleh diketahui, cincin progres selama aksi; pindah ke bawah target bila pemain di atasnya; sentuhan di pop-up tidak memunculkan joystick.
 - **Adegan menyatu (meniru Brain Puzzle, tetap berjalan):** tiap stage satu adegan 3/4 tanpa garis petak; benda hiasan (`jenis: "hiasan"`, huruf kecil di peta) bisa diperiksa seperti benda kosong (reaksi + abu-abu) dan TIDAK kena jeda 4 stage; tombol/label bertuliskan "Periksa" tanpa nama benda sumber/kosong/hiasan (nama terungkap di teks reaksi setelah diperiksa); sorotan berupa cincin halus. Gaya gambar: garis tipis senada, bayangan & sorotan lembut, palet per tema.
-- **Catatan petunjuk (2026-10-13):** clue hanya untuk benda sumber yang dipesan (bukan pengecoh), ditulis per stage di kolom `petunjuk`, dibaca lewat panel yang bisa dibuka ulang (timer tetap jalan). Ikon mata uang RPG craftpix direncanakan sebagai benda kosong/pengalih (belum diunduh, menunggu izin & cek lisensi).
+- **Catatan petunjuk (2026-10-13):** clue hanya untuk benda sumber yang dipesan (bukan pengecoh), ditulis per stage di kolom `petunjuk`, dibaca lewat panel yang bisa dibuka ulang (timer tetap jalan). Pengalih bertema harta (permintaan pengguna, terinspirasi ikon mata uang RPG craftpix) dibuat sebagai SVG sendiri dan berjenis `hiasan` (bebas jeda 4 stage): `tumpukan_koin`, `permata_biru` (1-1), `kantong_koin`, `medali_emas` (1-2), `peti_harta`, `kristal_ungu` (1-3, menggantikan karung beras & tali gulung). File craftpix TIDAK dipakai: unduhannya perlu akun, dan lisensinya melarang file mentah bisa diambil orang lain (repo publik).
 - **Pemecah seri target:** jika dua target berselisih jarak ≤ `toleransi_seri_petak`, pilih yang paling searah dengan `pemain.hadap`.
 - **Git:** commit tiap fase lalu push ke `origin main` (https://github.com/acannnz/FindSeeds-game.git).
 
@@ -121,7 +121,7 @@ scripts/
     layar_hasil.gd           layar menang / "Waktu habis!" / "Dijeda" (scenes/layar_hasil.tscn)
     tampilan_bintang.gd      bintang digambar poligon
 scenes/                      main.tscn, stage.tscn, pemain.tscn, layar_hasil.tscn
-aset/                        107 SVG (viewBox 128 per petak, ekspor 2x) + .import; lihat scripts/inti/aset.gd untuk konvensi nama
+aset/                        115 SVG (viewBox 128 per petak, ekspor 2x) + .import; lihat scripts/inti/aset.gd untuk konvensi nama
   benda/ tanaman/ karakter/ pembeli/ petak/ ui/
 tools/
   pemeriksa_stage.gd         CLI (extends SceneTree), cetak laporan, exit code 1 jika gagal

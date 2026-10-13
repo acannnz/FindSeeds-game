@@ -43,7 +43,7 @@ func _initialize() -> void:
 
 	_uji("Hiasan boleh dipakai lagi di stage berikutnya (bebas jeda 4 stage)", [], func(d):
 		var s := _stage(d, "1-2")
-		_ganti_sel(s, Vector2i(6, 2), "k")
+		_ganti_sel(s, Vector2i(3, 9), "k")
 		s.legenda.k = "kursi_taman")
 
 	_uji("Cek 6: logika musim Panas dipakai di Musim Semi", [Pemeriksa.CEK_LOGIKA_MUSIM], func(d):

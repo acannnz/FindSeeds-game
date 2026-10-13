@@ -7,14 +7,14 @@
   "pesanan": { "pembeli": "mang_ujang", "isi": { "tomat": 1, "wortel": 1 } },
   "peta": [
     "########",
-    "#B..u.X#",
+    "#B..uxX#",
     "#.PZ...#",
     "#r..O..#",
     "#..kMM.#",
     "#.j.MM.#",
     "#TC.MM.#",
     "#T.....#",
-    "#..q..K#",
+    "#.yq..K#",
     "#lN..h.#",
     "#e..@.p#",
     "########"
@@ -26,6 +26,7 @@
     "u": "payung_merah", "r": "radio_merah", "k": "kursi_rotan", "j": "bola_basket",
     "h": "topi_pesta_biru", "l": "pot_lidah_mertua", "p": "sapu_ijuk", "e": "rak_sepatu",
     "q": "keranjang_cucian",
+    "x": "kantong_koin", "y": "medali_emas",
     "C": "catatan"
   },
   "petunjuk": [

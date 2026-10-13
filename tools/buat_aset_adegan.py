@@ -698,6 +698,68 @@ A["tanaman/bunga_muda"] = svg(batang("M64 112 L64 46") + daun(48, 86, 15, 7, -30
 A["tanaman/bunga_matang"] = svg(batang("M64 112 L64 48") + batang("M64 82 Q46 72 38 58") + daun(80, 86, 15, 7, 30) + bunga(64, 38, 15) + bunga(36, 54, 10))
 A["tanaman/bunga_buah"] = buah_bayang(bunga(64, 70, 30))
 
+# =============================================================== hiasan harta (koin, permata) — gaya sendiri
+EMAS = "#f2c230"
+
+
+def koin_datar(cx, cy, rx):
+    """Satu koin rebah (elips) dengan tebal dan kilau."""
+    ry = rx * 0.42
+    return (f'<ellipse cx="{cx}" cy="{cy + 4}" rx="{rx}" ry="{ry}" {isi(gelap(EMAS, 0.2))}/>'
+            f'<ellipse cx="{cx}" cy="{cy}" rx="{rx}" ry="{ry}" {isi(EMAS)}/>'
+            f'<ellipse cx="{cx}" cy="{cy}" rx="{rx * 0.62:.1f}" ry="{ry * 0.62:.1f}" {garis(gelap(EMAS, 0.25), 2)}/>'
+            f'<ellipse cx="{cx - rx * 0.35:.1f}" cy="{cy - ry * 0.3:.1f}" rx="{rx * 0.25:.1f}" ry="{ry * 0.22:.1f}" fill="#ffffff" fill-opacity="0.6"/>')
+
+
+def permata(cx, cy, s, warna):
+    """Permata potong: mahkota atas + paviliun runcing ke bawah."""
+    t, l = 14 * s, 26 * s
+    atas = f"M{cx - l} {cy} L{cx - l * 0.6} {cy - t} L{cx + l * 0.6} {cy - t} L{cx + l} {cy} Z"
+    bawah = f"M{cx - l} {cy} L{cx + l} {cy} L{cx} {cy + l * 1.25} Z"
+    return (f'<path d="{bawah}" {isi(warna)}/><path d="{atas}" {isi(terang(warna, 0.3))}/>'
+            f'<path d="M{cx} {cy + l * 1.25} L{cx + l} {cy} L{cx + l * 0.35} {cy} Z" fill="{gelap(warna, 0.2)}"/>'
+            f'<path d="M{cx - l * 0.6} {cy - t} L{cx - l * 0.25} {cy} L{cx} {cy - t} L{cx + l * 0.25} {cy} L{cx + l * 0.6} {cy - t}" {garis(gelap(warna, 0.35), 1.5)}/>'
+            f'<path d="M{cx - l * 0.5} {cy - t * 0.5} L{cx - l * 0.2} {cy - t * 0.85}" {garis("#ffffff", 3)} stroke-opacity="0.8"/>')
+
+
+A["benda/tumpukan_koin"] = svg(bayang(64, 116, 40) + koin_datar(44, 106, 22) + koin_datar(44, 98, 22) + koin_datar(44, 90, 22)
+                               + koin_datar(84, 106, 22) + koin_datar(84, 98, 22) + koin_datar(64, 82, 22) + koin_datar(64, 74, 22)
+                               + koin_datar(66, 64, 22))
+
+A["benda/permata_biru"] = svg(bayang(64, 116, 30) + f'<ellipse cx="64" cy="104" rx="28" ry="9" {isi("#c9b48a")}/>' + permata(64, 62, 1.3, "#3f8de0"))
+
+A["benda/kristal_ungu"] = svg(bayang(64, 116, 36) + f'''
+<path d="M40 110 L34 70 L44 50 L52 72 L50 110 Z" {isi("#9a5fd6")}/>
+<path d="M54 110 L52 46 L64 18 L76 46 L74 110 Z" {isi("#b37ae6")}/>
+<path d="M78 110 L78 66 L88 48 L96 70 L90 110 Z" {isi("#8d52c9")}/>
+<path d="M64 18 L76 46 L74 110 L66 110 Z" fill="{gelap("#b37ae6", 0.18)}"/>
+<path d="M58 44 L62 30" {garis("#ffffff", 3)} stroke-opacity="0.8"/><path d="M40 70 L43 58" {garis("#ffffff", 2.5)} stroke-opacity="0.7"/>
+<path d="M28 112 Q64 100 100 112 Z" {isi("#7d7d86")}/>''')
+
+A["benda/kantong_koin"] = svg(bayang(64, 116, 34) + f'''
+<path d="M34 112 Q22 84 42 62 L86 62 Q106 84 94 112 Z" {isi("#9b6a3e")}/>
+<path d="M78 62 L86 62 Q106 84 94 112 L80 112 Q92 86 78 62 Z" fill="{gelap("#9b6a3e", 0.18)}"/>
+<path d="M44 62 Q40 48 50 40 L78 40 Q88 48 84 62 Z" {isi("#b07c4a")}/>
+<path d="M42 62 L86 62" {garis("#5a3a1e", 5)}/>
+<circle cx="64" cy="88" r="12" {isi(EMAS, tebal=2)}/><path d="M60 82 L68 82 M64 82 L64 94" {garis(gelap(EMAS, 0.3), 2.5)}/>
+<ellipse cx="50" cy="76" rx="6" ry="9" fill="#ffffff" fill-opacity="0.25"/>''' + koin_datar(30, 108, 12))
+
+A["benda/medali_emas"] = svg(bayang(64, 116, 26) + f'''
+<path d="M44 14 L58 60 L70 60 L56 14 Z" {isi("#d8394a")}/><path d="M84 14 L70 60 L58 60 L72 14 Z" {isi("#3f6fd8")}/>
+<circle cx="64" cy="84" r="27" {isi(EMAS)}/>
+<circle cx="64" cy="84" r="19" {isi(terang(EMAS, 0.2), tebal=2)}/>
+<path d="M64 70 L68 80 L79 80 L70 87 L73 98 L64 91 L55 98 L58 87 L49 80 L60 80 Z" fill="{gelap(EMAS, 0.25)}"/>
+<ellipse cx="53" cy="72" rx="7" ry="4" fill="#ffffff" fill-opacity="0.55" transform="rotate(-30 53 72)"/>''')
+
+A["benda/peti_harta"] = svg(bayang(64, 118, 46) + f'''
+<path d="M18 70 L110 70 L110 114 L18 114 Z" {isi("#8a5a32")}/>
+<path d="M18 70 Q18 38 64 38 Q110 38 110 70 Z" {isi("#a06a3c")}/>
+<path d="M30 70 L30 114 M98 70 L98 114" {garis("#d9a63a", 7)}/><path d="M30 70 Q30 46 40 42 M98 70 Q98 46 88 42" {garis("#d9a63a", 7)}/>
+<path d="M18 70 L110 70" {garis("#d9a63a", 6)}/>
+<rect x="56" y="64" width="16" height="20" rx="3" {isi("#e7b93f", tebal=2)}/><circle cx="64" cy="73" r="3" fill="#4a2e14"/>
+<path d="M88 70 L110 70 L110 114 L92 114 Z" fill="{gelap("#8a5a32", 0.15)}"/>
+<path d="M36 48 Q52 42 66 42" {garis("#ffffff", 3)} stroke-opacity="0.35"/>''')
+
 # =============================================================== catatan petunjuk (samping lahan)
 A["benda/catatan"] = svg(bayang(64, 118, 30) + f'''
 <rect x="58" y="78" width="12" height="40" rx="2" {isi("#8a5a3b")}/>

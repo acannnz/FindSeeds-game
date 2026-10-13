@@ -53,6 +53,13 @@
   "kardus_mainan":       { "nama": "Kardus MAINAN", "warna": "#a1887f", "label": "MAINAN", "gambar": "kardus", "butuh_alat": "gunting", "isi": "hidung_badut" },
   "kardus_sepatu":       { "nama": "Kardus SEPATU", "warna": "#a1887f", "label": "SEPATU", "gambar": "kardus", "butuh_alat": "gunting", "isi": "sepatu" },
 
+  "tumpukan_koin":       { "nama": "Tumpukan koin emas",     "warna": "#f2c230", "jenis": "hiasan", "teks_reaksi": "Cring! Cuma koin, tidak bisa ditanam." },
+  "permata_biru":        { "nama": "Permata biru",           "warna": "#3f8de0", "jenis": "hiasan", "teks_reaksi": "Berkilau... tapi bukan benih." },
+  "kantong_koin":        { "nama": "Kantong koin",           "warna": "#9b6a3e", "jenis": "hiasan", "teks_reaksi": "Gemerincing! Isinya koin semua." },
+  "medali_emas":         { "nama": "Medali emas",            "warna": "#f2c230", "jenis": "hiasan", "teks_reaksi": "Juara satu! Sayang tidak bisa tumbuh." },
+  "peti_harta":          { "nama": "Peti harta",             "warna": "#8a5a32", "jenis": "hiasan", "teks_reaksi": "Terkunci rapat. Tidak ada benih di sini." },
+  "kristal_ungu":        { "nama": "Kristal ungu",           "warna": "#9a5fd6", "jenis": "hiasan", "teks_reaksi": "Dingin dan keras, tidak akan bertunas." },
+
   "catatan":             { "nama": "Catatan petunjuk", "warna": "#fff3c4", "jenis": "catatan" },
 
   "gunting":             { "nama": "Gunting", "warna": "#90a4ae", "jenis": "alat" },

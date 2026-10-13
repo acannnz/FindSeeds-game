@@ -8,10 +8,10 @@
   "peta": [
     "########",
     "#B.k..E#",
-    "#.m....#",
+    "#.m..x.#",
     "#c..O.t#",
     "#......#",
-    "#....b.#",
+    "#y...b.#",
     "#.S....#",
     "#w...RR#",
     "#..g.RR#",
@@ -25,6 +25,7 @@
     "k": "kursi_taman", "m": "mawar_merah", "c": "pot_kaktus", "t": "tong_sampah",
     "b": "batu_bulat", "w": "kaleng_siram", "g": "sepeda_roda_tiga", "a": "mobil_mainan",
     "s": "selang_air",
+    "x": "tumpukan_koin", "y": "permata_biru",
     "C": "catatan"
   },
   "petunjuk": [
