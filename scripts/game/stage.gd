@@ -51,6 +51,8 @@ func _ready() -> void:
 	pemain.position = peta.posisi_awal
 	pemain.siapkan(UKURAN_PETAK, joystick)
 	popup_aksi.siapkan(UKURAN_PETAK, peta.ukuran_dunia().x)
+	for pembeli in peta.daftar_pembeli:
+		popup_aksi.daerah_hindari.append(pembeli.kotak_gelembung_dunia())
 	# Sentuhan pada pop-up atau saat panel petunjuk terbuka tidak memunculkan joystick.
 	joystick.penolak = func(posisi: Vector2) -> bool: return panel_petunjuk.visible or popup_aksi.kena(posisi)
 	interaksi.siapkan(pemain, peta, popup_aksi, pesanan, UKURAN_PETAK)

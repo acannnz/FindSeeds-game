@@ -47,6 +47,11 @@ func siapkan(id_pembeli: String, pesanan_stage: RefCounted, ukuran_petak: float,
 	queue_redraw()
 
 
+## Kotak gelembung pesanan dalam koordinat dunia (dihindari pop-up aksi).
+func kotak_gelembung_dunia() -> Rect2:
+	return Rect2(position + _gelembung.position, _gelembung.size)
+
+
 ## Reaksi saat hasil panen tiba: centang jika dipesan, menggeleng jika tidak.
 func reaksi(tanaman: String, diterima: bool) -> void:
 	if diterima:

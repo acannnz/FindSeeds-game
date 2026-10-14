@@ -1,12 +1,13 @@
 extends Control
-## Deretan bintang (terisi sebanyak `jumlah`). Digambar sebagai poligon karena
-## font bawaan belum tentu punya simbol bintang.
+## Deretan bintang emas (terisi sebanyak `jumlah`), kosong = kertas redup.
+## Digambar sebagai poligon karena font belum tentu punya simbol bintang.
 
 const Bintang := preload("res://scripts/inti/bintang.gd")
+const Gaya := preload("res://scripts/inti/gaya.gd")
 
-const WARNA_ISI := Color("#ffd54f")
-const WARNA_KOSONG := Color(1, 1, 1, 0.18)
-const WARNA_TEPI := Color("#ff8f00")
+const WARNA_ISI := Color("#f6c445")
+const WARNA_KILAU := Color("#fde59a")
+const WARNA_TEPI := Color("#b7781c")
 const SUDUT_BINTANG := 5
 const PORSI_DALAM := 0.45
 
@@ -22,10 +23,12 @@ func _draw() -> void:
 	for i in Bintang.BINTANG_MAKS:
 		var pusat := Vector2(lebar_satu * (i + 0.5), size.y / 2.0)
 		var titik := _titik_bintang(pusat, radius)
-		draw_colored_polygon(titik, WARNA_ISI if i < jumlah else WARNA_KOSONG)
-		if i < jumlah:
-			titik.append(titik[0])
-			draw_polyline(titik, WARNA_TEPI, 3.0)
+		var terisi := i < jumlah
+		draw_colored_polygon(titik, WARNA_ISI if terisi else Gaya.KERTAS_REDUP)
+		if terisi:
+			draw_colored_polygon(_titik_bintang(pusat - Vector2(radius * 0.12, radius * 0.14), radius * 0.45), WARNA_KILAU)
+		titik.append(titik[0])
+		draw_polyline(titik, WARNA_TEPI if terisi else Gaya.TEKS_SAMAR, 4.0, true)
 
 
 func _titik_bintang(pusat: Vector2, radius: float) -> PackedVector2Array:

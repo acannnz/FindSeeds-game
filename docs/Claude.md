@@ -18,7 +18,7 @@ Baca dokumen lengkapnya hanya jika butuh detail yang tidak ada di sini.
 | + | Pemeriksa jalan saat build (plugin editor + tools/build_android.bat) | Selesai |
 | + | Kontrol modern: satu kanvas, joystick dinamis, tombol melayang, label target, HUD atas | Selesai, diuji pengguna di HP Android (2026-10-08): OK |
 | + | Pop-up aksi di atas benda (ikon kaca pembesar dsb.) menggantikan tombol kanan bawah; peta di tengah sisa tinggi layar | Selesai (2026-10-13) |
-| + | Sistem desain UI "kayu & kertas" (gaya.gd, font Fredoka): HUD satu papan, gelembung pesanan berekor, pop-up kertas, teks melayang kapsul, dunia sampai tepi layar, bedengan | Contoh di 1-1 untuk persetujuan (2026-10-13); kode berlaku ke semua stage, layar hasil belum |
+| + | Sistem desain UI "kayu & kertas" (gaya.gd, font Fredoka): HUD satu papan, gelembung pesanan berekor, pop-up kertas, teks melayang kapsul, dunia sampai tepi layar, bedengan | Selesai untuk 1-1, 1-2, 1-3 + layar hasil (2026-10-14) |
 | + | Catatan petunjuk di samping lahan: teka-teki benda sumber pesanan, panel bisa dibaca ulang; cek 7 | Selesai (2026-10-13) |
 | + | Aset vektor SVG + pemuat dengan cadangan kotak warna | Selesai; gaya lama sudah seluruhnya diganti gaya adegan |
 | + | Adegan menyatu gaya modern 3/4: hiasan bisa diperiksa, nama dirahasiakan, y-sort, tempelan lantai | Selesai untuk 1-1, 1-2, 1-3 (115 aset, satu gaya) |
@@ -53,7 +53,7 @@ Durasi (semua dari `data/pengaturan.json`): jalan 4 petak/detik, identifikasi 2,
 
 - **Benih yang ditanam:** urutan masuk (FIFO), paling lama ditanam duluan.
 - **Benda padat:** benda menempati petaknya dan tidak bisa dilewati; diinteraksi dari petak sebelah.
-- **Wadah tanpa alat:** ikon alat di atas wadah, tombol tampil abu-abu "Potong" dan tidak bisa ditekan.
+- **Wadah tanpa alat:** gambar alat yang dibutuhkan tampil di dalam pop-up (abu-abu, keterangan "Butuh <alat>"), tidak bisa ditekan. Gelembung ikon alat terpisah di atas benda sudah dihapus (2026-10-14).
 - **Kantong penuh:** Identifikasi dikunci untuk SEMUA benda yang belum dicoba (tombol abu-abu "Kantong penuh"), supaya tidak membocorkan mana yang sumber. Ambil dan Potong tetap bisa.
 - **Kontrol (mengubah dokumen awal "2/3 peta + 1/3 kontrol"):** satu kanvas; peta selebar layar di bawah HUD atas, di tengah sisa tinggi (diperkecil bila tidak muat); joystick tak terlihat sampai disentuh, muncul di titik sentuh separuh kiri, alas ikut tertarik, memudar saat dilepas; HUD melayang di atas. **Diubah 2026-10-13:** tombol aksi kanan bawah + label target diganti satu pop-up di atas target: gelembung berikon aksi (kaca pembesar = Periksa), hijau berdenyut bila aktif, abu-abu + keterangan alasan bila terkunci, keterangan nama bila boleh diketahui, cincin progres selama aksi; pindah ke bawah target bila pemain di atasnya; sentuhan di pop-up tidak memunculkan joystick.
 - **Adegan menyatu (meniru Brain Puzzle, tetap berjalan):** tiap stage satu adegan 3/4 tanpa garis petak; benda hiasan (`jenis: "hiasan"`, huruf kecil di peta) bisa diperiksa seperti benda kosong (reaksi + abu-abu) dan TIDAK kena jeda 4 stage; tombol/label bertuliskan "Periksa" tanpa nama benda sumber/kosong/hiasan (nama terungkap di teks reaksi setelah diperiksa); sorotan berupa cincin halus. Gaya gambar: garis tipis senada, bayangan & sorotan lembut, palet per tema.
@@ -120,7 +120,7 @@ scripts/
     joystick.gd              joystick dinamis: muncul di titik sentuh separuh kiri, alas ikut tertarik, memudar; satu indeks sentuhan; `penolak` (sentuhan pop-up)
     hud.gd                   HUD melayang atas: timer m:ss (merah ≤ timer_merah_sisa_detik) + nama stage, slot kantong, alat di tangan
     panel_petunjuk.gd        panel catatan petunjuk (Label autowrap), tutup saat diketuk / Esc; dibuka ulang dari catatan
-    layar_hasil.gd           layar menang / "Waktu habis!" / "Dijeda" (scenes/layar_hasil.tscn)
+    layar_hasil.gd           layar menang / "Waktu habis!" / "Dijeda" (scenes/layar_hasil.tscn): kartu kertas, tombol kayu, "Lanjut" hijau
     tampilan_bintang.gd      bintang digambar poligon
 scenes/                      main.tscn, stage.tscn, pemain.tscn, layar_hasil.tscn
 aset/                        115 SVG (viewBox 128 per petak, ekspor 2x) + .import; lihat scripts/inti/aset.gd untuk konvensi nama
@@ -174,7 +174,7 @@ Penghalang punya id sendiri: `rumah`, `meja`, `rak`, `wastafel` (+ `penghalang` 
 - **Benda, `B`, `#`, dan penghalang padat.** `.`, `@`, `T` bisa diinjak. Pemain berupa lingkaran dengan radius `radius_pemain_petak`.
 - **Pintasan debug** (build debug saja): tombol 1–9 memilih stage, R mengulang stage, panah untuk bergerak.
 - **UI:** semua komponen memakai `scripts/inti/gaya.gd` (font Fredoka OFL di `aset/font/`, juga font default Control lewat `gui/theme/custom_font`). Teks digambar lewat `Gambar.huruf_tengah` (default `Gaya.FONT`), jangan `ThemeDB.fallback_font`. Dunia di luar peta = tekstur dinding tema sejauh `MARGIN_LUAR` petak (peta.gd). Petak tanah bersambung digambar sebagai satu bedengan bertepi membulat; tekstur `tanah.svg` bersambung ke segala arah.
-- **Tampilan 3/4:** Stage dan Peta `y_sort_enabled`; benda, tanaman, pembeli, blok penghalang, dan pemain di-y-sort bersama (z_index 0). Latar (lantai mulus per potongan selebar tekstur, dinding + `dinding_muka`, tanah, tempelan lantai) digambar `peta._draw`. Gambar benda berpijak di dasar petak, diperbesar `skala_gambar_benda`; tempelan disebar acak-tetap (benih = id stage) dengan `peluang_tempelan_lantai` dari daftar `tempelan` di tema.json. Gelembung ikon alat = node anak z 5.
+- **Tampilan 3/4:** Stage dan Peta `y_sort_enabled`; benda, tanaman, pembeli, blok penghalang, dan pemain di-y-sort bersama (z_index 0). Latar (lantai mulus per potongan selebar tekstur, dinding + `dinding_muka`, tanah, tempelan lantai) digambar `peta._draw`. Gambar benda berpijak di dasar petak, diperbesar `skala_gambar_benda`; tempelan disebar acak-tetap (benih = id stage) dengan `peluang_tempelan_lantai` dari daftar `tempelan` di tema.json. Pop-up aksi menghindari gelembung pesanan (`daerah_hindari`): bila tertutup, pop-up pindah ke samping target.
 - **Aset:** `scripts/inti/aset.gd` menentukan jalur dari id (benda/<id>.svg, tanaman/<id>_<muda|matang|buah>.svg + tunas.svg, karakter/pemain_<arah>.svg, pembeli/<id>.svg, petak/<tema>_<lantai|dinding>.svg + tanah.svg, ui/aksi_<aksi>.svg). Aset hilang → `tekstur()` null → kotak warna lama. `main.gd` memuat SEMUA tekstur di awal (`Aset.muat_semua`); tekstur yang pertama dimuat di dalam `_draw()` bisa tampil putih. Node mengambil tekstur di `siapkan()`, bukan di `_draw()`. Penghalang bersambung (huruf sama) digambar sebagai satu blok diregangkan (rumah 2×4, meja 2×3, rak 1×3). Pemeriksa CLI melaporkan aset hilang sebagai `[INFO]` (tidak gagal). Mipmap + filter linear diaktifkan (`[importer_defaults]` dan `default_texture_filter=2` di project.godot). Kredit/lisensi: `docs/kredit_aset.md`.
 - **Menjalankan game:** buka proyek di editor Godot 4.7.2 lalu F5. Bisa juga `Godot_v4.7.2-stable_win64.exe --path . --resolution 360x640`.
 

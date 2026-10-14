@@ -6,7 +6,8 @@ extends Node2D
 ## nama target jika boleh diketahui (benda rahasia tanpa nama). Gaya kertas &
 ## kayu (gaya.gd). Aksi aktif: ikon hijau dan berdenyut; terkunci: pudar. Progres aksi berdurasi tampil
 ## sebagai cincin di tepi gelembung. Jika pemain berdiri di atas target,
-## pop-up pindah ke bawah target agar tidak menutupi pemain.
+## pop-up pindah ke bawah target agar tidak menutupi pemain; jika di atas target
+## ada daerah_hindari (gelembung pesanan), pop-up pindah ke samping target.
 ## Di desktop, Spasi/Enter (ui_accept) juga memicu aksi.
 
 signal ditekan
@@ -21,8 +22,6 @@ const Gaya := preload("res://scripts/inti/gaya.gd")
 ## skala_gambar_benda dan berpijak di dasar petak, jadi puncaknya ±0,85 petak.
 const PORSI_JARAK_ATAS := 0.95
 const PORSI_JARAK_BAWAH := 0.55
-## Tambahan jarak jika di atas target sudah ada gelembung ikon alat.
-const PORSI_JARAK_IKON := 0.5
 const PORSI_TINGGI_TEKS := 0.36
 const PORSI_EKOR := 0.12
 ## Area sentuh sedikit lebih besar dari gelembung agar mudah dikenai jempol.
@@ -30,6 +29,8 @@ const PORSI_AREA_SENTUH := 1.35
 const SKALA_DENYUT := 0.06
 const KECEPATAN_DENYUT := 5.0
 
+## Kotak dunia yang tidak boleh ditutupi pop-up (gelembung pesanan pembeli).
+var daerah_hindari: Array[Rect2] = []
 ## 0..1 saat aksi berjalan, negatif jika tidak ada aksi berjalan.
 var progres := -1.0:
 	set(v):
@@ -46,6 +47,10 @@ var _ikon: Texture2D
 var _aktif := false
 var _naik := 0.0
 var _di_bawah := false
+## 0 = di atas/bawah target; 1 / -1 = di kanan / kiri target.
+var _samping := 0
+## True jika _ikon gambar alat (digambar berwarna asli, bukan diwarnai).
+var _ikon_berwarna := false
 var _waktu := 0.0
 
 
@@ -57,15 +62,20 @@ func siapkan(ukuran_petak: float, lebar_peta: float) -> void:
 	hide()
 
 
-## posisi: pusat target di dunia; aksi: id aksi untuk ikon; ada_ikon: target
-## sedang menampilkan ikon alat di atasnya; di_bawah: pop-up di bawah target.
-func tampilkan(posisi: Vector2, nama: String, label_aksi: String, aksi: String, aktif: bool, alasan: String, ada_ikon: bool, di_bawah: bool) -> void:
-	var naik := PORSI_JARAK_ATAS + (PORSI_JARAK_IKON if ada_ikon and not di_bawah else 0.0)
+## posisi: pusat target di dunia; aksi: id aksi untuk ikon; ikon_alat: id alat
+## yang dibutuhkan wadah tertutup (gambarnya menggantikan ikon aksi, berwarna
+## asli); di_bawah: pop-up di bawah target.
+func tampilkan(posisi: Vector2, nama: String, label_aksi: String, aksi: String, aktif: bool, alasan: String, ikon_alat: String, di_bawah: bool) -> void:
+	var naik := PORSI_JARAK_ATAS
 	var ikon := Aset.tekstur(Aset.aksi(aksi)) if aksi != "" else null
+	if ikon_alat != "":
+		ikon = Aset.tekstur(Aset.benda(ikon_alat, DataGame.entri_benda(ikon_alat)))
+	_ikon_berwarna = ikon_alat != ""
 	if visible and position == posisi and nama == _nama and label_aksi == _label and alasan == _alasan \
 			and ikon == _ikon and aktif == _aktif and naik == _naik and di_bawah == _di_bawah:
 		return
 	position = posisi
+	_samping = 0
 	_nama = nama
 	_label = label_aksi
 	_alasan = alasan
@@ -73,6 +83,10 @@ func tampilkan(posisi: Vector2, nama: String, label_aksi: String, aksi: String, 
 	_aktif = aktif
 	_naik = naik
 	_di_bawah = di_bawah
+	if not di_bawah and _kena_hindari(position + _pusat_lokal()):
+		_samping = 1
+		if position.x + _pusat_lokal().x + _radius > _lebar_peta:
+			_samping = -1
 	show()
 	queue_redraw()
 
@@ -114,10 +128,27 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _pusat_lokal() -> Vector2:
+	if _samping != 0:
+		return Vector2(_samping * (_ukuran * 0.5 + _radius + _ukuran * PORSI_EKOR * 1.6), -_ukuran * 0.2)
 	var x := _geser_x(_radius)
 	if _di_bawah:
 		return Vector2(x, _ukuran * PORSI_JARAK_BAWAH + _radius)
 	return Vector2(x, -_ukuran * _naik - _radius)
+
+
+func _kena_hindari(pusat_dunia: Vector2) -> bool:
+	var kotak := Rect2(pusat_dunia - Vector2.ONE * _radius, Vector2.ONE * _radius * 2.0)
+	for daerah in daerah_hindari:
+		if daerah.intersects(kotak):
+			return true
+	return false
+
+
+## Arah dari gelembung ke target (ke mana ekor menunjuk).
+func _arah_ekor() -> Vector2:
+	if _samping != 0:
+		return Vector2(-_samping, 0)
+	return Vector2.UP if _di_bawah else Vector2.DOWN
 
 
 ## Geser horizontal agar selebar `setengah` di kiri-kanan tetap di dalam peta.
@@ -136,17 +167,22 @@ func _draw() -> void:
 	var isi := Gaya.KERTAS if _aktif else Gaya.KERTAS_REDUP
 	var tepi := Gaya.KAYU if _aktif else Gaya.TEKS_SAMAR
 	# Ekor kecil menunjuk ke target, digambar dulu agar pangkalnya tertutup gelembung.
-	var arah := -1.0 if _di_bawah else 1.0
+	var d := _arah_ekor()
+	var n := Vector2(-d.y, d.x)
 	var e := _ukuran * PORSI_EKOR
-	var pangkal := p + Vector2(0, (r - tebal) * arah)
-	var ujung := Vector2(p.x * 0.5, pangkal.y + e * 1.6 * arah)
-	draw_colored_polygon(PackedVector2Array([pangkal + Vector2(-e, 0), pangkal + Vector2(e, 0), ujung]), isi)
-	draw_polyline(PackedVector2Array([pangkal + Vector2(-e, 0), ujung, pangkal + Vector2(e, 0)]), tepi, tebal, true)
+	var pangkal := p + d * (r - tebal)
+	# Ujung condong setengah jalan ke arah target bila gelembung tergeser.
+	var ujung := pangkal + d * e * 1.6 + n * (n.dot(-p) * 0.5)
+	draw_colored_polygon(PackedVector2Array([pangkal + n * e, pangkal - n * e, ujung]), isi)
+	draw_polyline(PackedVector2Array([pangkal + n * e, ujung, pangkal - n * e]), tepi, tebal, true)
 	Gaya.bulatan(self, p, r, isi, tepi, tebal, 4.0)
-	draw_colored_polygon(PackedVector2Array([pangkal + Vector2(-e + tebal, -tebal * arah), pangkal + Vector2(e - tebal, -tebal * arah), ujung - Vector2(0, tebal * 1.6 * arah)]), isi)
+	draw_colored_polygon(PackedVector2Array([pangkal + n * (e - tebal) - d * tebal, pangkal - n * (e - tebal) - d * tebal, ujung - d * tebal * 1.6]), isi)
 	var warna_ikon := Gaya.HIJAU_GELAP if _aktif else Color(Gaya.TEKS_SAMAR, 0.8)
 	if _ikon != null:
 		var sisi := r * 1.2
+		if _ikon_berwarna:
+			sisi = r * 1.5
+			warna_ikon = Color(1, 1, 1, 1.0 if _aktif else 0.85)
 		draw_texture_rect(_ikon, Rect2(p - Vector2.ONE * sisi / 2.0, Vector2.ONE * sisi), false, warna_ikon)
 	else:
 		Gambar.huruf_tengah(self, _label, Rect2(p - Vector2(r, r * 0.4), Vector2(r * 2.0, r * 0.8)), warna_ikon, 0.7)
@@ -165,7 +201,7 @@ func _gambar_keterangan(p: Vector2, r: float) -> void:
 	var tinggi := _ukuran * PORSI_TINGGI_TEKS
 	var ukuran_font := int(tinggi * 0.72)
 	var lebar := font.get_string_size(teks, HORIZONTAL_ALIGNMENT_LEFT, -1, ukuran_font).x + tinggi
-	var y := p.y + r + 6.0 if _di_bawah else p.y - r - 6.0 - tinggi
+	var y := p.y + r + 6.0 if _di_bawah or _samping != 0 else p.y - r - 6.0 - tinggi
 	var kotak := Rect2(Vector2(p.x - lebar / 2.0, y), Vector2(lebar, tinggi))
 	var x_dunia := position.x + kotak.position.x
 	if _lebar_peta > 0.0:

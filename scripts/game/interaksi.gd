@@ -123,10 +123,10 @@ func _perbarui_target() -> void:
 	var alasan: String = aksi_kini.alasan
 	if aksi_kini.butuh_alat != "":
 		alasan = "Butuh %s" % DataGame.nama_benda(aksi_kini.butuh_alat)
-	var ada_ikon: bool = "ikon_alat" in terdekat and terdekat.ikon_alat != ""
+	var ikon_alat: String = terdekat.ikon_alat if "ikon_alat" in terdekat else ""
 	# Pemain di atas target: pop-up di bawah agar tidak menutupi pemain.
 	var di_bawah := _pemain.position.y < terdekat.position.y - _ukuran * 0.25
-	_popup.tampilkan(terdekat.position, _nama_target(terdekat), aksi_kini.label, aksi_kini.aksi, aksi_kini.aktif, alasan, ada_ikon, di_bawah)
+	_popup.tampilkan(terdekat.position, _nama_target(terdekat), aksi_kini.label, aksi_kini.aksi, aksi_kini.aktif, alasan, ikon_alat, di_bawah)
 
 
 ## Calon terdekat. Jika selisih jaraknya dalam toleransi seri, pilih yang
